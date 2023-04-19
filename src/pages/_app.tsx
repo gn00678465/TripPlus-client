@@ -2,6 +2,7 @@ import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { Noto_Sans_TC } from 'next/font/google';
 import localFont from 'next/font/local';
+import { Chakra } from '@/components';
 
 const noto_sans_tc = Noto_Sans_TC({
   weight: ['100', '300', '400', '500', '700', '900'],
@@ -34,7 +35,9 @@ const alkatra = localFont({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <main className={`${noto_sans_tc.variable} ${alkatra.variable} font-sans`}>
-      <Component {...pageProps} />
+      <Chakra>
+        <Component {...pageProps} />
+      </Chakra>
     </main>
   );
 }
