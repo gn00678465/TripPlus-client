@@ -1,9 +1,5 @@
-import type {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { RequestInterceptor } from './types';
 
 import CustomAxiosInstance from './instance';
 
@@ -16,8 +12,11 @@ interface RequestParam {
   axiosConfig?: AxiosRequestConfig;
 }
 
-export function createRequest(config: AxiosRequestConfig) {
-  const customInstance = new CustomAxiosInstance(config);
+export function createRequest(
+  config: AxiosRequestConfig,
+  interceptorsObj?: RequestInterceptor<AxiosResponse>
+) {
+  const customInstance = new CustomAxiosInstance(config, interceptorsObj);
 
   async function asyncRequest<T>(
     param: RequestParam
