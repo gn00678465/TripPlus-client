@@ -1,8 +1,7 @@
 import { Layout } from '@/components';
-import { NextPageWithLayout } from '../_app';
 import type { ReactElement } from 'react';
 
-const Account: NextPageWithLayout = () => {
+const Account: App.NextPageWithLayout = () => {
   return <h2>Account</h2>;
 };
 
