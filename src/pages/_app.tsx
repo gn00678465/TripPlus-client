@@ -32,12 +32,15 @@ const alkatra = localFont({
   variable: '--font-alkatra'
 });
 
-export default function App({ Component, pageProps }: AppProps) {
+type AppPropsWithLayout = AppProps & {
+  Component: App.NextPageWithLayout;
+};
+
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
+  const getLayout = Component.getLayout ?? ((page) => page);
   return (
     <main className={`${noto_sans_tc.variable} ${alkatra.variable} font-sans`}>
-      <Chakra>
-        <Component {...pageProps} />
-      </Chakra>
+      <Chakra>{getLayout(<Component {...pageProps} />)}</Chakra>
     </main>
   );
 }
