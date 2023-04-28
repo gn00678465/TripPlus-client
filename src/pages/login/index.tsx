@@ -2,13 +2,14 @@ import { Layout } from '@/components';
 import Link from 'next/link';
 import Head from 'next/head';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   Box,
   Container,
   FormControl,
   FormLabel,
   Input,
+  FormErrorMessage,
   Checkbox,
   Heading,
   Flex,
@@ -21,91 +22,103 @@ import {
 import { FcGoogle } from 'react-icons/fc';
 
 const Login: App.NextPageWithLayout = () => {
-  interface FormState {
+  interface FormInputs {
     email: string;
     password: string;
     isRemember: boolean;
   }
 
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    isRemember: false
-  } as FormState);
+  const {
+    handleSubmit,
+    register,
+    formState: { errors }
+  } = useForm<FormInputs>();
 
-  const changeInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    name: string
-  ): void => {
-    setForm((state) => ({
-      ...state,
-      [name]: e.target.value
-    }));
-  };
-
-  const changeCheckbox = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setForm((state) => ({
-      ...state,
-      isRemember: !form.isRemember
-    }));
+  const onSubmit = (data: FormInputs) => {
+    console.log(data);
   };
 
   return (
-    <Box py={10}>
+    <Box py={20}>
       <Head>
         <title>會員登入-TripPlus+</title>
       </Head>
       <Container maxW="500px">
-        <Box backgroundColor={'#FFF'} p={10} borderRadius={10}>
+        <Box
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          backgroundColor={'white'}
+          p={10}
+          borderRadius={10}
+        >
           <Heading as="h1" size="lg" textAlign={'center'}>
             登入
           </Heading>
 
-          <FormControl my={4}>
+          <FormControl isInvalid={!!errors.email} my={4}>
             <FormLabel>E-mail</FormLabel>
             <Input
               type="email"
-              value={form.email}
-              onChange={(e) => changeInput(e, 'email')}
+              {...register('email', {
+                required: '請填入 E-mail!',
+                pattern: {
+                  value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                  message: 'E-mail 格式錯誤'
+                }
+              })}
             />
+
+            {!!errors.email && (
+              <FormErrorMessage className="visible">
+                {errors.email.message}
+              </FormErrorMessage>
+            )}
           </FormControl>
 
-          <FormControl my={4}>
+          <FormControl isInvalid={!!errors.password} my={4}>
             <FormLabel>密碼</FormLabel>
             <Input
               type="password"
-              value={form.password}
-              onChange={(e) => changeInput(e, 'password')}
+              {...register('password', {
+                required: '請填入密碼!',
+                minLength: { value: 8, message: '密碼至少需要8碼' },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+                  message: '密碼至少需要包含1個大寫字母、1個小寫字母、1個數字'
+                }
+              })}
             />
+
+            {!!errors.password && (
+              <FormErrorMessage>{errors.password.message}</FormErrorMessage>
+            )}
           </FormControl>
 
-          <Flex my={4}>
-            <Checkbox isChecked={form.isRemember} onChange={changeCheckbox}>
-              記住我
-            </Checkbox>
+          <FormControl>
+            <Flex my={4}>
+              <Checkbox {...register('isRemember')}>記住我</Checkbox>
 
-            <Spacer />
+              <Spacer />
 
-            <Box>
-              <Link
-                href="/"
-                className="text-primary-700 hover:text-primary-500"
-              >
-                忘記密碼?
-              </Link>
-            </Box>
-          </Flex>
+              <Box>
+                <Link
+                  href="/"
+                  className="text-primary-700 hover:text-primary-500"
+                >
+                  忘記密碼?
+                </Link>
+              </Box>
+            </Flex>
+          </FormControl>
 
-          <Button colorScheme="primary" width={'100%'} my={4}>
+          <Button type="submit" colorScheme="primary" width={'100%'} my={4}>
             登入
           </Button>
 
           <Flex alignItems={'center'} my={3}>
-            <Divider borderColor={'#E2E8F0'} />
+            <Divider borderColor={'light-gray'} />
             <Box px={2}>或</Box>
-            <Divider borderColor={'#E2E8F0'} />
+            <Divider borderColor={'light-gray'} />
           </Flex>
 
           <Button colorScheme="gray" width={'100%'} my={4}>
@@ -113,11 +126,14 @@ const Login: App.NextPageWithLayout = () => {
             使用 Google 帳號登入
           </Button>
 
-          <Divider borderColor={'#E2E8F0'} mt={3} mb={5} />
+          <Divider borderColor={'light-gray'} mt={3} mb={5} />
 
           <Flex>
             <Box mr={3}>尚未成為會員?</Box>
-            <Link href="/" className="text-primary-700 hover:text-primary-500">
+            <Link
+              href="/signup"
+              className="text-primary-700 hover:text-primary-500"
+            >
               註冊帳號
             </Link>
           </Flex>

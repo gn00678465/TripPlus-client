@@ -59,7 +59,7 @@ const Footer = () => {
 
             <Spacer />
 
-            <Box color={'#4F4F4F'}>
+            <Box color={'light'}>
               Copyright © 2023 TripPlus. All rights reserved.
             </Box>
           </Flex>

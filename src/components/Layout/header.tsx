@@ -119,7 +119,6 @@ const Header = () => {
                 placeholder="搜尋關鍵字"
                 backgroundColor={'#ededed'}
                 pl={12}
-                className="focus:border-[#999]"
               />
             </Box>
           </DrawerHeader>
