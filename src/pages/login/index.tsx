@@ -51,7 +51,7 @@ const Login: App.NextPageWithLayout = () => {
           p={10}
           borderRadius={10}
         >
-          <Heading as="h1" size="lg" textAlign={'center'}>
+          <Heading as="h1" size="lg" textAlign={'center'} mb={10}>
             登入
           </Heading>
 
@@ -66,6 +66,7 @@ const Login: App.NextPageWithLayout = () => {
                   message: 'E-mail 格式錯誤'
                 }
               })}
+              placeholder="請輸入 E-mail"
             />
 
             {!!errors.email && (
@@ -87,6 +88,7 @@ const Login: App.NextPageWithLayout = () => {
                   message: '密碼至少需要包含1個大寫字母、1個小寫字母、1個數字'
                 }
               })}
+              placeholder="請輸入密碼"
             />
 
             {!!errors.password && (
