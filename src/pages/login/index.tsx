@@ -157,7 +157,7 @@ export default Login;
 Login.getLayout = function (page: ReactElement) {
   return (
     <Layout>
-      <Box className="bg-[#E7E7E7]">{page}</Box>
+      <Box className="bg-gray-200">{page}</Box>
     </Layout>
   );
 };
