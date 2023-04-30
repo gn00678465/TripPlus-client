@@ -12,7 +12,36 @@ const colors = {
   'primary-emphasis': tailwind.theme?.colors?.['primary-emphasis'],
   secondary: tailwind.theme?.colors?.secondary,
   success: tailwind.theme?.colors?.success,
-  light: tailwind.theme?.colors?.light
+  light: tailwind.theme?.colors?.light,
+  'light-gray': tailwind.theme?.colors?.['light-gray']
 };
 
-export const theme = extendTheme({ colors });
+const components = {
+  Input: {
+    variants: {
+      outline: {
+        field: {
+          _focus: {
+            borderColor: 'primary.500',
+            boxShadow: 'none'
+          }
+        }
+      }
+    }
+  },
+  Checkbox: {
+    baseStyle: {
+      control: {
+        _checked: {
+          bg: 'primary.600',
+          borderColor: 'primary.600'
+        },
+        _hover: {
+          borderColor: 'primary.300'
+        }
+      }
+    }
+  }
+};
+
+export const theme = extendTheme({ colors, components });
