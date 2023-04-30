@@ -1,4 +1,5 @@
 import { Layout } from '@/components';
+import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 import type { ReactElement } from 'react';
@@ -143,6 +144,12 @@ const Login: App.NextPageWithLayout = () => {
       </Container>
     </Box>
   );
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  return {
+    props: {}
+  };
 };
 
 export default Login;
