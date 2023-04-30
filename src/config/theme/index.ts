@@ -12,8 +12,7 @@ const colors = {
   'primary-emphasis': tailwind.theme?.colors?.['primary-emphasis'],
   secondary: tailwind.theme?.colors?.secondary,
   success: tailwind.theme?.colors?.success,
-  light: tailwind.theme?.colors?.light,
-  'light-gray': tailwind.theme?.colors?.['light-gray']
+  light: tailwind.theme?.colors?.light
 };
 
 const components = {
