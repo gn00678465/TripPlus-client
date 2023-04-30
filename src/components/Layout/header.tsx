@@ -55,12 +55,12 @@ const Header = () => {
                 width={172}
                 height={48}
                 alt="TripPlus Logo"
-                className="mr-10"
+                className="mr-16"
                 priority
               />
             </Link>
 
-            <List gap="5" className="hidden md:flex">
+            <List gap="12" className="hidden md:flex">
               {menu.map(
                 (item) =>
                   item.isShowPc && (
@@ -77,16 +77,12 @@ const Header = () => {
           <Spacer />
 
           <Box alignItems="center" className="hidden md:flex">
-            <Center className="mr-8">
-              <Icon
-                as={AiOutlineSearch}
-                mr={1}
-                className="cursor-pointer text-xl"
-              />
+            <Center className="mr-8 cursor-pointer">
+              <Icon as={AiOutlineSearch} mr={1} className=" text-xl" />
               搜尋
             </Center>
             <Button colorScheme="primary" width={81}>
-              登出
+              登入
             </Button>
           </Box>
 
@@ -140,7 +136,7 @@ const Header = () => {
 
           <DrawerFooter pt={0}>
             <Button colorScheme="primary" width={'100%'}>
-              登出
+              登入
             </Button>
           </DrawerFooter>
         </DrawerContent>
