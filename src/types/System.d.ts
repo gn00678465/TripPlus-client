@@ -1,5 +1,5 @@
 declare namespace Service {
-  type SuccessResult<T> = T extends undefined
+  type SuccessResult<T> = T extends null
     ? {
         status: 'Success';
         message?: string;
@@ -7,15 +7,11 @@ declare namespace Service {
     : {
         status: 'Success';
         message?: string;
-        data: T;
-        response?: any;
       };
 
   interface FailedResult {
     status: 'Error';
     message: string;
-    data?: any;
-    response?: any;
   }
 
   type RequestResult<T> = SuccessResult<T> | FailedResult;
