@@ -36,8 +36,10 @@ export default class CustomAxiosInstance {
 
         return handleConfig;
       },
-      (axiosError: AxiosError<Service.FailedResult>) =>
-        Promise.reject(axiosError)
+      (axiosError: AxiosError<Service.FailedResult>) => {
+        const error = handleAxiosError(axiosError);
+        return Promise.reject(error);
+      }
     );
 
     this.instance.interceptors.request.use(
