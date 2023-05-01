@@ -23,6 +23,7 @@ import { apiPostSignup } from '../../service/api/index';
 import ModalBox from '@/components/Modal';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { safeAwait } from '@/utils';
 
 const Signup: App.NextPageWithLayout = () => {
   const router = useRouter();
@@ -53,11 +54,15 @@ const Signup: App.NextPageWithLayout = () => {
   watch('password', password.current);
 
   const onSubmit = async (data: SignupInterface.FormInputs) => {
-    try {
-      const res = await apiPostSignup(data);
-
-      console.log(res);
-
+    const [err, res] = await safeAwait(apiPostSignup(data));
+    if (err) {
+      setModal(() => ({
+        isOpen: true,
+        content: err.message,
+        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+      }));
+    }
+    if (res) {
       if (res.status === 'Success') {
         setModal(() => ({
           isOpen: true,
@@ -70,15 +75,7 @@ const Signup: App.NextPageWithLayout = () => {
         }, 3000);
 
         setTimer(timerChange);
-      } else {
-        setModal(() => ({
-          isOpen: true,
-          content: res.message,
-          footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
-        }));
       }
-    } catch (error) {
-      console.log(error);
     }
   };
 
