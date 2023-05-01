@@ -51,7 +51,7 @@ module.exports = {
           DEFAULT: '#4F4F4F'
         },
         secondary: '#EAF8F8',
-        'secondary-lignt': '#EFF5F5',
+        'secondary-light': '#EFF5F5',
         success: '#00C2FF',
         light: '#4F4F4F'
       },
