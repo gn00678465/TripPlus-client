@@ -56,7 +56,7 @@ const Signup: App.NextPageWithLayout = () => {
     try {
       const res = await apiPostSignup(data);
 
-      if (res.data && res.data.status === 'Success') {
+      if (res.status === 'Success') {
         setModal(() => ({
           isOpen: true,
           content: '註冊成功',
@@ -71,7 +71,7 @@ const Signup: App.NextPageWithLayout = () => {
       } else {
         setModal(() => ({
           isOpen: true,
-          content: res.response.data.message,
+          content: res.message,
           footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
         }));
       }
