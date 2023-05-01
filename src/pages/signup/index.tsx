@@ -56,6 +56,8 @@ const Signup: App.NextPageWithLayout = () => {
     try {
       const res = await apiPostSignup(data);
 
+      console.log(res);
+
       if (res.status === 'Success') {
         setModal(() => ({
           isOpen: true,
@@ -124,7 +126,7 @@ const Signup: App.NextPageWithLayout = () => {
               )}
             </FormControl>
 
-            <FormControl isInvalid={!!errors.email} my={4}>
+            <FormControl isInvalid={!!errors.name} my={4}>
               <FormLabel>真實姓名</FormLabel>
               <Input
                 type="text"
