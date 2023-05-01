@@ -16,6 +16,12 @@ interface ModalBoxProps {
   content: React.ReactNode;
 }
 
+export interface ModalState {
+  isOpen: boolean;
+  content: string;
+  footer: React.ReactNode | null;
+}
+
 const ChakraModal = ({
   isOpen,
   onClose,

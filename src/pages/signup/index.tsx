@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import { apiPostSignup } from '../../service/api/index';
-import ModalBox from '@/components/Modal';
+import ModalBox, { type ModalState } from '@/components/Modal';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { safeAwait } from '@/utils';
@@ -28,7 +28,7 @@ import { safeAwait } from '@/utils';
 const Signup: App.NextPageWithLayout = () => {
   const router = useRouter();
 
-  const [modal, setModal] = useState<SignupInterface.ModalState>({
+  const [modal, setModal] = useState<ModalState>({
     isOpen: false,
     content: '',
     footer: null

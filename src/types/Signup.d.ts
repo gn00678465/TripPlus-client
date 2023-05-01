@@ -5,10 +5,4 @@ declare namespace SignupInterface {
     password: string;
     confirmPassword: string;
   }
-
-  interface ModalState {
-    isOpen: boolean;
-    content: string;
-    footer: React.ReactNode | null;
-  }
 }
