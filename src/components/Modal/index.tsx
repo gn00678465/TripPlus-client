@@ -18,7 +18,7 @@ interface ModalBoxProps {
 
 export interface ModalState {
   isOpen: boolean;
-  content: string;
+  content: React.ReactNode;
   footer: React.ReactNode | null;
 }
 

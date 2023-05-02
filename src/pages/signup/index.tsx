@@ -24,6 +24,7 @@ import ModalBox, { type ModalState } from '@/components/Modal';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { safeAwait } from '@/utils';
+import { useTimeoutFn } from '@/hooks';
 
 const Signup: App.NextPageWithLayout = () => {
   const router = useRouter();
@@ -33,8 +34,6 @@ const Signup: App.NextPageWithLayout = () => {
     content: '',
     footer: null
   });
-
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
   const setOpenModal = (boolean: boolean): void => {
     setModal((state) => ({
@@ -53,6 +52,10 @@ const Signup: App.NextPageWithLayout = () => {
   const password = useRef('');
   watch('password', password.current);
 
+  const [isReady, clear, set] = useTimeoutFn(() => {
+    router.push('/login');
+  }, 3000);
+
   const onSubmit = async (data: SignupInterface.FormInputs) => {
     const [err, res] = await safeAwait(apiPostSignup(data));
     if (err) {
@@ -66,24 +69,18 @@ const Signup: App.NextPageWithLayout = () => {
       if (res.status === 'Success') {
         setModal(() => ({
           isOpen: true,
-          content: '註冊成功',
+          content: <p>註冊成功！3秒後跳轉到登錄頁面...</p>,
           footer: null
         }));
 
-        const timerChange = setTimeout(() => {
-          router.push('/login');
-        }, 3000);
-
-        setTimer(timerChange);
+        set();
       }
     }
   };
 
   useEffect(() => {
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [timer]);
+    clear();
+  }, [clear]);
 
   return (
     <>
