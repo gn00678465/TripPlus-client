@@ -162,7 +162,7 @@ const Signup: App.NextPageWithLayout = () => {
                 {...register('confirmPassword', {
                   required: '請填入確認密碼!',
                   validate: (val: string) => {
-                    if (watch('password') != val) {
+                    if (watch('password') !== val) {
                       return '兩次密碼輸入不一致，請檢查';
                     }
                   }
