@@ -41,7 +41,7 @@ const Header = () => {
   return (
     <Box
       as="header"
-      className="relative !z-[1500] bg-white font-semibold"
+      className={`relative bg-white font-semibold ${isOpen ? '!z-[1500]' : ''}`}
       py={5}
       borderBottom="1px"
       borderColor="#E9E9E9"

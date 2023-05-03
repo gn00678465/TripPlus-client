@@ -57,7 +57,7 @@ const Login: App.NextPageWithLayout = () => {
           </Heading>
 
           <FormControl isInvalid={!!errors.email} my={4}>
-            <FormLabel>E-mail</FormLabel>
+            <FormLabel className="!font-normal">E-mail</FormLabel>
             <Input
               type="email"
               {...register('email', {
@@ -119,9 +119,9 @@ const Login: App.NextPageWithLayout = () => {
           </Button>
 
           <Flex alignItems={'center'} my={3}>
-            <Divider borderColor={'light-gray'} />
+            <Divider borderColor={'gray.300'} />
             <Box px={2}>或</Box>
-            <Divider borderColor={'light-gray'} />
+            <Divider borderColor={'gray.300'} />
           </Flex>
 
           <Button colorScheme="gray" width={'100%'} my={4}>
@@ -129,7 +129,7 @@ const Login: App.NextPageWithLayout = () => {
             使用 Google 帳號登入
           </Button>
 
-          <Divider borderColor={'light-gray'} mt={3} mb={5} />
+          <Divider borderColor={'gray.300'} mt={3} mb={5} />
 
           <Flex>
             <Box mr={3}>尚未成為會員?</Box>
@@ -157,7 +157,7 @@ export default Login;
 Login.getLayout = function (page: ReactElement) {
   return (
     <Layout>
-      <Box className="bg-[#E7E7E7]">{page}</Box>
+      <Box className="bg-gray-200">{page}</Box>
     </Layout>
   );
 };

@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   env: {
-    BASE_URL: process.env.BASE_API_URL
+    BASE_API_URL: process.env.BASE_API_URL
   }
 };
 
