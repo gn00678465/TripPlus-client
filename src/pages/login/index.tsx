@@ -3,7 +3,12 @@ import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 import type { ReactElement } from 'react';
+import { apiPostLogin } from '@/service/api/index';
+import ModalBox, { type ModalState } from '@/components/Modal';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
+import { safeAwait, localStg } from '@/utils';
 import {
   Box,
   Container,
@@ -19,130 +24,173 @@ import {
   Divider,
   Icon
 } from '@chakra-ui/react';
-
 import { FcGoogle } from 'react-icons/fc';
+import { useAuthStore } from '@/store';
 
 const Login: App.NextPageWithLayout = () => {
-  interface FormInputs {
-    email: string;
-    password: string;
-    isRemember: boolean;
-  }
+  const router = useRouter();
+  const { isLogin, setIsLogin } = useAuthStore();
+
+  useEffect(() => {
+    if (isLogin) router.push('/');
+  }, [isLogin]);
+
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    content: '',
+    footer: null
+  });
+
+  const setOpenModal = (boolean: boolean): void => {
+    setModal((state) => ({
+      ...state,
+      isOpen: boolean
+    }));
+  };
 
   const {
     handleSubmit,
     register,
     formState: { errors }
-  } = useForm<FormInputs>();
+  } = useForm<LoginInterface.FormInputs>({
+    defaultValues: {
+      isRemember: true // 設定 checkbox 的預設值
+    }
+  });
 
-  const onSubmit = (data: FormInputs) => {
-    console.log(data);
+  const onSubmit = async (data: LoginInterface.FormInputs) => {
+    const [err, res] = await safeAwait(apiPostLogin(data));
+    if (err) {
+      setModal(() => ({
+        isOpen: true,
+        content: err.message,
+        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+      }));
+    }
+
+    if (res) {
+      if (res.status !== 'Success') return;
+      setIsLogin(true);
+      localStg.set('userInfo', res.data);
+      router.push('/');
+    }
   };
 
   return (
-    <Box py={20}>
+    <>
       <Head>
         <title>會員登入-TripPlus+</title>
       </Head>
-      <Container maxW="500px">
-        <Box
-          as="form"
-          onSubmit={handleSubmit(onSubmit)}
-          backgroundColor={'white'}
-          p={10}
-          borderRadius={10}
-        >
-          <Heading as="h1" size="lg" textAlign={'center'} mb={10}>
-            登入
-          </Heading>
 
-          <FormControl isInvalid={!!errors.email} my={4}>
-            <FormLabel className="!font-normal">E-mail</FormLabel>
-            <Input
-              type="email"
-              {...register('email', {
-                required: '請填入 E-mail!',
-                pattern: {
-                  value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                  message: 'E-mail 格式錯誤'
-                }
-              })}
-              placeholder="請輸入 E-mail"
-            />
+      <Box py={20}>
+        <Container maxW="500px">
+          <Box
+            as="form"
+            onSubmit={handleSubmit(onSubmit)}
+            backgroundColor={'white'}
+            p={10}
+            borderRadius={10}
+          >
+            <Heading as="h1" size="lg" textAlign={'center'} mb={10}>
+              登入
+            </Heading>
 
-            {!!errors.email && (
-              <FormErrorMessage className="visible">
-                {errors.email.message}
-              </FormErrorMessage>
-            )}
-          </FormControl>
+            <FormControl isInvalid={!!errors.email} my={4}>
+              <FormLabel className="!font-normal">E-mail</FormLabel>
+              <Input
+                type="email"
+                {...register('email', {
+                  required: '請填入 E-mail!',
+                  pattern: {
+                    value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                    message: 'E-mail 格式錯誤'
+                  }
+                })}
+                placeholder="請輸入 E-mail"
+              />
 
-          <FormControl isInvalid={!!errors.password} my={4}>
-            <FormLabel>密碼</FormLabel>
-            <Input
-              type="password"
-              {...register('password', {
-                required: '請填入密碼!',
-                minLength: { value: 8, message: '密碼至少需要8碼' },
-                pattern: {
-                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
-                  message: '密碼至少需要包含1個大寫字母、1個小寫字母、1個數字'
-                }
-              })}
-              placeholder="請輸入密碼"
-            />
+              {!!errors.email && (
+                <FormErrorMessage className="visible">
+                  {errors.email.message}
+                </FormErrorMessage>
+              )}
+            </FormControl>
 
-            {!!errors.password && (
-              <FormErrorMessage>{errors.password.message}</FormErrorMessage>
-            )}
-          </FormControl>
+            <FormControl isInvalid={!!errors.password} my={4}>
+              <FormLabel>密碼</FormLabel>
+              <Input
+                type="password"
+                {...register('password', {
+                  required: '請填入密碼!',
+                  minLength: { value: 8, message: '密碼至少需要8碼' },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+                    message: '密碼至少需要包含1個大寫字母、1個小寫字母、1個數字'
+                  }
+                })}
+                placeholder="請輸入密碼"
+              />
 
-          <FormControl>
-            <Flex my={4}>
-              <Checkbox {...register('isRemember')}>記住我</Checkbox>
+              {!!errors.password && (
+                <FormErrorMessage>{errors.password.message}</FormErrorMessage>
+              )}
+            </FormControl>
 
-              <Spacer />
+            <FormControl>
+              <Flex my={4}>
+                <Checkbox {...register('isRemember')}>記住我</Checkbox>
 
-              <Box>
-                <Link
-                  href="/"
-                  className="text-primary-700 hover:text-primary-500"
-                >
-                  忘記密碼?
-                </Link>
-              </Box>
+                <Spacer />
+
+                <Box>
+                  <Link
+                    href="/"
+                    className="text-primary-700 hover:text-primary-500"
+                  >
+                    忘記密碼?
+                  </Link>
+                </Box>
+              </Flex>
+            </FormControl>
+
+            <Button type="submit" colorScheme="primary" width={'100%'} my={4}>
+              登入
+            </Button>
+
+            <Flex alignItems={'center'} my={3}>
+              <Divider borderColor={'gray.300'} />
+              <Box px={2}>或</Box>
+              <Divider borderColor={'gray.300'} />
             </Flex>
-          </FormControl>
 
-          <Button type="submit" colorScheme="primary" width={'100%'} my={4}>
-            登入
-          </Button>
+            <Button colorScheme="gray" width={'100%'} my={4}>
+              <Icon as={FcGoogle} mr={1} className="text-xl" />
+              使用 Google 帳號登入
+            </Button>
 
-          <Flex alignItems={'center'} my={3}>
-            <Divider borderColor={'gray.300'} />
-            <Box px={2}>或</Box>
-            <Divider borderColor={'gray.300'} />
-          </Flex>
+            <Divider borderColor={'gray.300'} mt={3} mb={5} />
 
-          <Button colorScheme="gray" width={'100%'} my={4}>
-            <Icon as={FcGoogle} mr={1} className="text-xl" />
-            使用 Google 帳號登入
-          </Button>
+            <Flex>
+              <Box mr={3}>尚未成為會員?</Box>
+              <Link
+                href="/signup"
+                className="text-primary-700 hover:text-primary-500"
+              >
+                註冊帳號
+              </Link>
+            </Flex>
+          </Box>
+        </Container>
+      </Box>
 
-          <Divider borderColor={'gray.300'} mt={3} mb={5} />
-
-          <Flex>
-            <Box mr={3}>尚未成為會員?</Box>
-            <Link
-              href="/signup"
-              className="text-primary-700 hover:text-primary-500"
-            >
-              註冊帳號
-            </Link>
-          </Flex>
-        </Box>
-      </Container>
-    </Box>
+      <ModalBox
+        content={modal.content}
+        isOpen={modal.isOpen}
+        onClose={() => setOpenModal(false)}
+        header="提醒"
+        footer={modal.footer}
+      ></ModalBox>
+    </>
   );
 };
 
