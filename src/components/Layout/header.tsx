@@ -23,10 +23,15 @@ import {
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { NextRouter, useRouter } from 'next/router';
 
 const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const router = useRouter();
+
+  const [transparent, setTransparent] = useState<boolean>(false);
 
   type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
@@ -38,13 +43,24 @@ const Header = () => {
     { title: '提案', url: '/', isShowPc: true }
   ];
 
+  useEffect(() => {
+    if (router.route === '/') {
+      const setBgColor = () => {
+        setTransparent(true);
+      };
+      setBgColor();
+    }
+  });
+
   return (
     <Box
       as="header"
-      className={`relative bg-white font-semibold ${isOpen ? '!z-[1500]' : ''}`}
+      className={`relative font-semibold ${
+        transparent
+          ? 'border-none bg-transparent'
+          : 'border-b-2 border-b-gray-200 bg-white '
+      }  ${isOpen ? '!z-[1500]' : ''}`}
       py={5}
-      borderBottom="1px"
-      borderColor="#E9E9E9"
     >
       <Container maxW="1296px">
         <Flex alignItems="center">
@@ -78,7 +94,7 @@ const Header = () => {
 
           <Box alignItems="center" className="hidden md:flex">
             <Center className="mr-8 cursor-pointer">
-              <Icon as={AiOutlineSearch} mr={1} className=" text-xl" />
+              <Icon as={AiOutlineSearch} mr={1} className="text-xl " />
               搜尋
             </Center>
             <Button colorScheme="primary" width={81}>
