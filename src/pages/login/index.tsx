@@ -33,7 +33,7 @@ const Login: App.NextPageWithLayout = () => {
 
   useEffect(() => {
     if (isLogin) router.push('/');
-  }, [isLogin]);
+  }, [isLogin, router]);
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -52,13 +52,13 @@ const Login: App.NextPageWithLayout = () => {
     handleSubmit,
     register,
     formState: { errors }
-  } = useForm<LoginInterface.FormInputs>({
+  } = useForm<PagesInterface.LoginInputs>({
     defaultValues: {
-      isRemember: true // 設定 checkbox 的預設值
+      isRemember: true
     }
   });
 
-  const onSubmit = async (data: LoginInterface.FormInputs) => {
+  const onSubmit = async (data: PagesInterface.LoginInputs) => {
     const [err, res] = await safeAwait(apiPostLogin(data));
     if (err) {
       setModal(() => ({
@@ -144,7 +144,7 @@ const Login: App.NextPageWithLayout = () => {
 
                 <Box>
                   <Link
-                    href="/"
+                    href="/user/change-password"
                     className="text-primary-700 hover:text-primary-500"
                   >
                     忘記密碼?
