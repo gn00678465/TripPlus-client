@@ -3,7 +3,7 @@ import Header from './header';
 import Footer from './footer';
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store';
-import { localStg } from '@/utils';
+import { getToken } from '@/service/request/helpers';
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,8 +12,8 @@ interface LayoutProps {
 const Layout: FC<LayoutProps> = ({ children }) => {
   const { isLogin, setIsLogin } = useAuthStore();
   useEffect(() => {
-    const userInfo = localStg.get('userInfo');
-    if (userInfo && userInfo.token) setIsLogin(true);
+    const token = getToken();
+    if (token) setIsLogin(true);
   }, [isLogin, setIsLogin]);
 
   return (

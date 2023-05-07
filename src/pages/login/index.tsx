@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { safeAwait, localStg } from '@/utils';
+import { getToken } from '@/service/request/helpers';
 import {
   Box,
   Container,
@@ -29,11 +30,7 @@ import { useAuthStore } from '@/store';
 
 const Login: App.NextPageWithLayout = () => {
   const router = useRouter();
-  const { isLogin, setIsLogin } = useAuthStore();
-
-  useEffect(() => {
-    if (isLogin) router.push('/');
-  }, [isLogin, router]);
+  const { setIsLogin } = useAuthStore();
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -70,11 +67,16 @@ const Login: App.NextPageWithLayout = () => {
 
     if (res) {
       if (res.status !== 'Success') return;
-      setIsLogin(true);
       localStg.set('userInfo', res.data);
+      setIsLogin(true);
       router.push('/');
     }
   };
+
+  useEffect(() => {
+    const token = getToken();
+    if (token) router.push('/');
+  }, [router]);
 
   return (
     <>
