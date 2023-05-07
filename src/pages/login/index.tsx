@@ -49,13 +49,13 @@ const Login: App.NextPageWithLayout = () => {
     handleSubmit,
     register,
     formState: { errors }
-  } = useForm<PagesInterface.LoginInputs>({
+  } = useForm<LoginInterface.FormInputs>({
     defaultValues: {
       isRemember: true
     }
   });
 
-  const onSubmit = async (data: PagesInterface.LoginInputs) => {
+  const onSubmit = async (data: LoginInterface.FormInputs) => {
     const [err, res] = await safeAwait(apiPostLogin(data));
     if (err) {
       setModal(() => ({

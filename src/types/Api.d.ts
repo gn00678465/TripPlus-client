@@ -4,10 +4,4 @@ declare namespace ApiAuth {
     roles: string[];
     token: string;
   }
-
-  interface SignupResponse {
-    token: string;
-    name: string;
-    roles: string[];
-  }
 }

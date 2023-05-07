@@ -17,5 +17,5 @@ export function apiPostLogin(data: LoginBody) {
 }
 
 export function apiPostSignup(data: SignupBody) {
-  return request.post<ApiAuth.SignupResponse>('/auth/signup', data);
+  return request.post<ApiAuth.UserInfo>('/auth/signup', data);
 }

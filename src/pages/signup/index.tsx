@@ -47,7 +47,7 @@ const Signup: App.NextPageWithLayout = () => {
     register,
     formState: { errors },
     watch
-  } = useForm<PagesInterface.SignupInputs>();
+  } = useForm<SignupInterface.FormInputs>();
 
   const password = useRef('');
   watch('password', password.current);
@@ -56,7 +56,7 @@ const Signup: App.NextPageWithLayout = () => {
     router.push('/login');
   }, 3000);
 
-  const onSubmit = async (data: PagesInterface.SignupInputs) => {
+  const onSubmit = async (data: SignupInterface.FormInputs) => {
     const [err, res] = await safeAwait(apiPostSignup(data));
     if (err) {
       setModal(() => ({
