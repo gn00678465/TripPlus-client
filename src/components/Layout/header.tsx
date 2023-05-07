@@ -44,7 +44,7 @@ const Header = () => {
       return;
     }
     setIsLogin(false);
-    localStg.clear();
+    localStg.remove('userInfo');
     router.push('/');
   };
 
