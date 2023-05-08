@@ -32,7 +32,8 @@ export default class CustomAxiosInstance {
         let handleConfig = { ...config };
 
         // 處理 token
-        handleConfig.headers.Authorization = getToken();
+        const token = getToken();
+        handleConfig.headers.Authorization = `Bearer ${token}`;
 
         return handleConfig;
       },

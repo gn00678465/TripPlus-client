@@ -24,13 +24,29 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
 import { useState } from 'react';
+import { localStg } from '@/utils';
+import { useRouter } from 'next/router';
+import { useAuthStore } from '@/store';
 
 const Header = () => {
+  const router = useRouter();
+  const { isLogin, setIsLogin } = useAuthStore();
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
   const [placement, setPlacement] = useState<DrawerPlacement>('top');
+
+  const logout = () => {
+    if (!isLogin) {
+      router.push('/login');
+      return;
+    }
+    setIsLogin(false);
+    localStg.remove('userInfo');
+    router.push('/');
+  };
 
   const menu = [
     { title: '首頁', url: '/', isShowPc: false },
@@ -41,7 +57,9 @@ const Header = () => {
   return (
     <Box
       as="header"
-      className={`relative bg-white font-semibold ${isOpen ? '!z-[1500]' : ''}`}
+      className={`relative border-none bg-transparent font-semibold ${
+        isOpen ? '!z-[1500]' : ''
+      }`}
       py={5}
       borderBottom="1px"
       borderColor="#E9E9E9"
@@ -81,8 +99,8 @@ const Header = () => {
               <Icon as={AiOutlineSearch} mr={1} className=" text-xl" />
               搜尋
             </Center>
-            <Button colorScheme="primary" width={81}>
-              登入
+            <Button colorScheme="primary" width={81} onClick={logout}>
+              {isLogin ? '登出' : '登入'}
             </Button>
           </Box>
 
@@ -136,7 +154,7 @@ const Header = () => {
 
           <DrawerFooter pt={0}>
             <Button colorScheme="primary" width={'100%'}>
-              登入
+              {isLogin ? '登出' : '登入'}
             </Button>
           </DrawerFooter>
         </DrawerContent>

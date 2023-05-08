@@ -7,6 +7,7 @@ declare namespace Service {
     : {
         status: 'Success';
         message?: string;
+        data: T;
       };
 
   interface FailedResult {
