@@ -64,7 +64,7 @@ const Header = () => {
       borderBottom="1px"
       borderColor="#E9E9E9"
     >
-      <Container maxW="1296px">
+      <Container maxW="container.xl">
         <Flex alignItems="center">
           <Flex alignItems="center">
             <Link href="/">

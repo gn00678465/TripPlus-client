@@ -17,15 +17,47 @@ const colors = {
   'secondary-lignt': tailwind.theme?.colors?.['secondary-lignt']
 };
 
+const breakpoints = {
+  xs: '375px',
+  xl: '1296px'
+};
+
 const components = {
   Input: {
     variants: {
       outline: {
         field: {
+          borderColor: 'gray.300',
+
           _focus: {
             borderColor: 'primary.500',
             boxShadow: 'none'
           }
+        }
+      }
+    }
+  },
+  Select: {
+    variants: {
+      outline: {
+        field: {
+          borderColor: 'gray.300',
+
+          _focus: {
+            borderColor: 'primary.500',
+            boxShadow: 'none'
+          }
+        }
+      }
+    }
+  },
+  Textarea: {
+    variants: {
+      outline: {
+        borderColor: 'gray.300',
+        _focus: {
+          borderColor: 'primary.500',
+          boxShadow: 'none'
         }
       }
     }
@@ -45,4 +77,4 @@ const components = {
   }
 };
 
-export const theme = extendTheme({ colors, components });
+export const theme = extendTheme({ colors, breakpoints, components });

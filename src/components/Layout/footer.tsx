@@ -24,7 +24,7 @@ const Footer = () => {
 
   return (
     <Box as="footer" className="mt-auto py-10 md:py-20">
-      <Container maxW="1296px">
+      <Container maxW="container.xl">
         <Flex className="flex-col md:flex-row md:justify-between">
           <Flex className="flex-col text-center font-semibold md:flex-row md:text-left">
             {footerMenu.map((item) => (
