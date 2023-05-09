@@ -2,7 +2,7 @@ import { FC } from 'react';
 import BreadcrumbList from '@/components/Breadcrumb';
 import UserMenu from '@/components/User/menu';
 import { Box, Container } from '@chakra-ui/react';
-import styles from '@/styles/user.module.scss';
+// import styles from '@/styles/user.module.scss';
 
 interface UserHeaderProps {
   breadcrumb: ComponentsInterface.Breadcrumb[];
@@ -14,7 +14,18 @@ const UserHeader: FC<UserHeaderProps> = ({ breadcrumb }) => {
       <Container
         maxW="container.xl"
         mx={'auto'}
-        className={`${styles['scroll-bar']} overflow-x-auto overflow-y-hidden pt-4 md:pt-10`}
+        className="overflow-x-auto overflow-y-hidden pt-4 md:pt-10"
+        css={{
+          '&::-webkit-scrollbar': {
+            height: 0,
+            backgroundColor: 'transparent'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'transparent'
+          },
+          scrollbarColor: 'transparent transparent',
+          scrollbarWidth: 'thin'
+        }}
       >
         <Box className="hidden md:block">
           <BreadcrumbList breadcrumb={breadcrumb} />
