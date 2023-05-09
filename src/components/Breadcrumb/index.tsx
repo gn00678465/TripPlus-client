@@ -1,7 +1,12 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react';
 
+export interface Breadcrumb {
+  name: string;
+  url: string;
+}
+
 interface BreadcrumbProps {
-  breadcrumb: ComponentsInterface.Breadcrumb[];
+  breadcrumb: Breadcrumb[];
 }
 
 const BreadcrumbList = ({ breadcrumb }: BreadcrumbProps) => {
