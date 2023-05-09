@@ -57,7 +57,7 @@ const Header = () => {
   return (
     <Box
       as="header"
-      className={`relative border-none bg-transparent font-semibold ${
+      className={`relative border-none bg-white font-semibold ${
         isOpen ? '!z-[1500]' : ''
       }`}
       py={5}
@@ -115,7 +115,6 @@ const Header = () => {
       </Container>
 
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
         <DrawerContent className="!top-20 !z-10" backgroundColor={'#F9F9F9'}>
           <DrawerHeader pt={5} pb={0}>
             <Box pos="relative">

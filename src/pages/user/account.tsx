@@ -60,7 +60,7 @@ const Account: App.NextPageWithLayout = () => {
 
       <UserHeader breadcrumb={breadcrumb} />
 
-      <Box pt={3} pb={20}>
+      <Box pt={3} className="pb-10 md:pb-20">
         <Container maxW={'container.xl'}>
           <Box backgroundColor={'white'} className="p-5 md:p-10">
             <Box
