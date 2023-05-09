@@ -23,14 +23,23 @@ import {
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { localStg } from '@/utils';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store';
 
 const Header = () => {
   const router = useRouter();
-  const { isLogin, setIsLogin } = useAuthStore();
+  // const { isLogin, setIsLogin } = useAuthStore();
+  const hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const loginStatus = useAuthStore((state) => state.getters.isLogin);
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    if (hasHydrated) {
+      setIsLogin(loginStatus);
+    }
+  }, [hasHydrated]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -43,8 +52,9 @@ const Header = () => {
       router.push('/login');
       return;
     }
-    setIsLogin(false);
-    localStg.remove('userInfo');
+    // setIsLogin(false);
+    // localStg.remove('userInfo');
+    useAuthStore.persist.clearStorage();
     router.push('/');
   };
 
@@ -100,7 +110,7 @@ const Header = () => {
               搜尋
             </Center>
             <Button colorScheme="primary" width={81} onClick={logout}>
-              {isLogin ? '登出' : '登入'}
+              {hasHydrated && isLogin ? '登出' : '登入'}
             </Button>
           </Box>
 
@@ -154,7 +164,7 @@ const Header = () => {
 
           <DrawerFooter pt={0}>
             <Button colorScheme="primary" width={'100%'}>
-              {isLogin ? '登出' : '登入'}
+              {hasHydrated && isLogin ? '登出' : '登入'}
             </Button>
           </DrawerFooter>
         </DrawerContent>

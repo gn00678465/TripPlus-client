@@ -30,6 +30,7 @@ import { useAuthStore } from '@/store';
 
 const Signup: App.NextPageWithLayout = () => {
   const router = useRouter();
+  const isLogin = useAuthStore((state) => state.getters.isLogin);
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -84,9 +85,9 @@ const Signup: App.NextPageWithLayout = () => {
   }, [clear]);
 
   useEffect(() => {
-    const token = getToken();
-    if (token) router.push('/');
-  }, [router]);
+    // const token = getToken();
+    if (isLogin) router.push('/');
+  }, [router, isLogin]);
 
   return (
     <>
