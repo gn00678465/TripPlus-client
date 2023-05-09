@@ -24,13 +24,13 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
 import { useState, useEffect } from 'react';
-import { localStg } from '@/utils';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store';
+import { useCookie } from '@/hooks';
 
 const Header = () => {
   const router = useRouter();
-  // const { isLogin, setIsLogin } = useAuthStore();
+  const [value, updateCookie, deleteCookie] = useCookie('token');
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const loginStatus = useAuthStore((state) => state.getters.isLogin);
   const [isLogin, setIsLogin] = useState(false);
@@ -39,7 +39,7 @@ const Header = () => {
     if (hasHydrated) {
       setIsLogin(loginStatus);
     }
-  }, [hasHydrated]);
+  }, [hasHydrated, loginStatus]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -52,9 +52,8 @@ const Header = () => {
       router.push('/login');
       return;
     }
-    // setIsLogin(false);
-    // localStg.remove('userInfo');
     useAuthStore.persist.clearStorage();
+    deleteCookie();
     router.push('/');
   };
 

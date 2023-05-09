@@ -1,16 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-// type AuthState = {
-//   isLogin: boolean;
-//   setIsLogin: (isLogin: boolean) => void;
-// };
-
-// export const useAuthStore = create<AuthState>((set) => ({
-//   isLogin: false,
-//   setIsLogin: (isLogin) => set({ isLogin })
-// }));
-
 type State = {
   userInfo: ApiAuth.UserInfo | null;
   _hasHydrated: boolean;

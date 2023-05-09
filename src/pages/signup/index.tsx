@@ -84,11 +84,6 @@ const Signup: App.NextPageWithLayout = () => {
     clear();
   }, [clear]);
 
-  useEffect(() => {
-    // const token = getToken();
-    if (isLogin) router.push('/');
-  }, [router, isLogin]);
-
   return (
     <>
       <Head>

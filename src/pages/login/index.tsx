@@ -5,7 +5,7 @@ import Head from 'next/head';
 import type { ReactElement } from 'react';
 import { apiPostLogin } from '@/service/api/index';
 import ModalBox, { type ModalState } from '@/components/Modal';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { safeAwait } from '@/utils';
@@ -26,12 +26,12 @@ import {
 } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuthStore } from '@/store';
+import { useCookie } from '@/hooks';
 
 const Login: App.NextPageWithLayout = () => {
   const router = useRouter();
-  // const { setIsLogin } = useAuthStore();
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
-  const isLogin = useAuthStore((state) => state.getters.isLogin);
+  const [value, updateCookie, deleteCookie] = useCookie('token');
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -68,17 +68,11 @@ const Login: App.NextPageWithLayout = () => {
 
     if (res) {
       if (res.status !== 'Success') return;
-      // localStg.set('userInfo', res.data);
       setUserInfo(res.data);
-      // setIsLogin(true);
+      updateCookie(res.data.token);
       router.push('/');
     }
   };
-
-  useEffect(() => {
-    // const token = getToken();
-    if (isLogin) router.push('/');
-  }, [router, isLogin]);
 
   return (
     <>
