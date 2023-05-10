@@ -110,7 +110,10 @@ const Account: App.NextPageWithLayout = () => {
                 </FormControl>
 
                 <FormControl my={10}>
-                  <FormLabel>真實身份 / 名稱</FormLabel>
+                  <FormLabel>
+                    真實身份 / 名稱
+                    <span className="pl-1">*</span>
+                  </FormLabel>
                   <Input
                     type="text"
                     {...register('name')}
@@ -129,6 +132,7 @@ const Account: App.NextPageWithLayout = () => {
                       }
                     })}
                     placeholder="請輸入 E-mail"
+                    disabled
                   />
 
                   {!!errors.email && (
@@ -139,11 +143,11 @@ const Account: App.NextPageWithLayout = () => {
                 </FormControl>
 
                 <FormControl my={10}>
-                  <FormLabel>電話</FormLabel>
+                  <FormLabel>手機</FormLabel>
                   <Input
                     type="text"
                     {...register('phone')}
-                    placeholder="請輸入電話"
+                    placeholder="請輸入手機"
                   />
                 </FormControl>
 

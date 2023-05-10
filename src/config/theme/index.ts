@@ -32,6 +32,12 @@ const components = {
           _focus: {
             borderColor: 'primary.500',
             boxShadow: 'none'
+          },
+
+          _disabled: {
+            opacity: '1',
+            borderColor: 'gray.300',
+            backgroundColor: 'gray.100'
           }
         }
       }
@@ -46,6 +52,12 @@ const components = {
           _focus: {
             borderColor: 'primary.500',
             boxShadow: 'none'
+          },
+
+          _disabled: {
+            opacity: '1',
+            borderColor: 'gray.300',
+            backgroundColor: 'gray.100'
           }
         }
       }
@@ -58,6 +70,12 @@ const components = {
         _focus: {
           borderColor: 'primary.500',
           boxShadow: 'none'
+        },
+
+        _disabled: {
+          opacity: '1',
+          borderColor: 'gray.300',
+          backgroundColor: 'gray.100'
         }
       }
     }
