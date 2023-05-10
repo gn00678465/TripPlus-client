@@ -105,7 +105,7 @@ const Header = () => {
 
           <Box alignItems="center" className="hidden md:flex">
             <Center className="mr-8 cursor-pointer">
-              <Icon as={AiOutlineSearch} mr={1} className=" text-xl" />
+              <Icon as={AiOutlineSearch} mr={1} className="text-xl" />
               搜尋
             </Center>
             <Button colorScheme="primary" width={81} onClick={logout}>

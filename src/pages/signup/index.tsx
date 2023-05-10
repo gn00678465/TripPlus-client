@@ -5,7 +5,6 @@ import Head from 'next/head';
 import type { ReactElement } from 'react';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { getToken } from '@/service/request/helpers';
 import {
   Box,
   Container,
@@ -30,7 +29,6 @@ import { useAuthStore } from '@/store';
 
 const Signup: App.NextPageWithLayout = () => {
   const router = useRouter();
-  const isLogin = useAuthStore((state) => state.getters.isLogin);
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,

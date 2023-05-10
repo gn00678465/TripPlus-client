@@ -7,13 +7,6 @@ interface LayoutProps {
 }
 
 const Layout: FC<LayoutProps> = ({ children }) => {
-  // const { isLogin, setIsLogin } = useAuthStore();
-
-  // useEffect(() => {
-  //   const token = getToken();
-  //   if (token) setIsLogin(true);
-  // }, [isLogin, setIsLogin]);
-
   return (
     <>
       <Header />
