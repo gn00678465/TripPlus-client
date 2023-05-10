@@ -26,12 +26,10 @@ import {
 } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuthStore } from '@/store';
-import { useCookie } from '@/hooks';
 
 const Login: App.NextPageWithLayout = () => {
   const router = useRouter();
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
-  const [value, updateCookie, deleteCookie] = useCookie('token');
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -69,7 +67,6 @@ const Login: App.NextPageWithLayout = () => {
     if (res) {
       if (res.status !== 'Success') return;
       setUserInfo(res.data);
-      updateCookie(res.data.token);
       router.push('/');
     }
   };
