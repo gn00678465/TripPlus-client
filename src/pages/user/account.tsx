@@ -109,11 +109,8 @@ const Account: App.NextPageWithLayout = () => {
                   />
                 </FormControl>
 
-                <FormControl my={10}>
-                  <FormLabel>
-                    真實身份 / 名稱
-                    <span className="pl-1">*</span>
-                  </FormLabel>
+                <FormControl isRequired my={10}>
+                  <FormLabel>真實身份 / 名稱</FormLabel>
                   <Input
                     type="text"
                     {...register('name')}
