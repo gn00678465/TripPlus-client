@@ -119,9 +119,9 @@ const Account: App.NextPageWithLayout = () => {
         phone,
         address,
         gender,
-        year: dayjs(birthday).get('year'),
-        month: dayjs(birthday).add(1, 'month').get('month'),
-        day: dayjs(birthday).get('date'),
+        year: birthday ? dayjs(birthday).get('year') : null,
+        month: birthday ? dayjs(birthday).add(1, 'month').get('month') : null,
+        day: birthday ? dayjs(birthday).get('date') : null,
         country,
         introduction
       });
@@ -151,7 +151,7 @@ const Account: App.NextPageWithLayout = () => {
       nickName,
       phone,
       address,
-      photo: userPhoto,
+      photo: typeof userPhoto === 'string' ? userPhoto : '',
       gender: Number(gender),
       birthday: dayjs(`${year}-${month}-${day}`).toDate(),
       country,
