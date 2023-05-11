@@ -11,7 +11,7 @@ declare namespace ApiAuth {
     nickName: string;
     phone: string;
     address: string;
-    photo: StaticImageData;
+    photo: string | StaticImageData;
     gender: number;
     birthday: Date;
     country: string;
