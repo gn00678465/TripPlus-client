@@ -57,14 +57,14 @@ const Header = () => {
   return (
     <Box
       as="header"
-      className={`relative border-none bg-transparent font-semibold ${
+      className={`relative border-none bg-white font-semibold ${
         isOpen ? '!z-[1500]' : ''
       }`}
       py={5}
       borderBottom="1px"
       borderColor="#E9E9E9"
     >
-      <Container maxW="1296px">
+      <Container maxW="container.xl">
         <Flex alignItems="center">
           <Flex alignItems="center">
             <Link href="/">
@@ -115,7 +115,6 @@ const Header = () => {
       </Container>
 
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
         <DrawerContent className="!top-20 !z-10" backgroundColor={'#F9F9F9'}>
           <DrawerHeader pt={5} pb={0}>
             <Box pos="relative">
