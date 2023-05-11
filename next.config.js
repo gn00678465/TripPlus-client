@@ -4,6 +4,9 @@ const nextConfig = {
   output: 'standalone',
   env: {
     BASE_API_URL: process.env.BASE_API_URL
+  },
+  images: {
+    domains: ['res.cloudinary.com']
   }
 };
 

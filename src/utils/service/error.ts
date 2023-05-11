@@ -1,4 +1,5 @@
 import type { AxiosError } from 'axios';
+import Router from 'next/router';
 
 export function handleAxiosError(axiosError: AxiosError<Service.FailedResult>) {
   const error: Service.FailedResult = {
@@ -6,7 +7,13 @@ export function handleAxiosError(axiosError: AxiosError<Service.FailedResult>) {
     message: ''
   };
   if (axiosError.response) {
-    Object.assign(error, { message: axiosError.response.data.message });
+    if (axiosError.response.status === 401) {
+      Router.push('/login');
+    }
+
+    Object.assign(error, {
+      message: axiosError.response.data.message
+    });
   }
 
   return error;
