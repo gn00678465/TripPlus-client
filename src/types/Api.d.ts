@@ -11,7 +11,7 @@ declare namespace ApiAuth {
     nickName: string;
     phone: string;
     address: string;
-    photo: string | StaticImageData;
+    photo: string;
     gender: number;
     birthday: Date;
     country: string;
@@ -19,6 +19,6 @@ declare namespace ApiAuth {
   }
 
   interface UploadFile {
-    imageUrl: StaticImageData;
+    imageUrl: string;
   }
 }

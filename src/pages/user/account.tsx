@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import { GetStaticProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
@@ -39,7 +39,7 @@ const Account: App.NextPageWithLayout = () => {
     { id: 1, name: '女性' }
   ];
 
-  const [userPhoto, setUserPhoto] = useState(NoImage);
+  const [userPhoto, setUserPhoto] = useState<string | StaticImageData>(NoImage);
   const [fileName, setFileName] = useState('');
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
