@@ -130,6 +130,15 @@ const Account: App.NextPageWithLayout = () => {
     }
   }, [reset]);
 
+  const formatBirthday = (
+    year: UserAccountInterface.FormInputs['year'],
+    month: UserAccountInterface.FormInputs['month'],
+    day: UserAccountInterface.FormInputs['day']
+  ) => {
+    if (!year || !month || !day) return '';
+    return `${year}-${month}-${day}`;
+  };
+
   const onSubmit = async (data: UserAccountInterface.FormInputs) => {
     const {
       email,
@@ -153,10 +162,12 @@ const Account: App.NextPageWithLayout = () => {
       address,
       photo: typeof userPhoto === 'string' ? userPhoto : '',
       gender: Number(gender),
-      birthday: dayjs(`${year}-${month}-${day}`).toDate(),
+      birthday: formatBirthday(year, month, day),
       country,
       introduction
     };
+
+    console.log(payload.birthday);
 
     const [err, res] = await safeAwait(apiPatchUserAccount(payload));
 

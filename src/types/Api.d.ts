@@ -13,7 +13,7 @@ declare namespace ApiAuth {
     address: string;
     photo: string;
     gender: number;
-    birthday: Date;
+    birthday: string;
     country: string;
     introduction: string;
   }
