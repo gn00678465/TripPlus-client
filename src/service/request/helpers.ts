@@ -1,5 +1,6 @@
-import { localStg } from '@/utils';
+// import { localStg } from '@/utils';
+import { useAuthStore } from '@/store';
 
 export function getToken() {
-  return localStg.get('userInfo')?.token || '';
+  return useAuthStore.getState().userInfo?.token || '';
 }

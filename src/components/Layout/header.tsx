@@ -23,14 +23,23 @@ import {
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
-import { useState } from 'react';
-import { localStg } from '@/utils';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store';
+import { useCookie } from '@/hooks';
 
 const Header = () => {
   const router = useRouter();
-  const { isLogin, setIsLogin } = useAuthStore();
+  const [value, updateCookie, deleteCookie] = useCookie('token');
+  const hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const loginStatus = useAuthStore((state) => state.getters.isLogin);
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    if (hasHydrated) {
+      setIsLogin(loginStatus);
+    }
+  }, [hasHydrated, loginStatus]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -43,8 +52,8 @@ const Header = () => {
       router.push('/login');
       return;
     }
-    setIsLogin(false);
-    localStg.remove('userInfo');
+    useAuthStore.persist.clearStorage();
+    deleteCookie();
     router.push('/');
   };
 
@@ -96,11 +105,11 @@ const Header = () => {
 
           <Box alignItems="center" className="hidden md:flex">
             <Center className="mr-8 cursor-pointer">
-              <Icon as={AiOutlineSearch} mr={1} className=" text-xl" />
+              <Icon as={AiOutlineSearch} mr={1} className="text-xl" />
               搜尋
             </Center>
             <Button colorScheme="primary" width={81} onClick={logout}>
-              {isLogin ? '登出' : '登入'}
+              {hasHydrated && isLogin ? '登出' : '登入'}
             </Button>
           </Box>
 
@@ -154,7 +163,7 @@ const Header = () => {
 
           <DrawerFooter pt={0}>
             <Button colorScheme="primary" width={'100%'}>
-              {isLogin ? '登出' : '登入'}
+              {hasHydrated && isLogin ? '登出' : '登入'}
             </Button>
           </DrawerFooter>
         </DrawerContent>

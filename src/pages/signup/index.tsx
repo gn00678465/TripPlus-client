@@ -5,7 +5,6 @@ import Head from 'next/head';
 import type { ReactElement } from 'react';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { getToken } from '@/service/request/helpers';
 import {
   Box,
   Container,
@@ -82,11 +81,6 @@ const Signup: App.NextPageWithLayout = () => {
   useEffect(() => {
     clear();
   }, [clear]);
-
-  useEffect(() => {
-    const token = getToken();
-    if (token) router.push('/');
-  }, [router]);
 
   return (
     <>

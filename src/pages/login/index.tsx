@@ -5,11 +5,10 @@ import Head from 'next/head';
 import type { ReactElement } from 'react';
 import { apiPostLogin } from '@/service/api/index';
 import ModalBox, { type ModalState } from '@/components/Modal';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
-import { safeAwait, localStg } from '@/utils';
-import { getToken } from '@/service/request/helpers';
+import { safeAwait } from '@/utils';
 import {
   Box,
   Container,
@@ -30,7 +29,7 @@ import { useAuthStore } from '@/store';
 
 const Login: App.NextPageWithLayout = () => {
   const router = useRouter();
-  const { setIsLogin } = useAuthStore();
+  const setUserInfo = useAuthStore((state) => state.setUserInfo);
 
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -67,16 +66,10 @@ const Login: App.NextPageWithLayout = () => {
 
     if (res) {
       if (res.status !== 'Success') return;
-      localStg.set('userInfo', res.data);
-      setIsLogin(true);
+      setUserInfo(res.data);
       router.push('/');
     }
   };
-
-  useEffect(() => {
-    const token = getToken();
-    if (token) router.push('/');
-  }, [router]);
 
   return (
     <>
