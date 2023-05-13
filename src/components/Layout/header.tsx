@@ -24,18 +24,40 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
 import { useState, useEffect } from 'react';
-import { NextRouter, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
+import { useAuthStore } from '@/store';
+import { useCookie } from '@/hooks';
 
 const Header = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   const router = useRouter();
+  const [value, updateCookie, deleteCookie] = useCookie('token');
+  const hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const loginStatus = useAuthStore((state) => state.getters.isLogin);
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    if (hasHydrated) {
+      setIsLogin(loginStatus);
+    }
+  }, [hasHydrated, loginStatus]);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [transparent, setTransparent] = useState<boolean>(false);
 
   type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
   const [placement, setPlacement] = useState<DrawerPlacement>('top');
+
+  const logout = () => {
+    if (!isLogin) {
+      router.push('/login');
+      return;
+    }
+    useAuthStore.persist.clearStorage();
+    deleteCookie();
+    router.push('/');
+  };
 
   const menu = [
     { title: '首頁', url: '/', isShowPc: false },
@@ -62,7 +84,7 @@ const Header = () => {
       }  ${isOpen ? '!z-[1500]' : ''}`}
       py={5}
     >
-      <Container maxW="1296px">
+      <Container maxW="container.xl">
         <Flex alignItems="center">
           <Flex alignItems="center">
             <Link href="/">
@@ -94,11 +116,11 @@ const Header = () => {
 
           <Box alignItems="center" className="hidden md:flex">
             <Center className="mr-8 cursor-pointer">
-              <Icon as={AiOutlineSearch} mr={1} className="text-xl " />
+              <Icon as={AiOutlineSearch} mr={1} className="text-xl" />
               搜尋
             </Center>
-            <Button colorScheme="primary" width={81}>
-              登入
+            <Button colorScheme="primary" width={81} onClick={logout}>
+              {hasHydrated && isLogin ? '登出' : '登入'}
             </Button>
           </Box>
 
@@ -113,7 +135,6 @@ const Header = () => {
       </Container>
 
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
         <DrawerContent className="!top-20 !z-10" backgroundColor={'#F9F9F9'}>
           <DrawerHeader pt={5} pb={0}>
             <Box pos="relative">
@@ -152,7 +173,7 @@ const Header = () => {
 
           <DrawerFooter pt={0}>
             <Button colorScheme="primary" width={'100%'}>
-              登入
+              {hasHydrated && isLogin ? '登出' : '登入'}
             </Button>
           </DrawerFooter>
         </DrawerContent>

@@ -5,12 +5,6 @@ interface LoginBody {
   password: string;
 }
 
-interface LoginResponseData {
-  id: string;
-  token: string;
-  expired: number;
-}
-
 interface SignupBody {
   email: string;
   name: string;
@@ -18,16 +12,10 @@ interface SignupBody {
   confirmPassword: string;
 }
 
-interface SignupResponseData {
-  token: string;
-  name: string;
-  roles: string[];
-}
-
 export function apiPostLogin(data: LoginBody) {
-  return request.post<LoginResponseData>('/auth/login', data);
+  return request.post<ApiAuth.UserInfo>('/auth/login', data);
 }
 
 export function apiPostSignup(data: SignupBody) {
-  return request.post<SignupResponseData>('/auth/signup', data);
+  return request.post<ApiAuth.UserInfo>('/auth/signup', data);
 }

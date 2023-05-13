@@ -19,12 +19,13 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
-import { apiPostSignup } from '../../service/api/index';
+import { apiPostSignup } from '@/service/api/index';
 import ModalBox, { type ModalState } from '@/components/Modal';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { safeAwait } from '@/utils';
 import { useTimeoutFn } from '@/hooks';
+import { useAuthStore } from '@/store';
 
 const Signup: App.NextPageWithLayout = () => {
   const router = useRouter();
@@ -66,15 +67,14 @@ const Signup: App.NextPageWithLayout = () => {
       }));
     }
     if (res) {
-      if (res.status === 'Success') {
-        setModal(() => ({
-          isOpen: true,
-          content: <p>註冊成功！3秒後跳轉到登錄頁面...</p>,
-          footer: null
-        }));
+      if (res.status !== 'Success') return;
+      setModal(() => ({
+        isOpen: true,
+        content: <p>註冊成功！3秒後跳轉到登錄頁面...</p>,
+        footer: null
+      }));
 
-        set();
-      }
+      set();
     }
   };
 
