@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import Image, { type StaticImageData, ImageLoader } from 'next/image';
+import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
@@ -25,7 +25,8 @@ import {
   Textarea
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { safeAwait } from '@/utils';
+import { safeAwait, omit } from '@/utils';
+import { useFileReader } from '@/hooks';
 import NoImage from '@/assets/images/user/no-image.png';
 import dayjs from 'dayjs';
 import toObject from 'dayjs/plugin/toObject';
@@ -48,8 +49,8 @@ const gender = [
 const Account: App.NextPageWithLayout = () => {
   const { mutate } = useSWRConfig();
 
-  const [userPhoto, setUserPhoto] = useState<string | StaticImageData>(NoImage);
   const [file, setFile] = useState<undefined | File>();
+  const { dataURL } = useFileReader(file);
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -81,6 +82,7 @@ const Account: App.NextPageWithLayout = () => {
     register,
     formState: { errors },
     reset,
+    getValues,
     setValue
   } = useForm<UserAccountInterface.FormInputs>();
 
@@ -108,7 +110,6 @@ const Account: App.NextPageWithLayout = () => {
             month: isNaN(months) ? undefined : months + 1,
             day: isNaN(date) ? undefined : date
           });
-          setUserPhoto(data.data?.photo || NoImage);
         }
       }
     }
@@ -138,14 +139,6 @@ const Account: App.NextPageWithLayout = () => {
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     setFile(files?.[0]);
-  }
-
-  function omit<T extends object>(data: T, keys: (keyof T)[]) {
-    return Object.fromEntries(
-      Object.entries(data).filter(
-        ([key, value]) => !keys.includes(key as keyof T)
-      )
-    );
   }
 
   function handleBirthday(data: UserAccountInterface.FormInputs) {
@@ -205,8 +198,8 @@ const Account: App.NextPageWithLayout = () => {
                   className="relative mx-auto h-60 w-60"
                 >
                   <Image
-                    src={userPhoto}
-                    alt=""
+                    src={dataURL || getValues('photo') || NoImage}
+                    alt="使用者圖片"
                     width={500}
                     height={500}
                     priority
@@ -232,7 +225,7 @@ const Account: App.NextPageWithLayout = () => {
                       onChange={onFileChange}
                     />
 
-                    <span className="text-sm">
+                    <span className="truncate text-sm">
                       {file ? file.name : '未選擇任何檔案'}
                     </span>
                   </FormControl>
