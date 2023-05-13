@@ -1,16 +1,16 @@
 declare namespace UserAccountInterface {
   interface FormInputs {
-    file: string;
+    photo: string;
     email: string;
     name: string;
-    nikeName: string;
+    nickName: string;
     phone: string;
     address: string;
     photo: string;
-    gender: string;
-    year: string;
-    month: string;
-    day: string;
+    gender: number;
+    year: number | null;
+    month: number | null;
+    day: number | null;
     country: string;
     introduction: string;
   }

@@ -1,8 +1,16 @@
 import Head from 'next/head';
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
+import { GetStaticProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
+import ModalBox, { type ModalState } from '@/components/Modal';
 import type { ReactElement } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import {
+  apiGetUserAccount,
+  apiPatchUserAccount,
+  apiPostUpload
+} from '@/service/api/index';
 import {
   Box,
   Button,
@@ -15,6 +23,8 @@ import {
   Textarea
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
+import { safeAwait } from '@/utils';
+import dayjs from 'dayjs';
 import NoImage from '@/assets/images/user/no-image.png';
 
 const Account: App.NextPageWithLayout = () => {
@@ -29,28 +39,158 @@ const Account: App.NextPageWithLayout = () => {
     { id: 1, name: '女性' }
   ];
 
+  const [userPhoto, setUserPhoto] = useState<string | StaticImageData>(NoImage);
+  const [fileName, setFileName] = useState('');
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    content: '',
+    footer: null
+  });
+
+  const setOpenModal = (boolean: boolean): void => {
+    setModal((state) => ({
+      ...state,
+      isOpen: boolean
+    }));
+  };
+
   const currentYear = new Date().getFullYear();
   const years = Array.from(
     { length: currentYear - 1922 },
-    (_, index) => currentYear - index
+    (_, index) => currentYear - index - 1
   );
 
   const numberOptions = (length: number) => {
     return Array.from({ length }, (_, index) => index + 1);
   };
-
   const months = numberOptions(12);
   const days = numberOptions(31);
+
+  const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    const formData = new FormData();
+    if (!files) return;
+    formData.append('file', files[0]);
+
+    const [err, res] = await safeAwait(apiPostUpload(formData));
+    if (err) {
+      setModal(() => ({
+        isOpen: true,
+        content: err.message,
+        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+      }));
+    }
+    if (res) {
+      if (res.status !== 'Success') return;
+      setUserPhoto(res.data.imageUrl);
+      setFileName(files[0].name);
+    }
+  };
 
   const {
     handleSubmit,
     register,
-    formState: { errors }
+    formState: { errors },
+    reset
   } = useForm<UserAccountInterface.FormInputs>();
 
-  const onSubmit = async (data: UserAccountInterface.FormInputs) => {
-    console.log(data);
+  const fetchAccount = useCallback(async () => {
+    const [err, res] = await safeAwait(apiGetUserAccount());
+
+    if (res) {
+      if (res.status !== 'Success') return;
+      const {
+        email,
+        name,
+        nickName,
+        phone,
+        address,
+        photo,
+        gender,
+        birthday,
+        country,
+        introduction
+      } = res.data;
+
+      reset({
+        email,
+        name,
+        nickName,
+        phone,
+        address,
+        gender,
+        year: birthday ? dayjs(birthday).get('year') : null,
+        month: birthday ? dayjs(birthday).add(1, 'month').get('month') : null,
+        day: birthday ? dayjs(birthday).get('date') : null,
+        country,
+        introduction
+      });
+
+      setUserPhoto(photo || NoImage);
+    }
+  }, [reset]);
+
+  const formatBirthday = (
+    year: UserAccountInterface.FormInputs['year'],
+    month: UserAccountInterface.FormInputs['month'],
+    day: UserAccountInterface.FormInputs['day']
+  ) => {
+    if (!year || !month || !day) return '';
+    return `${year}-${month}-${day}`;
   };
+
+  const onSubmit = async (data: UserAccountInterface.FormInputs) => {
+    const {
+      email,
+      name,
+      nickName,
+      phone,
+      address,
+      gender,
+      year,
+      month,
+      day,
+      country,
+      introduction
+    } = data;
+
+    const payload = {
+      email,
+      name,
+      nickName,
+      phone,
+      address,
+      photo: typeof userPhoto === 'string' ? userPhoto : '',
+      gender: Number(gender),
+      birthday: formatBirthday(year, month, day),
+      country,
+      introduction
+    };
+
+    console.log(payload.birthday);
+
+    const [err, res] = await safeAwait(apiPatchUserAccount(payload));
+
+    if (err) {
+      setModal(() => ({
+        isOpen: true,
+        content: err.message,
+        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+      }));
+    }
+
+    if (res) {
+      setModal(() => ({
+        isOpen: true,
+        content: res.message,
+        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+      }));
+    }
+  };
+
+  useEffect(() => {
+    fetchAccount();
+  }, [fetchAccount]);
 
   return (
     <>
@@ -74,7 +214,13 @@ const Account: App.NextPageWithLayout = () => {
                   overflow={'hidden'}
                   className="mx-auto h-60 w-60"
                 >
-                  <Image src={NoImage} alt="" />
+                  <Image
+                    src={userPhoto}
+                    alt=""
+                    width={500}
+                    height={500}
+                    priority
+                  />
                 </Box>
 
                 <Box mt={6}>
@@ -83,18 +229,22 @@ const Account: App.NextPageWithLayout = () => {
                     textAlign={'center'}
                   >
                     <label
-                      htmlFor="file"
+                      htmlFor="photo"
                       className="mr-2 cursor-pointer rounded bg-primary px-3 py-1 text-center text-sm text-white hover:bg-primary-600"
                     >
                       選擇檔案
                     </label>
                     <Input
-                      id="file"
+                      id="photo"
                       type="file"
                       display={'none'}
-                      {...register('file')}
+                      {...register('photo')}
+                      onChange={uploadImage}
                     />
-                    <span className="text-sm">未選擇任何檔案</span>
+
+                    <span className="text-sm">
+                      {fileName ? fileName : '未選擇任何檔案'}
+                    </span>
                   </FormControl>
                 </Box>
               </Box>
@@ -104,7 +254,7 @@ const Account: App.NextPageWithLayout = () => {
                   <FormLabel>暱稱</FormLabel>
                   <Input
                     type="text"
-                    {...register('nikeName')}
+                    {...register('nickName')}
                     placeholder="請輸入暱稱"
                   />
                 </FormControl>
@@ -113,7 +263,9 @@ const Account: App.NextPageWithLayout = () => {
                   <FormLabel>真實身份 / 名稱</FormLabel>
                   <Input
                     type="text"
-                    {...register('name')}
+                    {...register('name', {
+                      required: '請填入真實姓名'
+                    })}
                     placeholder="請輸入真實身份 / 名稱"
                   />
                 </FormControl>
@@ -123,6 +275,7 @@ const Account: App.NextPageWithLayout = () => {
                   <Input
                     type="email"
                     {...register('email', {
+                      required: '請填入 E-mail',
                       pattern: {
                         value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
                         message: 'E-mail 格式錯誤'
@@ -139,13 +292,24 @@ const Account: App.NextPageWithLayout = () => {
                   )}
                 </FormControl>
 
-                <FormControl my={10}>
+                <FormControl isInvalid={!!errors.phone} my={10}>
                   <FormLabel>手機</FormLabel>
                   <Input
                     type="text"
-                    {...register('phone')}
+                    {...register('phone', {
+                      pattern: {
+                        value: /^09\d{8}$/,
+                        message: '手機格式錯誤'
+                      }
+                    })}
                     placeholder="請輸入手機"
                   />
+
+                  {!!errors.phone && (
+                    <FormErrorMessage className="visible">
+                      {errors.phone.message}
+                    </FormErrorMessage>
+                  )}
                 </FormControl>
 
                 <FormControl my={10}>
@@ -191,7 +355,7 @@ const Account: App.NextPageWithLayout = () => {
 
                     <Select placeholder="日" {...register('day')}>
                       {days.map((day) => (
-                        <option key={day} value="option1">
+                        <option key={day} value={day}>
                           {day}
                         </option>
                       ))}
@@ -229,8 +393,22 @@ const Account: App.NextPageWithLayout = () => {
           </Box>
         </Container>
       </Box>
+
+      <ModalBox
+        content={modal.content}
+        isOpen={modal.isOpen}
+        onClose={() => setOpenModal(false)}
+        header="提醒"
+        footer={modal.footer}
+      ></ModalBox>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  return {
+    props: {}
+  };
 };
 
 export default Account;
