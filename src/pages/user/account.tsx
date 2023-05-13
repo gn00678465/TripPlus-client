@@ -221,6 +221,7 @@ const Account: App.NextPageWithLayout = () => {
                       id="photo"
                       type="file"
                       display={'none'}
+                      accept="image/*"
                       {...register('photo')}
                       onChange={onFileChange}
                     />
