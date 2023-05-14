@@ -1,11 +1,13 @@
 import Head from 'next/head';
-import Image, { type StaticImageData } from 'next/image';
+import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
 import ModalBox, { type ModalState } from '@/components/Modal';
 import type { ReactElement } from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
+import useSWR, { useSWRConfig } from 'swr';
+import useSWRMutation from 'swr/mutation';
 import {
   apiGetUserAccount,
   apiPatchUserAccount,
@@ -23,24 +25,33 @@ import {
   Textarea
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { safeAwait } from '@/utils';
-import dayjs from 'dayjs';
+import { safeAwait, omit } from '@/utils';
+import { useFileReader } from '@/hooks';
 import NoImage from '@/assets/images/user/no-image.png';
+import dayjs from 'dayjs';
+import toObject from 'dayjs/plugin/toObject';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(toObject);
+dayjs.extend(utc);
+
+const breadcrumb = [
+  { name: '首頁', url: '/' },
+  { name: '會員中心', url: '/user/account' },
+  { name: '個人資料', url: '/user/account' }
+];
+
+const gender = [
+  { id: 0, name: '男性' },
+  { id: 1, name: '女性' }
+];
 
 const Account: App.NextPageWithLayout = () => {
-  const breadcrumb = [
-    { name: '首頁', url: '/' },
-    { name: '會員中心', url: '/user/account' },
-    { name: '個人資料', url: '/user/account' }
-  ];
+  const { mutate } = useSWRConfig();
 
-  const gender = [
-    { id: 0, name: '男性' },
-    { id: 1, name: '女性' }
-  ];
-
-  const [userPhoto, setUserPhoto] = useState<string | StaticImageData>(NoImage);
-  const [fileName, setFileName] = useState('');
+  const [file, setFile] = useState<undefined | File>();
+  const { dataURL } = useFileReader(file);
+  const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
     content: '',
@@ -66,131 +77,103 @@ const Account: App.NextPageWithLayout = () => {
   const months = numberOptions(12);
   const days = numberOptions(31);
 
-  const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    const formData = new FormData();
-    if (!files) return;
-    formData.append('file', files[0]);
-
-    const [err, res] = await safeAwait(apiPostUpload(formData));
-    if (err) {
-      setModal(() => ({
-        isOpen: true,
-        content: err.message,
-        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
-      }));
-    }
-    if (res) {
-      if (res.status !== 'Success') return;
-      setUserPhoto(res.data.imageUrl);
-      setFileName(files[0].name);
-    }
-  };
-
   const {
     handleSubmit,
     register,
     formState: { errors },
-    reset
+    reset,
+    getValues,
+    setValue
   } = useForm<UserAccountInterface.FormInputs>();
 
-  const fetchAccount = useCallback(async () => {
-    const [err, res] = await safeAwait(apiGetUserAccount());
-
-    if (res) {
-      if (res.status !== 'Success') return;
-      const {
-        email,
-        name,
-        nickName,
-        phone,
-        address,
-        photo,
-        gender,
-        birthday,
-        country,
-        introduction
-      } = res.data;
-
-      reset({
-        email,
-        name,
-        nickName,
-        phone,
-        address,
-        gender,
-        year: birthday ? dayjs(birthday).get('year') : null,
-        month: birthday ? dayjs(birthday).add(1, 'month').get('month') : null,
-        day: birthday ? dayjs(birthday).get('date') : null,
-        country,
-        introduction
-      });
-
-      setUserPhoto(photo || NoImage);
+  // queries
+  const { data: account } = useSWR(
+    ['get', '/api/user/account'],
+    apiGetUserAccount,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          const { years, months, date } = dayjs(data.data.birthday)
+            .utc(true)
+            .toObject();
+          reset({
+            email: data.data.email,
+            name: data.data.name,
+            nickName: data.data?.nickName ?? undefined,
+            phone: data.data?.phone ?? undefined,
+            gender: data.data?.gender ?? 0,
+            address: data.data?.address ?? undefined,
+            photo: data.data?.photo ?? undefined,
+            country: data.data?.country ?? undefined,
+            introduction: data.data?.introduction ?? undefined,
+            year: isNaN(years) ? undefined : years,
+            month: isNaN(months) ? undefined : months + 1,
+            day: isNaN(date) ? undefined : date
+          });
+        }
+      }
     }
-  }, [reset]);
+  );
+  const { trigger: updateAccount } = useSWRMutation(
+    ['post', '/api/user/account'],
+    (url, { arg }: { arg: ApiAuth.Account }) => apiPatchUserAccount(arg),
+    {
+      onSuccess: (data, key, config) => {
+        setModal(() => ({
+          isOpen: true,
+          content: data.message,
+          footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+        }));
+        mutate(['get', '/api/user/account']);
+      },
+      onError(err, key, config) {
+        setModal(() => ({
+          isOpen: true,
+          content: err.message,
+          footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+        }));
+      }
+    }
+  );
 
-  const formatBirthday = (
-    year: UserAccountInterface.FormInputs['year'],
-    month: UserAccountInterface.FormInputs['month'],
-    day: UserAccountInterface.FormInputs['day']
-  ) => {
-    if (!year || !month || !day) return '';
-    return `${year}-${month}-${day}`;
-  };
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    setFile(files?.[0]);
+  }
 
-  const onSubmit = async (data: UserAccountInterface.FormInputs) => {
+  function handleBirthday(data: UserAccountInterface.FormInputs) {
     const {
-      email,
-      name,
-      nickName,
-      phone,
-      address,
-      gender,
       year,
       month,
-      day,
-      country,
-      introduction
-    } = data;
-
-    const payload = {
-      email,
-      name,
-      nickName,
-      phone,
-      address,
-      photo: typeof userPhoto === 'string' ? userPhoto : '',
-      gender: Number(gender),
-      birthday: formatBirthday(year, month, day),
-      country,
-      introduction
+      day
+    }: Pick<UserAccountInterface.FormInputs, 'year' | 'month' | 'day'> = data;
+    const params = omit(data, ['year', 'month', 'day']);
+    if (!year || !month || !day) return params;
+    return {
+      ...params,
+      birthday: dayjs(new Date(year, month - 1, day)).format(
+        'YYYY-MM-DDTHH:mm:ssZ'
+      )
     };
+  }
 
-    console.log(payload.birthday);
-
-    const [err, res] = await safeAwait(apiPatchUserAccount(payload));
-
-    if (err) {
-      setModal(() => ({
-        isOpen: true,
-        content: err.message,
-        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
-      }));
+  const onSubmit = async (data: UserAccountInterface.FormInputs) => {
+    setLoading(true);
+    const params = handleBirthday(data) as ApiAuth.Account;
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const [err, res] = await safeAwait(apiPostUpload(formData));
+      if (res && res.status === 'Success') {
+        params.photo = res.data.imageUrl;
+      }
+      if (err) {
+      }
+      setFile(undefined);
     }
-
-    if (res) {
-      setModal(() => ({
-        isOpen: true,
-        content: res.message,
-        footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
-      }));
-    }
+    await updateAccount(params);
+    setLoading(false);
   };
-
-  useEffect(() => {
-    fetchAccount();
-  }, [fetchAccount]);
 
   return (
     <>
@@ -212,11 +195,11 @@ const Account: App.NextPageWithLayout = () => {
                 <Box
                   borderRadius={'full'}
                   overflow={'hidden'}
-                  className="mx-auto h-60 w-60"
+                  className="relative mx-auto h-60 w-60"
                 >
                   <Image
-                    src={userPhoto}
-                    alt=""
+                    src={dataURL || getValues('photo') || NoImage}
+                    alt="使用者圖片"
                     width={500}
                     height={500}
                     priority
@@ -238,12 +221,13 @@ const Account: App.NextPageWithLayout = () => {
                       id="photo"
                       type="file"
                       display={'none'}
+                      accept="image/*"
                       {...register('photo')}
-                      onChange={uploadImage}
+                      onChange={onFileChange}
                     />
 
-                    <span className="text-sm">
-                      {fileName ? fileName : '未選擇任何檔案'}
+                    <span className="truncate text-sm">
+                      {file ? file.name : '未選擇任何檔案'}
                     </span>
                   </FormControl>
                 </Box>
@@ -385,6 +369,7 @@ const Account: App.NextPageWithLayout = () => {
                   colorScheme="primary"
                   width={'100%'}
                   my={4}
+                  isLoading={loading}
                 >
                   更新
                 </Button>
