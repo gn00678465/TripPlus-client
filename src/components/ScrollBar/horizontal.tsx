@@ -17,7 +17,7 @@ const Scrollbar: FC<Scrollbar> = ({ children }) => {
   return (
     <Box
       className={`overflow-y-hidden ${
-        isShowScrollBar ? 'overflow-x-auto' : 'overflow-x-hidden'
+        isShowScrollBar ? 'md:overflow-x-auto' : 'md:overflow-x-hidden'
       }`}
       onMouseEnter={showScrollBar(true)}
       onMouseLeave={showScrollBar(false)}
