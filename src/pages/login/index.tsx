@@ -3,7 +3,7 @@ import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 import type { ReactElement } from 'react';
-import { apiPostLogin } from '@/service/api/index';
+import { apiPostLogin } from '@/api/index';
 import ModalBox, { type ModalState } from '@/components/Modal';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
@@ -48,13 +48,13 @@ const Login: App.NextPageWithLayout = () => {
     handleSubmit,
     register,
     formState: { errors }
-  } = useForm<LoginInterface.FormInputs>({
+  } = useForm<AuthInterface.LoginForm>({
     defaultValues: {
       isRemember: true
     }
   });
 
-  const onSubmit = async (data: LoginInterface.FormInputs) => {
+  const onSubmit = async (data: AuthInterface.LoginForm) => {
     const [err, res] = await safeAwait(apiPostLogin(data));
     if (err) {
       setModal(() => ({
