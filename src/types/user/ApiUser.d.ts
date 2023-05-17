@@ -1,10 +1,4 @@
-declare namespace ApiAuth {
-  interface UserInfo {
-    name: string;
-    roles: string[];
-    token: string;
-  }
-
+declare namespace ApiUser {
   interface Account {
     email: string;
     name: string;

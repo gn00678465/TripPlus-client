@@ -12,7 +12,7 @@ import {
   apiGetUserAccount,
   apiPatchUserAccount,
   apiPostUpload
-} from '@/service/api/index';
+} from '@/api/index';
 import {
   Box,
   Button,
@@ -84,7 +84,7 @@ const Account: App.NextPageWithLayout = () => {
     reset,
     getValues,
     setValue
-  } = useForm<UserAccountInterface.FormInputs>();
+  } = useForm<User.AccountForm>();
 
   // queries
   const { data: account } = useSWR(
@@ -116,7 +116,7 @@ const Account: App.NextPageWithLayout = () => {
   );
   const { trigger: updateAccount } = useSWRMutation(
     ['post', '/api/user/account'],
-    (url, { arg }: { arg: ApiAuth.Account }) => apiPatchUserAccount(arg),
+    (url, { arg }: { arg: ApiUser.Account }) => apiPatchUserAccount(arg),
     {
       onSuccess: (data, key, config) => {
         setModal(() => ({
@@ -141,12 +141,12 @@ const Account: App.NextPageWithLayout = () => {
     setFile(files?.[0]);
   }
 
-  function handleBirthday(data: UserAccountInterface.FormInputs) {
+  function handleBirthday(data: User.AccountForm) {
     const {
       year,
       month,
       day
-    }: Pick<UserAccountInterface.FormInputs, 'year' | 'month' | 'day'> = data;
+    }: Pick<User.AccountForm, 'year' | 'month' | 'day'> = data;
     const params = omit(data, ['year', 'month', 'day']);
     if (!year || !month || !day) return params;
     return {
@@ -157,9 +157,9 @@ const Account: App.NextPageWithLayout = () => {
     };
   }
 
-  const onSubmit = async (data: UserAccountInterface.FormInputs) => {
+  const onSubmit = async (data: User.AccountForm) => {
     setLoading(true);
-    const params = handleBirthday(data) as ApiAuth.Account;
+    const params = handleBirthday(data) as ApiUser.Account;
     if (file) {
       const formData = new FormData();
       formData.append('file', file);
