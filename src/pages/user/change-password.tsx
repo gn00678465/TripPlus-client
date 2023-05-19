@@ -42,7 +42,8 @@ const ChangePassword: App.NextPageWithLayout = () => {
     handleSubmit,
     register,
     formState: { errors },
-    watch
+    watch,
+    reset
   } = useForm<ApiUser.ChangePassword>();
 
   const password = useRef('');
@@ -75,6 +76,11 @@ const ChangePassword: App.NextPageWithLayout = () => {
     setLoading(true);
     await updatePassword(data);
     setLoading(false);
+    reset({
+      password: '',
+      confirmPassword: '',
+      oldPassword: ''
+    });
   };
 
   return (
