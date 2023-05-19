@@ -90,20 +90,21 @@ const Transactions: App.NextPageWithLayout = () => {
         <Container maxW={'container.xl'}>
           <Flex
             justifyContent={'space-between'}
-            className="my-10 flex-col md:flex-row"
+            className="mb-5 mt-9 flex-col md:mb-10 md:flex-row"
           >
             <Heading
               as="h1"
               size="lg"
-              className="mb-5 text-center md:mb-0 md:text-left"
+              className="mb-5 text-center md:mb-0 md:text-left "
               fontWeight={700}
+              fontSize={{ base: 28, md: 32 }}
             >
               {selectedTab ? selectedTab.title : ''}
             </Heading>
             <Center
               color={'gray.500'}
               fontWeight={500}
-              className="space-x-3 md:space-x-6"
+              className="space-x-3 text-sm md:space-x-6 md:text-base"
             >
               {tab.map((item) => {
                 if (item.id !== tabIdx) {
@@ -128,7 +129,7 @@ const Transactions: App.NextPageWithLayout = () => {
           </Flex>
 
           <Box
-            className="mb-4 bg-secondary-light py-4 tracking-widest md:mb-6 md:py-6"
+            className="mb-4 bg-secondary-light py-4 text-sm tracking-widest md:mb-6 md:py-6 md:text-base"
             color={'secondary-emphasis.500'}
             textAlign={'center'}
             borderRadius={2}
@@ -180,7 +181,7 @@ const Transactions: App.NextPageWithLayout = () => {
                   </Box>
                 </Box>
 
-                <Flex className="mt-6 flex-col items-start justify-between md:flex-row md:items-center">
+                <Flex className="mt-3 flex-col items-start justify-between text-sm md:mt-6 md:flex-row md:items-center md:text-base">
                   <Flex
                     color={'secondary-emphasis.500'}
                     fontWeight={500}
@@ -219,6 +220,7 @@ const Transactions: App.NextPageWithLayout = () => {
                       colorScheme="primary"
                       borderRadius={4}
                       className="mt-4 w-full md:mt-0 md:!h-12 md:w-[154px]"
+                      fontSize={{ base: '0.875rem', md: '1rem' }}
                       onClick={() => openModal(item.title)}
                     >
                       評價

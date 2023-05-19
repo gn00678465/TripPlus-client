@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiUploadCloud } from 'react-icons/fi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 interface RankModalProps {
@@ -54,7 +54,6 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
     { rate: 5, text: '非常好' }
   ];
 
-  const [comment, setComment] = useState('');
   const [rate, setRate] = useState(0);
 
   const selectedRateText = rateTexts.find((item) => item.rate === rate);
@@ -66,8 +65,18 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
   const {
     handleSubmit,
     register,
-    formState: { errors }
+    formState: { errors },
+    reset
   } = useForm<User.rank>();
+
+  useEffect(() => {
+    if (isOpen) return;
+    reset({
+      comment: ''
+    });
+    setRate(0);
+    setSelectShortComment(() => []);
+  }, [isOpen, reset]);
 
   return (
     <Modal
@@ -84,8 +93,8 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
         className={'!w-[90%] py-6 md:p-10'}
       >
         <ModalHeader textAlign={'center'}>
-          <div className="text-[1.75rem]">滿意度評價</div>
-          <div className="mt-6 text-base">{title}</div>
+          <div className="text-xl md:text-[1.75rem]">滿意度評價</div>
+          <div className="mt-4 text-sm md:mt-6 md:text-base">{title}</div>
         </ModalHeader>
         <ModalCloseButton
           border={1}
@@ -114,7 +123,7 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
               ))}
             </Box>
 
-            <Box className="mt-4">
+            <Box className="mt-4 text-xs md:text-sm">
               {rate > 0 && <span className="text-gray-400">商品品質</span>}
               <span className="ml-2 text-gray-500">
                 {selectedRateText ? selectedRateText.text : '請選擇評分'}
@@ -129,6 +138,9 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
                   borderStyle={'solid'}
                   bgColor={'transparent'}
                   borderColor={'gray.300'}
+                  fontSize={{ base: '0.75rem', md: '0.875rem' }}
+                  px={{ base: 3, md: 5 }}
+                  py={{ base: 1, md: 2 }}
                   m={2}
                   _hover={{
                     bg: 'secondary',
@@ -155,7 +167,9 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
                 border={0}
                 placeholder="分享更多開於此商品的評價以幫助其他買家"
                 letterSpacing={1}
-                className="!h-40 !p-6"
+                fontSize={{ base: '0.875rem', md: '1rem' }}
+                height={40}
+                p={{ base: 4, md: 6 }}
               />
             </FormControl>
 
@@ -169,10 +183,10 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
                 color: 'secondary-emphasis.400'
               }}
             >
-              <Button _hover={{ bg: 'transparent' }}>
+              <button>
                 <Icon as={FiUploadCloud} mx={1} className="text-xl" />
                 <span className="ml-1">上傳檔案</span>
-              </Button>
+              </button>
             </Box>
           </Box>
         </ModalBody>
@@ -185,6 +199,7 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
               onClick={onClose}
               className="w-full md:!h-12 md:w-[154px]"
               borderRadius={4}
+              fontSize={{ base: '0.875rem', md: '1rem' }}
             >
               取消
             </Button>
@@ -194,6 +209,7 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
               className="w-full md:!h-12 md:w-[154px]"
               borderRadius={4}
               isDisabled={rate <= 0}
+              fontSize={{ base: '0.875rem', md: '1rem' }}
             >
               完成
             </Button>
