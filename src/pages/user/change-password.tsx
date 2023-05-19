@@ -2,8 +2,9 @@ import Head from 'next/head';
 import { GetStaticProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
+import ModalBox, { type ModalState } from '@/components/Modal';
 import type { ReactElement } from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   Box,
   Container,
@@ -15,6 +16,8 @@ import {
   Heading
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
+import useSWRMutation from 'swr/mutation';
+import { apiPatchChangePassword } from '@/api/index';
 
 const ChangePassword: App.NextPageWithLayout = () => {
   const breadcrumb = [
@@ -22,19 +25,56 @@ const ChangePassword: App.NextPageWithLayout = () => {
     { name: '會員中心', url: '/user/account' },
     { name: '變更密碼', url: '/user/change-password' }
   ];
+  const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    content: '',
+    footer: null
+  });
+  const setOpenModal = (boolean: boolean): void => {
+    setModal((state) => ({
+      ...state,
+      isOpen: boolean
+    }));
+  };
 
   const {
     handleSubmit,
     register,
     formState: { errors },
     watch
-  } = useForm<User.ChangePassword>();
+  } = useForm<ApiUser.ChangePassword>();
 
   const password = useRef('');
   watch('password', password.current);
 
-  const onSubmit = async (data: User.ChangePassword) => {
-    console.log(data);
+  const { trigger: updatePassword } = useSWRMutation(
+    '/api/user/change-password',
+    (url, { arg }: { arg: ApiUser.ChangePassword }) =>
+      apiPatchChangePassword(arg),
+    {
+      onSuccess: (data, key, config) => {
+        setModal(() => ({
+          isOpen: true,
+          content: data.message,
+          footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+        }));
+      },
+      onError: (err, key, config) => {
+        setModal(() => ({
+          isOpen: true,
+          content: err.message,
+          footer: <Button onClick={() => setOpenModal(false)}>OK</Button>
+        }));
+        setLoading(false);
+      }
+    }
+  );
+
+  const onSubmit = async (data: ApiUser.ChangePassword) => {
+    setLoading(true);
+    await updatePassword(data);
+    setLoading(false);
   };
 
   return (
@@ -61,7 +101,7 @@ const ChangePassword: App.NextPageWithLayout = () => {
               <FormControl isInvalid={!!errors.password} my={10}>
                 <FormLabel>設定新密碼</FormLabel>
                 <Input
-                  type="text"
+                  type="password"
                   {...register('password', {
                     required: '請填入新密碼!',
                     minLength: { value: 8, message: '密碼至少需要8碼' },
@@ -82,7 +122,7 @@ const ChangePassword: App.NextPageWithLayout = () => {
               <FormControl isInvalid={!!errors.confirmPassword} my={10}>
                 <FormLabel>確認新密碼</FormLabel>
                 <Input
-                  type="text"
+                  type="password"
                   {...register('confirmPassword', {
                     required: '請填入確認新密碼!',
                     validate: (val: string) => {
@@ -104,7 +144,7 @@ const ChangePassword: App.NextPageWithLayout = () => {
               <FormControl isInvalid={!!errors.oldPassword} my={10}>
                 <FormLabel>目前密碼</FormLabel>
                 <Input
-                  type="text"
+                  type="password"
                   {...register('oldPassword', {
                     required: '請填入目前密碼!'
                   })}
@@ -118,13 +158,27 @@ const ChangePassword: App.NextPageWithLayout = () => {
                 )}
               </FormControl>
 
-              <Button type="submit" colorScheme="primary" width={'100%'} my={4}>
+              <Button
+                type="submit"
+                colorScheme="primary"
+                width={'100%'}
+                my={4}
+                isLoading={loading}
+              >
                 確認修改密碼
               </Button>
             </Box>
           </Box>
         </Container>
       </Box>
+
+      <ModalBox
+        content={modal.content}
+        isOpen={modal.isOpen}
+        onClose={() => setOpenModal(false)}
+        header="提醒"
+        footer={modal.footer}
+      ></ModalBox>
     </>
   );
 };

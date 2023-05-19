@@ -14,10 +14,4 @@ declare namespace User {
     country: string;
     introduction: string;
   }
-
-  interface ChangePassword {
-    password: string;
-    confirmPassword: string;
-    oldPassword: string;
-  }
 }
