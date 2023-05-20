@@ -1,7 +1,8 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { GetStaticProps } from 'next';
-import { Layout } from '@/components';
+import { Layout, ImageFallback } from '@/components';
+import NoImage from '@/assets/images/user/no-image.png';
 import UserHeader from '@/components/User/user-header';
 import ModalBox, { type ModalState } from '@/components/Modal';
 import type { ReactElement } from 'react';
@@ -27,7 +28,6 @@ import {
 import { useForm } from 'react-hook-form';
 import { safeAwait, omit } from '@/utils';
 import { useFileReader } from '@/hooks';
-import NoImage from '@/assets/images/user/no-image.png';
 import dayjs from 'dayjs';
 import toObject from 'dayjs/plugin/toObject';
 import utc from 'dayjs/plugin/utc';
@@ -51,6 +51,7 @@ const Account: App.NextPageWithLayout = () => {
 
   const [file, setFile] = useState<undefined | File>();
   const { dataURL } = useFileReader(file);
+  const [image, setImage] = useState(NoImage.src);
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -110,6 +111,9 @@ const Account: App.NextPageWithLayout = () => {
             month: isNaN(months) ? undefined : months + 1,
             day: isNaN(date) ? undefined : date
           });
+          if (data.data?.photo) {
+            setImage(data.data.photo);
+          }
         }
       }
     }
@@ -197,13 +201,14 @@ const Account: App.NextPageWithLayout = () => {
                   overflow={'hidden'}
                   className="relative mx-auto h-60 w-60"
                 >
-                  <Image
-                    src={dataURL || getValues('photo') || NoImage}
+                  <ImageFallback
+                    src={dataURL || image}
+                    fallbackSrc={NoImage.src}
                     alt="使用者圖片"
                     width={500}
                     height={500}
                     priority
-                  />
+                  ></ImageFallback>
                 </Box>
 
                 <Box mt={6}>
