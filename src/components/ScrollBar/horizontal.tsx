@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useState } from 'react';
 import { Box } from '@chakra-ui/react';
 
 interface Scrollbar {
@@ -6,18 +6,30 @@ interface Scrollbar {
 }
 
 const Scrollbar: FC<Scrollbar> = ({ children }) => {
+  const [isShowScrollBar, setIsShowScrollBar] = useState(false);
+
+  const showScrollBar = (boolean: boolean) => {
+    return () => {
+      setIsShowScrollBar(boolean);
+    };
+  };
+
   return (
     <Box
-      className="overflow-x-auto overflow-y-hidden "
+      className={`overflow-y-hidden ${
+        isShowScrollBar ? 'md:overflow-x-auto' : 'md:overflow-x-hidden'
+      }`}
+      onMouseEnter={showScrollBar(true)}
+      onMouseLeave={showScrollBar(false)}
       css={{
         '&::-webkit-scrollbar': {
-          height: 0,
+          height: 2,
           backgroundColor: 'transparent'
         },
         '&::-webkit-scrollbar-thumb': {
-          background: 'transparent'
+          background: '#D3D3D3'
         },
-        scrollbarColor: 'transparent transparent',
+        scrollbarColor: '#D3D3D3 transparent',
         scrollbarWidth: 'thin'
       }}
     >

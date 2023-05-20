@@ -19,7 +19,7 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
-import { apiPostSignup } from '@/service/api/index';
+import { apiPostSignup } from '@/api/index';
 import ModalBox, { type ModalState } from '@/components/Modal';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -48,7 +48,7 @@ const Signup: App.NextPageWithLayout = () => {
     register,
     formState: { errors },
     watch
-  } = useForm<SignupInterface.FormInputs>();
+  } = useForm<AuthInterface.SignupForm>();
 
   const password = useRef('');
   watch('password', password.current);
@@ -57,7 +57,7 @@ const Signup: App.NextPageWithLayout = () => {
     router.push('/login');
   }, 3000);
 
-  const onSubmit = async (data: SignupInterface.FormInputs) => {
+  const onSubmit = async (data: AuthInterface.SignupForm) => {
     const [err, res] = await safeAwait(apiPostSignup(data));
     if (err) {
       setModal(() => ({

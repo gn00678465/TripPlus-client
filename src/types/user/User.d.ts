@@ -1,5 +1,5 @@
-declare namespace UserAccountInterface {
-  interface FormInputs {
+declare namespace User {
+  interface AccountForm {
     photo: string;
     email: string;
     name: string;
@@ -13,5 +13,11 @@ declare namespace UserAccountInterface {
     day: number | null;
     country: string;
     introduction: string;
+  }
+
+  interface ChangePassword {
+    password: string;
+    confirmPassword: string;
+    oldPassword: string;
   }
 }
