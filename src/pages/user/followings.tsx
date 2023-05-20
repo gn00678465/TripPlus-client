@@ -97,11 +97,11 @@ const Followings: App.NextPageWithLayout = () => {
               {list.map((item) => (
                 <Box
                   key={item.id}
-                  className="mb-16 w-full md:w-1/3 md:px-3 lg:mt-6 lg:px-6"
+                  className="mb-16 mt-3 w-full md:w-1/3 md:px-3"
                 >
                   <Link
                     href="/"
-                    className="flex h-[50vw] w-full items-start justify-end rounded-lg bg-[length:100%] bg-center p-3 transition-all duration-500 ease-in-out hover:bg-[length:120%] md:h-[20vw] xl:h-[260px]"
+                    className="flex w-full items-start justify-end rounded-lg bg-[length:100%] bg-center p-3 pb-[59%] transition-all duration-500 ease-in-out hover:bg-[length:120%]"
                     style={{ backgroundImage: `url(${item.image})` }}
                   >
                     <div className="rounded bg-[#F15761] px-2 py-1 text-xs text-white md:text-sm">
