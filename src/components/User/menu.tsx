@@ -25,14 +25,16 @@ const UserMenu = () => {
         <li className="px-2.5 md:px-5" key={index}>
           <Link
             href={item.url}
-            className={`relative font-semibold text-gray-900 transition-colors hover:text-secondary-emphasis-500 ${
+            className={`group relative font-semibold text-gray-900 transition-colors hover:text-secondary-emphasis-500 ${
               pathName === item.url ? 'text-secondary-emphasis-500' : ''
             }`}
           >
             {item.title}
-            {pathName === item.url && (
-              <span className="absolute bottom-[-16px] left-0 h-0.5 w-full bg-secondary-emphasis-500 md:bottom-[-28px]"></span>
-            )}
+            <span
+              className={`absolute bottom-[-16px] left-0 h-0.5 w-full scale-y-100 bg-secondary-emphasis-500 transition-transform group-hover:scale-x-100 md:bottom-[-28px] ${
+                pathName === item.url ? 'scale-x-100' : 'scale-x-0'
+              }`}
+            ></span>
           </Link>
         </li>
       ))}
