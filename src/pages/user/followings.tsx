@@ -5,6 +5,7 @@ import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
 import type { ReactElement } from 'react';
 import { Box, Container, Heading, Flex, Button } from '@chakra-ui/react';
+import { currency } from '@/utils';
 
 const Followings: App.NextPageWithLayout = () => {
   const breadcrumb = [
@@ -34,40 +35,40 @@ const Followings: App.NextPageWithLayout = () => {
         '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
       category: getCategory(0),
       team: '臺灣世界展望會',
-      price: '10000000',
+      price: currency(10000000, 'zh-TW', 'TWD'),
       deadline: 3,
       progress: 20
     },
     {
-      id: 0,
+      id: 1,
       image: 'https://picsum.photos/300/300?random=2',
       title:
         '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
       category: getCategory(0),
       team: '臺灣世界展望會',
-      price: '10000000',
+      price: currency(10000000, 'zh-TW', 'TWD'),
       deadline: 5,
       progress: 50
     },
     {
-      id: 1,
+      id: 2,
       image: 'https://picsum.photos/300/300?random=3',
       title:
         '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
       category: getCategory(0),
       team: '臺灣世界展望會',
-      price: '10000000',
+      price: currency(10000000, 'zh-TW', 'TWD'),
       deadline: 10,
       progress: 80
     },
     {
-      id: 2,
+      id: 3,
       image: 'https://picsum.photos/300/300?random=4',
       title:
         '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
       category: getCategory(0),
       team: '臺灣世界展望會',
-      price: '10000000',
+      price: currency(10000000, 'zh-TW', 'TWD'),
       deadline: 3,
       progress: 100
     }
@@ -126,7 +127,7 @@ const Followings: App.NextPageWithLayout = () => {
 
                   <Box className="mt-4 md:mt-6">
                     <div className="text-lg font-medium text-gray-900 md:text-xl">
-                      ${item.price}
+                      {item.price}
                     </div>
                     <Box
                       bgColor={'gray.200'}
