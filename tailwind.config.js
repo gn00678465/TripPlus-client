@@ -46,15 +46,21 @@ module.exports = {
           100: '#F9F9F9',
           200: '#E9E9E9',
           300: '#D3D3D3',
-          400: '#939393',
-          500: '#4F4F4F',
+          400: '#ACACAC',
+          500: '#939393',
+          600: '#4F4F4F',
           900: '#1A1A1A',
           DEFAULT: '#4F4F4F'
         },
+        success: {
+          500: '#00C2FF',
+          DEFAULT: '#00C2FF'
+        },
         secondary: '#EAF8F8',
         'secondary-light': '#EFF5F5',
-        success: '#00C2FF',
-        light: '#4F4F4F'
+        light: '#4F4F4F',
+        white: '#FFFFFF',
+        red: '#F15761'
       },
       fontFamily: {
         sans: [

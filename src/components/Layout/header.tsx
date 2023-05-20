@@ -43,7 +43,7 @@ const Header = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [transparent, setTransparent] = useState<boolean>(false);
+  const [transparent, setTransparent] = useState<boolean>(router.route === '/');
 
   type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
@@ -80,8 +80,8 @@ const Header = () => {
       className={`relative font-semibold ${
         transparent
           ? 'border-none bg-transparent'
-          : 'border-b-2 border-b-gray-200 bg-white '
-      }  ${isOpen ? '!z-[1500]' : ''}`}
+          : 'border-b-[1px] border-b-gray-200 bg-white '
+      }  ${isOpen ? '!z-[1500]' : 'z-10'}`}
       py={5}
     >
       <Container maxW="container.xl">
