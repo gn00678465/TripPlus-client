@@ -120,9 +120,12 @@ const Followings: App.NextPageWithLayout = () => {
                     >
                       {item.title}
                     </Link>
-                    <div className="mt-1 text-xs text-secondary-emphasis md:mt-2 md:text-sm">
+                    <Link
+                      href="/"
+                      className="mt-1 text-xs text-secondary-emphasis hover:text-secondary-emphasis-400 md:mt-2 md:text-sm"
+                    >
                       {item.team}
-                    </div>
+                    </Link>
                   </Box>
 
                   <Box className="mt-4 md:mt-6">
