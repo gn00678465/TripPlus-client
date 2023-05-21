@@ -15,4 +15,10 @@ declare namespace ApiUser {
   interface UploadFile {
     imageUrl: string;
   }
+
+  interface ChangePassword {
+    password: string;
+    confirmPassword: string;
+    oldPassword: string;
+  }
 }

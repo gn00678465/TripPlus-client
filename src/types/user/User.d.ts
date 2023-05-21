@@ -15,12 +15,6 @@ declare namespace User {
     introduction: string;
   }
 
-  interface ChangePassword {
-    password: string;
-    confirmPassword: string;
-    oldPassword: string;
-  }
-
   interface rank {
     comment: string;
   }

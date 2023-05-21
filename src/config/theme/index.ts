@@ -17,11 +17,6 @@ const colors = {
   'secondary-lignt': tailwind.theme?.colors?.['secondary-lignt']
 };
 
-const breakpoints = {
-  xs: '375px',
-  xl: '1296px'
-};
-
 const components = {
   Input: {
     variants: {
@@ -95,4 +90,8 @@ const components = {
   }
 };
 
-export const theme = extendTheme({ colors, breakpoints, components });
+export const theme = extendTheme({
+  colors,
+  breakpoints: tailwind.theme.screens,
+  components
+});
