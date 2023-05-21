@@ -26,7 +26,7 @@ const Footer = () => {
     <Box as="footer" className="mt-auto py-10 md:py-20">
       <Container maxW="container.xl">
         <Flex className="flex-col md:flex-row md:justify-between">
-          <Flex className="flex-col text-center font-semibold md:flex-row md:text-left">
+          <Flex className="flex-col text-center font-medium md:flex-row md:text-left">
             {footerMenu.map((item) => (
               <List key={item.title} className="my-5 md:my-0 md:mr-20">
                 <Box mb={3} className="text-lg">
