@@ -102,10 +102,10 @@ const Followings: App.NextPageWithLayout = () => {
                 >
                   <Link
                     href="/"
-                    className="flex w-full items-start justify-end rounded-lg bg-[length:100%] bg-center p-3 pb-[59%] transition-all duration-500 ease-in-out hover:bg-[length:120%]"
+                    className="relative flex w-full items-start justify-end rounded-lg bg-[length:100%] bg-center pb-[70%] transition-all duration-500 ease-in-out hover:bg-[length:120%]"
                     style={{ backgroundImage: `url(${item.image})` }}
                   >
-                    <div className="rounded bg-[#F15761] px-2 py-1 text-xs text-white md:text-sm">
+                    <div className="absolute right-3 top-3 rounded bg-[#F15761] px-2 py-1 text-xs text-white md:text-sm">
                       紅利回饋
                     </div>
                   </Link>
