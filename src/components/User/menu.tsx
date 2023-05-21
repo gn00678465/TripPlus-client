@@ -25,7 +25,7 @@ const UserMenu = () => {
         <li className="px-2.5 md:px-5" key={index}>
           <Link
             href={item.url}
-            className={`group relative font-semibold text-gray-900 transition-colors hover:text-secondary-emphasis-500 ${
+            className={`group relative font-medium text-gray-900 transition-colors hover:text-secondary-emphasis-500 ${
               pathName === item.url ? 'text-secondary-emphasis-500' : ''
             }`}
           >
