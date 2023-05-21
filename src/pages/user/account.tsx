@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { Layout, ImageFallback } from '@/components';
 import NoImage from '@/assets/images/user/no-image.png';
