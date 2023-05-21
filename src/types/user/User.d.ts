@@ -14,4 +14,8 @@ declare namespace User {
     country: string;
     introduction: string;
   }
+
+  interface rank {
+    comment: string;
+  }
 }
