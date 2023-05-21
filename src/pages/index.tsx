@@ -210,7 +210,7 @@ const Index = () => {
                 width={20}
                 height={20}
                 priority
-                className="absolute -right-[20px] top-0"
+                className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
             <Link href="#">查看更多 {'>'}</Link>
@@ -308,7 +308,7 @@ const Index = () => {
                 width={20}
                 height={20}
                 priority
-                className="absolute -right-[20px] top-0"
+                className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
             <Link href="#">查看更多 {'>'}</Link>
@@ -447,7 +447,7 @@ const Index = () => {
                 width={20}
                 height={20}
                 priority
-                className="absolute -right-[20px] top-0"
+                className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
             <Link href="#">查看更多 {'>'}</Link>
