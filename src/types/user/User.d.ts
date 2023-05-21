@@ -20,4 +20,8 @@ declare namespace User {
     confirmPassword: string;
     oldPassword: string;
   }
+
+  interface rank {
+    comment: string;
+  }
 }
