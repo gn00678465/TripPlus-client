@@ -82,9 +82,9 @@ const Bonus: App.NextPageWithLayout = () => {
         <Container maxW={'container.xl'}>
           <Heading
             as="h1"
-            size="lg"
             my={10}
             className="text-center md:text-left"
+            fontSize={{ base: 28, md: 32 }}
           >
             紅利紀錄
           </Heading>

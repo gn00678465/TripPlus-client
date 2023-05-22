@@ -86,7 +86,7 @@ const Header = () => {
       borderBottom="1px"
       borderColor="#E9E9E9"
     >
-      <Container maxW="container.xl">
+      <Container maxW="container.xl" className="md:relative">
         <Flex alignItems="center">
           <Flex alignItems="center">
             <Link href="/">
@@ -147,7 +147,7 @@ const Header = () => {
             {openMemberMenu && (
               <Box
                 ref={memberMenuRef}
-                className="absolute right-3 top-20 rounded border bg-white pt-1.5 text-center text-sm tracking-widest text-gray-500 shadow-md"
+                className="absolute right-3 top-14 rounded border bg-white pt-1.5 text-center text-sm tracking-widest text-gray-500 shadow-md"
               >
                 <MemberMenu />
               </Box>

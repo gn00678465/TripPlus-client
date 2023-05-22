@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Box, List, ListItem, Flex, Container, Spacer } from '@chakra-ui/react';
+import Logo from '@/assets/images/logo.png';
 
 const Footer = () => {
   const footerMenu = [
@@ -49,7 +50,7 @@ const Footer = () => {
           >
             <Link href="/">
               <Image
-                src="/images/logo.png"
+                src={Logo}
                 width={172}
                 height={48}
                 alt="TripPlus Logo"
