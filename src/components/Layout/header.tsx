@@ -15,7 +15,6 @@ import {
   DrawerHeader,
   DrawerContent,
   DrawerFooter,
-  DrawerOverlay,
   Input,
   Icon
 } from '@chakra-ui/react';
@@ -23,14 +22,15 @@ import {
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store';
-import { useCookie } from '@/hooks';
+import UserImage from '@/assets/images/user/user-image.png';
+import MemberMenu from './member-menu';
+import Logo from '@/assets/images/logo.png';
 
 const Header = () => {
   const router = useRouter();
-  const [value, updateCookie, deleteCookie] = useCookie('token');
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const loginStatus = useAuthStore((state) => state.getters.isLogin);
   const [isLogin, setIsLogin] = useState(false);
@@ -48,16 +48,7 @@ const Header = () => {
   type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
   const [placement, setPlacement] = useState<DrawerPlacement>('top');
-
-  const logout = () => {
-    if (!isLogin) {
-      router.push('/login');
-      return;
-    }
-    useAuthStore.persist.clearStorage();
-    deleteCookie();
-    router.push('/');
-  };
+  const [openMemberMenu, setOpenMemberMenu] = useState(false);
 
   const menu = [
     { title: '首頁', url: '/', isShowPc: false },
@@ -73,23 +64,46 @@ const Header = () => {
       setBgColor();
     }
   });
+  const memberBtnRef = useRef<HTMLButtonElement>(null);
+  const memberMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const hidePopup = (e: MouseEvent) => {
+      if (!memberBtnRef.current) return;
+      if (!memberMenuRef.current) return;
+      if (
+        openMemberMenu &&
+        !memberBtnRef.current.contains(e.target as Node) &&
+        !memberMenuRef.current.contains(e.target as Node)
+      ) {
+        setOpenMemberMenu(false);
+      }
+    };
+
+    const handleClick = (e: unknown) => hidePopup(e as MouseEvent);
+
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('click', handleClick);
+    };
+  }, [openMemberMenu]);
 
   return (
     <Box
       as="header"
-      className={`relative font-semibold ${
+      className={`relative font-medium ${
         transparent
           ? 'border-none bg-transparent'
           : 'border-b-[1px] border-b-gray-200 bg-white '
-      }  ${isOpen ? '!z-[1500]' : 'z-10'}`}
+      } ${isOpen ? '!z-[1500]' : 'z-10'}`}
       py={5}
     >
-      <Container maxW="container.xl">
+      <Container maxW="container.xl" className="md:relative">
         <Flex alignItems="center">
           <Flex alignItems="center">
             <Link href="/">
               <Image
-                src="/images/logo.png"
+                src={Logo}
                 width={172}
                 height={48}
                 alt="TripPlus Logo"
@@ -119,9 +133,37 @@ const Header = () => {
               <Icon as={AiOutlineSearch} mr={1} className="text-xl" />
               搜尋
             </Center>
-            <Button colorScheme="primary" width={81} onClick={logout}>
-              {hasHydrated && isLogin ? '登出' : '登入'}
-            </Button>
+
+            {hasHydrated && isLogin ? (
+              <button
+                ref={memberBtnRef}
+                className="w-12 overflow-hidden rounded-md focus:border-2 focus:border-secondary-emphasis-300"
+                onClick={() => {
+                  setOpenMemberMenu(!openMemberMenu);
+                }}
+              >
+                <Image
+                  src={UserImage}
+                  alt="使用者圖片"
+                  width={500}
+                  height={500}
+                  priority
+                />
+              </button>
+            ) : (
+              <Button colorScheme="primary" width={81}>
+                <Link href="/login">登入</Link>
+              </Button>
+            )}
+
+            {openMemberMenu && (
+              <Box
+                ref={memberMenuRef}
+                className="absolute right-3 top-14 rounded border bg-white pt-1.5 text-center text-sm tracking-widest text-gray-500 shadow-md"
+              >
+                <MemberMenu />
+              </Box>
+            )}
           </Box>
 
           <Box className="cursor-pointer text-xl md:hidden">
@@ -133,7 +175,6 @@ const Header = () => {
           </Box>
         </Flex>
       </Container>
-
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
         <DrawerContent className="!top-20 !z-10" backgroundColor={'#F9F9F9'}>
           <DrawerHeader pt={5} pb={0}>
@@ -172,9 +213,24 @@ const Header = () => {
           </DrawerBody>
 
           <DrawerFooter pt={0}>
-            <Button colorScheme="primary" width={'100%'}>
-              {hasHydrated && isLogin ? '登出' : '登入'}
-            </Button>
+            {hasHydrated && isLogin ? (
+              <Box width={'100%'} textAlign={'center'}>
+                <Box
+                  bgColor={'gray.200'}
+                  py={0.5}
+                  color={'secondary-emphasis.500'}
+                  mb={3}
+                  fontWeight={500}
+                >
+                  Member
+                </Box>
+                <MemberMenu />
+              </Box>
+            ) : (
+              <Button colorScheme="primary" width={'100%'}>
+                <Link href="/login">登入</Link>
+              </Button>
+            )}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
