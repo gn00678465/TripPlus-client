@@ -1,10 +1,15 @@
 import Head from 'next/head';
-import { GetStaticProps } from 'next';
+import Link from 'next/link';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
+import ScrollBar from '@/components/ScrollBar/horizontal';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
-import ScrollBar from '@/components/ScrollBar/horizontal';
+import useSWR from 'swr';
+import { apiGetBonus } from '@/api/index';
+import dayjs from 'dayjs';
+import Loading from '@/components/Loading';
+
 import {
   Box,
   Container,
@@ -20,55 +25,67 @@ import {
   Td
 } from '@chakra-ui/react';
 
+const breadcrumb = [
+  { name: '首頁', url: '/' },
+  { name: '會員中心', url: '/user/account' },
+  { name: '紅利紀錄', url: '/user/bonus' }
+];
+
+const list = [
+  { title: '紅利點數將於「專案結束」後的 30 天統一發送。' },
+  { title: '如果專案結束時間延期，不會變更您原預定收到紅利點數的時間。' },
+  { title: '無限期的專案，將於訂單成立後 30 天發送紅利點數。' }
+];
+
 const Bonus: App.NextPageWithLayout = () => {
-  const breadcrumb = [
-    { name: '首頁', url: '/' },
-    { name: '會員中心', url: '/user/account' },
-    { name: '紅利紀錄', url: '/user/bonus' }
-  ];
+  const [totalBonus, setTotalBonus] = useState(0);
+  const [bonusData, setBonusData] = useState<User.Bonus[]>([]);
 
-  const list = [
-    { title: '紅利點數將於「專案結束」後的 30 天統一發送。' },
-    { title: '如果專案結束時間延期，不會變更您原預定收到紅利點數的時間。' },
-    { title: '無限期的專案，將於訂單成立後 30 天發送紅利點數。' }
-  ];
+  const getBonus = (data: ApiUser.Bonus) => {
+    setBonusData(() => {
+      let projects: User.Bonus[] = [];
+      let products: User.Bonus[] = [];
 
-  const [bonus, setBonus] = useState(33);
+      if (data.projects.length > 0) {
+        projects = data.projects.map((item) => {
+          return {
+            ...item,
+            isProject: true
+          };
+        });
+      }
 
-  const [bonusData, setBonusData] = useState([
-    {
-      bonus: 15,
-      title: 'Canvas:忘憂繪卷 | 你的第一款恣意創作桌遊',
-      shipmentId: 'REG1600481670252161',
-      shipDate: '2023/02/06 05:00',
-      limitDate: '2023/12/31 23:59',
-      isProject: true
-    },
-    {
-      bonus: 18,
-      title: '蔡璧名的《醫道習慣》線上課程集資計畫 | 心身情食寢，習慣成自然',
-      shipmentId: 'REG1600481670252161',
-      shipDate: '2023/02/06 05:00',
-      limitDate: '2023/12/31 23:59',
-      isProject: true
-    },
-    {
-      bonus: 15,
-      title: 'Canvas:忘憂繪卷 | 你的第一款恣意創作桌遊2',
-      shipmentId: 'REG1600481670252161',
-      shipDate: '2023/02/06 05:00',
-      limitDate: '2023/12/31 23:59',
-      isProject: true
-    },
-    {
-      bonus: 18,
-      title: '蔡璧名的《醫道習慣》線上課程集資計畫 | 心身情食寢，習慣成自然2',
-      shipmentId: 'REG1600481670252161',
-      shipDate: '2023/02/06 05:00',
-      limitDate: '2023/12/31 23:59',
-      isProject: true
+      if (data.products.length > 0) {
+        products = data.projects.map((item) => {
+          return {
+            ...item,
+            isProject: true
+          };
+        });
+      }
+
+      const lists = [...projects, ...products];
+
+      const listSort = lists.sort((a, b) => {
+        const timestampA = dayjs(a.expirationDate).valueOf();
+        const timestampB = dayjs(b.expirationDate).valueOf();
+        return timestampB - timestampA;
+      });
+
+      return listSort;
+    });
+  };
+
+  const { data: bonus, isLoading } = useSWR('/api/user/bonus', apiGetBonus, {
+    onSuccess(data, key, config) {
+      if (data && data.status === 'Success') {
+        setTotalBonus(data.data.TotalBonus);
+        getBonus(data.data);
+      }
     }
-  ]);
+  });
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
@@ -99,7 +116,7 @@ const Bonus: App.NextPageWithLayout = () => {
                 fontWeight={700}
                 className="ml-4 text-2xl"
               >
-                {bonus} pt
+                {totalBonus} pt
               </Box>
             </Flex>
 
@@ -125,24 +142,40 @@ const Bonus: App.NextPageWithLayout = () => {
                       <Th fontSize={'1rem'}>使用期限</Th>
                     </Tr>
                   </Thead>
+
                   <Tbody>
-                    {bonusData.map((item) => (
-                      <Tr key={item.title}>
-                        <Td
-                          color={'secondary-emphasis.400'}
-                          fontWeight={600}
-                          lineHeight={1.5}
-                        >
-                          + {item.bonus} pt
+                    {bonusData.length <= 0 ? (
+                      <Tr>
+                        <Td colSpan={5} textAlign={'center'}>
+                          沒有紅利紀錄，立即去
+                          <Link
+                            href="/projects"
+                            className="text-secondary-emphasis hover:text-secondary-emphasis-400"
+                          >
+                            探索集資專案
+                          </Link>
+                          ！
                         </Td>
-                        <Td lineHeight={1.5}>
-                          {item.isProject ? '專案' : '商品'}：{item.title}
-                        </Td>
-                        <Td lineHeight={1.5}>{item.shipmentId}</Td>
-                        <Td lineHeight={1.5}>{item.shipDate}</Td>
-                        <Td lineHeight={1.5}>{item.limitDate}</Td>
                       </Tr>
-                    ))}
+                    ) : (
+                      bonusData.map((item) => (
+                        <Tr key={item.transactionId}>
+                          <Td
+                            color={'secondary-emphasis.400'}
+                            fontWeight={600}
+                            lineHeight={1.5}
+                          >
+                            + {item.bonus} pt
+                          </Td>
+                          <Td lineHeight={1.5}>
+                            {item.isProject ? '專案' : '商品'}：{item.title}
+                          </Td>
+                          <Td lineHeight={1.5}>{item.transactionId}</Td>
+                          <Td lineHeight={1.5}>{item.sendDate}</Td>
+                          <Td lineHeight={1.5}>{item.expirationDate}</Td>
+                        </Tr>
+                      ))
+                    )}
                   </Tbody>
                 </Table>
               </ScrollBar>
@@ -152,12 +185,6 @@ const Bonus: App.NextPageWithLayout = () => {
       </Box>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps = async () => {
-  return {
-    props: {}
-  };
 };
 
 export default Bonus;

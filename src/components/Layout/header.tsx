@@ -140,7 +140,7 @@ const Header = () => {
               </button>
             ) : (
               <Button colorScheme="primary" width={81}>
-                <Link href="/">登入</Link>
+                <Link href="/login">登入</Link>
               </Button>
             )}
 
@@ -217,7 +217,7 @@ const Header = () => {
               </Box>
             ) : (
               <Button colorScheme="primary" width={'100%'}>
-                <Link href="/">登入</Link>
+                <Link href="/login">登入</Link>
               </Button>
             )}
           </DrawerFooter>
