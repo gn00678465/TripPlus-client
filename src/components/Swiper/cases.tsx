@@ -73,9 +73,17 @@ const Cases = () => {
       </div>
       <Swiper
         spaceBetween={24}
-        slidesPerView={3}
+        slidesPerView="auto"
         centeredSlides={true}
         loop={true}
+        breakpoints={{
+          375: {
+            slidesPerView: 1
+          },
+          768: {
+            slidesPerView: 3
+          }
+        }}
         pagination={{
           clickable: true
         }}

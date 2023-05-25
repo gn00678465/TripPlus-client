@@ -64,7 +64,7 @@ const Banner = () => {
     <section className="banner-slideshows">
       <Swiper
         spaceBetween={100}
-        slidesPerView={2}
+        slidesPerView="auto"
         centeredSlides={true}
         loop={true}
         pagination={{
@@ -73,6 +73,14 @@ const Banner = () => {
         navigation={{
           prevEl: prevRef.current ? prevRef.current : undefined,
           nextEl: nextRef.current ? nextRef.current : undefined
+        }}
+        breakpoints={{
+          375: {
+            slidesPerView: 1
+          },
+          768: {
+            slidesPerView: 2.5
+          }
         }}
         autoplay={{
           delay: 2500,
