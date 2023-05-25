@@ -115,30 +115,36 @@ const Cases = () => {
                       className="flex flex-col justify-between"
                     >
                       <Box>
-                        <Text fontSize={14} className="text-gray-600">
+                        <Text
+                          fontSize={{ xs: '12px', md: '14px' }}
+                          className="text-gray-600"
+                        >
                           {item.category}
                         </Text>
                         <Heading
-                          fontSize={20}
+                          fontSize={{ xs: '16px', md: '20px' }}
                           fontWeight={500}
                           my={2}
                           className="line-clamp-2 text-gray-900"
                         >
                           {item.title}
                         </Heading>
-                        <Text className="text-sm leading-6 text-secondary-emphasis">
+                        <Text className="text-xs leading-6 text-secondary-emphasis md:text-sm">
                           {item.team}
                         </Text>
                       </Box>
                       <Box className="mt-6">
                         <Flex justify="space-between" align="center">
                           <Text
-                            fontSize={20}
+                            fontSize={{ xs: '18px', md: '20px' }}
                             className="font-ubuntu font-medium text-gray-900"
                           >
                             ${item.targetMoney} | {item.currentStatus}%
                           </Text>
-                          <Text fontSize={14} className="text-gray">
+                          <Text
+                            fontSize={{ xs: '12px', md: '14px' }}
+                            className="text-gray"
+                          >
                             已結束
                           </Text>
                         </Flex>

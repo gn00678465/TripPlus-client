@@ -2,6 +2,10 @@ import { Layout } from '@/components';
 import type { ReactElement } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import landscape from '@/assets/images/index/mountains-nature-landscape.png';
+import landscapeMobile from '@/assets/images/index/mountains-nature-landscape-mobile.png';
+import CTA from '@/assets/images/index/CTA.png';
+import CTAMobile from '@/assets/images/index/CTA-mobile.png';
 import plus from '@/assets/images/plus.png';
 import lightbulb from '@/assets/images/identity/lightbulb.svg';
 import calendar from '@/assets/images/identity/calendar.svg';
@@ -170,22 +174,30 @@ const Index = () => {
     <>
       <Box className="flex flex-col items-center justify-center">
         <Image
-          src="/images/mountains-nature-landscape.png"
+          src={landscape}
           alt="mountains-nature-landscape"
           width={1920}
           height={240}
-          className="absolute left-0 top-0 object-cover md:h-[440px]"
+          className="absolute left-0 top-0 hidden object-cover md:block md:h-[440px]"
+          priority
+        ></Image>
+        <Image
+          src={landscapeMobile}
+          alt="mountains-nature-landscape"
+          width={1920}
+          height={240}
+          className="absolute left-0 top-0 object-cover md:hidden md:h-[440px]"
           priority
         ></Image>
       </Box>
-      <Box className="mb-[20px] mt-[100px] md:mt-[380px]">
+      <Box className="mt-[210px] md:mb-5 md:mt-[380px]">
         <Flex justifyContent="center">
           {category.map((item) => {
             return (
               <Link
                 key={item.title}
                 href={item.url}
-                className="border-r-[1px] border-gray-200 px-[48px] font-medium last:border-r-0"
+                className="border-r-[1px] border-gray-200 px-5 text-sm font-medium last:border-r-0 md:px-12 md:text-base"
               >
                 {item.title}
               </Link>
@@ -194,15 +206,19 @@ const Index = () => {
         </Flex>
       </Box>
       <Banner />
-      <Box as="section" className="bg-gray-100 py-[80px]">
+      <Box as="section" className="bg-gray-100 py-10 md:py-20">
         <Container maxW="container.xl">
           <Flex
             justifyContent="space-between"
             alignItems="center"
-            marginBottom="40px"
+            marginBottom={{ xs: '20px', md: '40px' }}
             className="text-gray-600"
           >
-            <Text fontSize={32} fontWeight={700} className="relative">
+            <Text
+              fontSize={{ xs: '28px', md: '32px' }}
+              fontWeight={700}
+              className="relative"
+            >
               熱門項目
               <Image
                 src={plus}
@@ -213,7 +229,9 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#">查看更多 {'>'}</Link>
+            <Link href="#" className="text-sm md:text-base">
+              查看更多 {'>'}
+            </Link>
           </Flex>
           <Box className="flex flex-wrap">
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -231,7 +249,7 @@ const Index = () => {
                         height={560}
                         className="aspect-ratio-object rounded-lg"
                       ></Image>
-                      <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-sm text-white">
+                      <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
                         紅利回饋
                       </span>
                     </Link>
@@ -241,12 +259,15 @@ const Index = () => {
                       className="flex flex-col justify-between"
                     >
                       <Box>
-                        <Text fontSize={14} className="text-gray-600">
+                        <Text
+                          fontSize={{ xs: '12px', md: '14px' }}
+                          className="text-gray-600"
+                        >
                           {item.category}
                         </Text>
                         <Link href="#">
                           <Heading
-                            fontSize={20}
+                            fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
                             my={2}
                             className="line-clamp-2 text-gray-900"
@@ -256,14 +277,14 @@ const Index = () => {
                         </Link>
                         <Link
                           href="#"
-                          className="text-sm leading-6 text-secondary-emphasis"
+                          className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
                           {item.team}
                         </Link>
                       </Box>
                       <Box>
                         <Text
-                          fontSize={20}
+                          fontSize={{ xs: '18px', md: '20px' }}
                           fontWeight={500}
                           className="text-gray-900"
                         >
@@ -276,10 +297,13 @@ const Index = () => {
                           className="mb-[18px] mt-4 rounded-[6px] !bg-gray-200"
                         />
                         <Box className="flex justify-between">
-                          <Text className="text-gray-900">
+                          <Text
+                            fontSize={{ xs: '14px', md: '16px' }}
+                            className="text-gray-900"
+                          >
                             {item.currentStatus}%
                           </Text>
-                          <Text fontSize={14}>
+                          <Text fontSize={{ xs: '12px', md: '14px' }}>
                             倒數 {item.countdownDays} 天
                           </Text>
                         </Box>
@@ -297,10 +321,14 @@ const Index = () => {
           <Flex
             justifyContent="space-between"
             alignItems="center"
-            marginBottom="40px"
+            marginBottom={{ xs: '20px', md: '40px' }}
             className="text-gray-600"
           >
-            <Text fontSize={32} fontWeight={700} className="relative">
+            <Text
+              fontSize={{ xs: '28px', md: '32px' }}
+              fontWeight={700}
+              className="relative"
+            >
               最新項目
               <Image
                 src={plus}
@@ -311,7 +339,9 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#">查看更多 {'>'}</Link>
+            <Link href="#" className="text-sm md:text-base">
+              查看更多 {'>'}
+            </Link>
           </Flex>
           <Box className="flex flex-wrap">
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -329,7 +359,7 @@ const Index = () => {
                         height={560}
                         className="aspect-ratio-object rounded-lg"
                       ></Image>
-                      <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-sm text-white">
+                      <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
                         紅利回饋
                       </span>
                     </Link>
@@ -339,12 +369,15 @@ const Index = () => {
                       className="flex flex-col justify-between"
                     >
                       <Box>
-                        <Text fontSize={14} className="text-gray-600">
+                        <Text
+                          fontSize={{ xs: '12px', md: '14px' }}
+                          className="text-gray-600"
+                        >
                           {item.category}
                         </Text>
                         <Link href="#">
                           <Heading
-                            fontSize={20}
+                            fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
                             my={2}
                             className="line-clamp-2 text-gray-900"
@@ -354,14 +387,14 @@ const Index = () => {
                         </Link>
                         <Link
                           href="#"
-                          className="text-sm leading-6 text-secondary-emphasis"
+                          className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
                           {item.team}
                         </Link>
                       </Box>
                       <Box>
                         <Text
-                          fontSize={20}
+                          fontSize={{ xs: '18px', md: '20px' }}
                           fontWeight={500}
                           className="text-gray-900"
                         >
@@ -374,10 +407,13 @@ const Index = () => {
                           className="mb-[18px] mt-4 rounded-[6px] !bg-gray-200"
                         />
                         <Box className="flex justify-between">
-                          <Text className="text-gray-900">
+                          <Text
+                            fontSize={{ xs: '14px', md: '16px' }}
+                            className="text-gray-900"
+                          >
                             {item.currentStatus}%
                           </Text>
-                          <Text fontSize={14}>
+                          <Text fontSize={{ xs: '12px', md: '14px' }}>
                             倒數 {item.countdownDays} 天
                           </Text>
                         </Box>
@@ -391,10 +427,10 @@ const Index = () => {
         </Container>
       </Box>
       <Box as="section" className="bg-secondary-light">
-        <Container maxW="container.xl" className="py-[100px]">
+        <Container maxW="container.xl" className="py-[60px] md:py-[100px]">
           <Box className="flex justify-center">
             <Text
-              fontSize={48}
+              fontSize={{ xs: '36px', md: '48px' }}
               className="flex content-center items-center font-alkatra"
             >
               Why
@@ -404,7 +440,7 @@ const Index = () => {
                 width={208}
                 height={58}
                 priority
-                className="mx-3"
+                className="md:[208px] mx-3 w-[130px]"
               ></Image>
               ?
             </Text>
@@ -422,7 +458,11 @@ const Index = () => {
                     width={identity.width}
                     height={identity.height}
                   ></Image>
-                  <Text fontSize={18} fontWeight={500} className="mt-[20px]">
+                  <Text
+                    fontSize={{ xs: '16px', md: '18px' }}
+                    fontWeight={500}
+                    className="mt-[20px]"
+                  >
                     {identity.text}
                   </Text>
                 </Box>
@@ -436,10 +476,14 @@ const Index = () => {
           <Flex
             justifyContent="space-between"
             alignItems="center"
-            marginBottom="40px"
+            marginBottom={{ xs: '20px', md: '40px' }}
             className="text-gray-600"
           >
-            <Text fontSize={32} fontWeight={700} className="relative">
+            <Text
+              fontSize={{ xs: '28px', md: '32px' }}
+              fontWeight={700}
+              className="relative"
+            >
               精選商品
               <Image
                 src={plus}
@@ -450,7 +494,9 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#">查看更多 {'>'}</Link>
+            <Link href="#" className="text-sm md:text-base">
+              查看更多 {'>'}
+            </Link>
           </Flex>
           <Box className="flex flex-wrap">
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -468,7 +514,7 @@ const Index = () => {
                         height={560}
                         className="aspect-ratio-object rounded-lg"
                       ></Image>
-                      <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-sm text-white">
+                      <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
                         可用紅利
                       </span>
                     </Link>
@@ -478,12 +524,15 @@ const Index = () => {
                       className="flex flex-col justify-between"
                     >
                       <Box>
-                        <Text fontSize={14} className="text-gray-600">
+                        <Text
+                          fontSize={{ xs: '12px', md: '14px' }}
+                          className="text-gray-600"
+                        >
                           {item.category}
                         </Text>
                         <Link href="#">
                           <Heading
-                            fontSize={20}
+                            fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
                             my={2}
                             className="line-clamp-2 text-gray-900"
@@ -493,7 +542,7 @@ const Index = () => {
                         </Link>
                         <Link
                           href="#"
-                          className="text-sm leading-6 text-secondary-emphasis"
+                          className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
                           {item.team}
                         </Link>
@@ -506,8 +555,10 @@ const Index = () => {
                           className="mb-[18px] mt-4 rounded-[6px] !bg-gray-200"
                         />
                         <Box className="flex items-center justify-end text-gray">
-                          <CgInfinity className="mr-1 text-xl" />
-                          <Text fontSize={14}>長期販售</Text>
+                          <CgInfinity className="mr-1 text-lg md:text-xl" />
+                          <Text fontSize={{ xs: '12px', md: '14px' }}>
+                            長期販售
+                          </Text>
                         </Box>
                       </Box>
                     </Box>
@@ -518,9 +569,9 @@ const Index = () => {
           </Box>
         </Container>
       </Box>
-      <Box as="section" className="bg-gray-100 py-[80px]">
+      <Box as="section" className="bg-gray-100 py-[40px] md:py-[80px]">
         <Container maxW="container.xl">
-          <Heading className="mb-10 text-center text-[32px] font-bold">
+          <Heading className="mb-5 text-center text-[32px] font-bold md:mb-10">
             成功案例
           </Heading>
           <Cases />
@@ -528,50 +579,66 @@ const Index = () => {
       </Box>
       <Box
         as="section"
-        className="bg-[url('/images/CTA-mobile.png')] bg-cover bg-no-repeat pb-[100%] pt-[60px] text-white md:bg-[url('/images/CTA.png')] md:py-[100px]"
+        className="bg-cover bg-center bg-no-repeat pb-[100%] pt-[60px] text-white md:py-[100px]"
+        backgroundImage={{ base: CTAMobile.src, md: CTA.src }}
       >
         <Container maxW="container.xl" className="flex flex-col ">
-          <Box className="flex items-center justify-center text-[40px] font-bold md:justify-start">
+          <Box className="flex items-center justify-center text-[28px] font-bold md:justify-start md:text-[40px]">
             <Text>在</Text>
             <Image
               src="/images/logo-white.png"
               alt="logo"
               width={208}
               height={58}
-              className="mx-[14px]"
+              className="mx-[14px] w-[130px] md:w-[208px]"
             ></Image>
             <Text>已有</Text>
           </Box>
           <Box className="mt-[63px] flex flex-wrap items-center justify-center font-medium md:mt-[124px]">
             <Box className="mb-10 flex flex-col items-center md:mb-0">
               <Box className="mb-4 flex md:mb-6">
-                <span className="mr-2 text-[54px]"> 1,000,000</span>
-                <span className="mt-8 text-[24px]">件</span>
+                <span className="mr-2 text-[36px] md:text-[54px]">
+                  1,000,000
+                </span>
+                <span className="mt-5 text-[18px] md:mt-8 md:text-[24px]">
+                  件
+                </span>
               </Box>
-              <Box className="text-[24px]">成功募資案</Box>
+              <Box className="text-[16px] md:text-[24px]">成功募資案</Box>
             </Box>
             <Box className="mb-10 flex flex-col items-center md:mx-[78px] md:mb-0 md:border-x-[1px] md:border-white/[.3] md:px-12">
               <Box className="mb-4 flex md:mb-6">
-                <span className="mr-2 text-[54px]">$100,000,000</span>
-                <span className="mt-8 text-[24px]">元</span>
+                <span className="mr-2 text-[36px] md:text-[54px]">
+                  $100,000,000
+                </span>
+                <span className="mt-5 text-[18px] md:mt-8 md:text-[24px]">
+                  元
+                </span>
               </Box>
-              <Box className="text-[24px]">募資金額</Box>
+              <Box className="text-[16px] md:text-[24px]">募資金額</Box>
             </Box>
             <Box className="flex flex-col items-center">
               <Box className="mb-4 flex md:mb-6">
-                <span className="mr-2 text-[54px]">10,000,000</span>
-                <span className="mt-8 text-[24px]">位</span>
+                <span className="mr-2 text-[36px] md:text-[54px]">
+                  10,000,000
+                </span>
+                <span className="mt-5 text-[18px] md:mt-8 md:text-[24px]">
+                  位
+                </span>
               </Box>
-              <Box className="text-[24px]">參與者</Box>
+              <Box className="text-[16px] md:text-[24px]">參與者</Box>
             </Box>
           </Box>
           <Box className="mt-[60px] flex flex-col items-center md:mt-[132px] md:flex-row md:justify-end">
-            <Text fontSize={28} className="mb-8 md:mb-0 md:mr-9">
+            <Text
+              fontSize={{ xs: '24px', md: '28px' }}
+              className="mb-8 md:mb-0 md:mr-9"
+            >
               點燃你的創意．集眾人之力
             </Text>
             <Button
-              className="relative z-10 !h-[140px] !w-[140px] !rounded-[100%]
-              after:absolute after:left-[50%] after:top-[50%] after:h-[164px] after:w-[164px] after:translate-x-[-50%] after:translate-y-[-50%] after:rounded-[100%] after:border-2 after:border-dashed after:border-white after:bg-transparent"
+              className="relative z-10 !h-[96px] !w-[96px] !rounded-[100%] !text-[14px] after:absolute after:left-[50%] after:top-[50%]
+              after:h-[112px] after:w-[112px]  after:translate-x-[-50%] after:translate-y-[-50%] after:rounded-[100%] after:border-[1px] after:border-dashed after:border-white after:bg-transparent md:!h-[140px] md:!w-[140px] md:!text-[20px] md:after:h-[164px] md:after:w-[164px] md:after:border-2"
               colorScheme="secondary-emphasis"
             >
               我要提案
