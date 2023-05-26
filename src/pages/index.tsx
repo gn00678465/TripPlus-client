@@ -457,6 +457,10 @@ const Index = () => {
                     alt={identity.text}
                     width={identity.width}
                     height={identity.height}
+                    style={{
+                      width: identity.width + 'px',
+                      height: identity.height + 'px'
+                    }}
                   ></Image>
                   <Text
                     fontSize={{ xs: '16px', md: '18px' }}
