@@ -184,8 +184,8 @@ const Index = () => {
         <Image
           src={landscapeMobile}
           alt="mountains-nature-landscape"
-          width={1920}
-          height={240}
+          width={768}
+          height={508}
           className="absolute left-0 top-0 object-cover md:hidden md:h-[440px]"
           priority
         ></Image>
@@ -247,6 +247,7 @@ const Index = () => {
                         alt={item.title}
                         width={800}
                         height={560}
+                        priority
                         className="aspect-ratio-object rounded-lg"
                       ></Image>
                       <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
@@ -357,6 +358,7 @@ const Index = () => {
                         alt={item.title}
                         width={800}
                         height={560}
+                        priority
                         className="aspect-ratio-object rounded-lg"
                       ></Image>
                       <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
@@ -516,6 +518,7 @@ const Index = () => {
                         alt={item.title}
                         width={800}
                         height={560}
+                        priority
                         className="aspect-ratio-object rounded-lg"
                       ></Image>
                       <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
@@ -594,6 +597,7 @@ const Index = () => {
               alt="logo"
               width={208}
               height={58}
+              priority
               className="mx-[14px] w-[130px] md:w-[208px]"
             ></Image>
             <Text>已有</Text>
