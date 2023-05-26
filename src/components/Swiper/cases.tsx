@@ -144,6 +144,7 @@ const Cases = () => {
                           <Text
                             fontSize={{ xs: '12px', md: '14px' }}
                             className="text-gray"
+                            whiteSpace={'nowrap'}
                           >
                             已結束
                           </Text>

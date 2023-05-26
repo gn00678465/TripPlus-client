@@ -2,6 +2,7 @@ import { Layout } from '@/components';
 import type { ReactElement } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Head from 'next/head';
 import landscape from '@/assets/images/index/mountains-nature-landscape.png';
 import landscapeMobile from '@/assets/images/index/mountains-nature-landscape-mobile.png';
 import CTA from '@/assets/images/index/CTA.png';
@@ -15,6 +16,8 @@ import userCheck from '@/assets/images/identity/user-check.svg';
 import Banner from '@/components/Swiper/banner';
 import Cases from '@/components/Swiper/cases';
 import { CgInfinity } from 'react-icons/cg';
+import { MdChevronRight } from 'react-icons/md';
+
 import {
   Text,
   Box,
@@ -172,6 +175,9 @@ const Index = () => {
 
   return (
     <>
+      <Head>
+        <title>Fund Your Next Adventure-TripPlus+</title>
+      </Head>
       <Box className="flex flex-col items-center justify-center">
         <Image
           src={landscape}
@@ -197,7 +203,7 @@ const Index = () => {
               <Link
                 key={item.title}
                 href={item.url}
-                className="border-r-[1px] border-gray-200 px-5 text-sm font-medium last:border-r-0 md:px-12 md:text-base"
+                className="border-r-[1px] border-gray-200 px-5 text-sm font-medium last:border-r-0 hover:text-gray-500 md:px-12 md:text-base"
               >
                 {item.title}
               </Link>
@@ -229,8 +235,9 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#" className="text-sm md:text-base">
-              查看更多 {'>'}
+            <Link href="#" className="flex items-center text-sm md:text-base">
+              查看更多
+              <MdChevronRight className="text-2xl" />
             </Link>
           </Flex>
           <Box className="flex flex-wrap">
@@ -340,8 +347,9 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#" className="text-sm md:text-base">
-              查看更多 {'>'}
+            <Link href="#" className="flex items-center text-sm md:text-base">
+              查看更多
+              <MdChevronRight className="text-2xl" />
             </Link>
           </Flex>
           <Box className="flex flex-wrap">
@@ -500,8 +508,9 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#" className="text-sm md:text-base">
-              查看更多 {'>'}
+            <Link href="#" className="flex items-center text-sm md:text-base">
+              查看更多
+              <MdChevronRight className="text-2xl" />
             </Link>
           </Flex>
           <Box className="flex flex-wrap">
@@ -586,7 +595,7 @@ const Index = () => {
       </Box>
       <Box
         as="section"
-        className="bg-cover bg-center bg-no-repeat pb-[100%] pt-[60px] text-white md:py-[100px]"
+        className="bg-cover bg-[center_bottom] bg-no-repeat pb-[100%] pt-[60px] text-white md:bg-center md:py-[100px]"
         backgroundImage={{ base: CTAMobile.src, md: CTA.src }}
       >
         <Container maxW="container.xl" className="flex flex-col ">
@@ -602,7 +611,7 @@ const Index = () => {
             ></Image>
             <Text>已有</Text>
           </Box>
-          <Box className="mt-[63px] flex flex-wrap items-center justify-center font-medium md:mt-[124px]">
+          <Box className="mt-[63px] flex flex-col flex-wrap items-center justify-center font-medium md:mt-[124px] md:flex-row">
             <Box className="mb-10 flex flex-col items-center md:mb-0">
               <Box className="mb-4 flex md:mb-6">
                 <span className="mr-2 text-[36px] md:text-[54px]">
