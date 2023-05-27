@@ -70,6 +70,15 @@ module.exports = {
           ...fontFamily.sans
         ],
         alkatra: ['var(--font-alkatra)']
+      },
+      keyframes: {
+        circle: {
+          '0%': { transform: 'rotate(0)' },
+          '100%': { transform: 'rotate(360deg)' }
+        }
+      },
+      animation: {
+        circle: 'circle 1s linear infinite'
       }
     }
   },
