@@ -196,7 +196,7 @@ const Index = () => {
           priority
         ></Image>
       </Box>
-      <Box className="mt-[210px] md:mb-5 md:mt-[380px]">
+      <Box className="mt-[210px] ss:mt-[300px] sm:mt-[380px] md:mb-5">
         <Flex justifyContent="center">
           {category.map((item) => {
             return (
