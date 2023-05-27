@@ -18,4 +18,18 @@ declare namespace User {
   interface rank {
     comment: string;
   }
+
+  interface Follows {
+    id: string;
+    title: string;
+    category: string;
+    team: string;
+    teamId: string;
+    keyVision: string;
+    target?: string;
+    progressRate: number;
+    countDownDays?: number;
+    type: string;
+    updatedAt: string;
+  }
 }

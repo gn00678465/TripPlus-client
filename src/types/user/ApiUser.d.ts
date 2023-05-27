@@ -21,4 +21,36 @@ declare namespace ApiUser {
     confirmPassword: string;
     oldPassword: string;
   }
+
+  interface Follows {
+    follows: FollowsList[];
+  }
+
+  interface FollowsList {
+    projectId?: FollowsProject;
+    productId?: FollowsProduct;
+  }
+
+  interface FollowsProject {
+    id: string;
+    title: string;
+    category: number;
+    teamId: string;
+    keyVision: string;
+    target: number;
+    progressRate: number;
+    countDownDays: number;
+    type: string;
+    updatedAt: string;
+  }
+
+  interface FollowsProduct {
+    id: string;
+    title: string;
+    category: number;
+    teamId: string;
+    keyVision: string;
+    type: string;
+    updatedAt: string;
+  }
 }
