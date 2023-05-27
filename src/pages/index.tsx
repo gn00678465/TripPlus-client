@@ -595,7 +595,7 @@ const Index = () => {
       </Box>
       <Box
         as="section"
-        className="bg-cover bg-[center_bottom] bg-no-repeat pb-[100%] pt-[60px] text-white md:bg-center md:py-[100px]"
+        className="bg-cover bg-[center_bottom] bg-no-repeat pb-[45%] pt-[60px] text-white md:bg-center md:py-[100px]"
         backgroundImage={{ base: CTAMobile.src, md: CTA.src }}
       >
         <Container maxW="container.xl" className="flex flex-col ">
