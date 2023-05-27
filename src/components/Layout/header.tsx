@@ -23,12 +23,14 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
 import { useState, useEffect, useRef, MouseEvent } from 'react';
+import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store';
 import UserImage from '@/assets/images/user/user-image.png';
 import MemberMenu from './member-menu';
 import Logo from '@/assets/images/logo.png';
 
 const Header = () => {
+  const router = useRouter();
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const loginStatus = useAuthStore((state) => state.getters.isLogin);
   const [isLogin, setIsLogin] = useState(false);
@@ -41,6 +43,8 @@ const Header = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const [transparent, setTransparent] = useState<boolean>(router.route === '/');
+
   type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
   const [placement, setPlacement] = useState<DrawerPlacement>('top');
@@ -52,6 +56,14 @@ const Header = () => {
     { title: '提案', url: '/', isShowPc: true }
   ];
 
+  useEffect(() => {
+    if (router.route === '/') {
+      const setBgColor = () => {
+        setTransparent(true);
+      };
+      setBgColor();
+    }
+  });
   const memberBtnRef = useRef<HTMLButtonElement>(null);
   const memberMenuRef = useRef<HTMLDivElement>(null);
 
@@ -79,12 +91,12 @@ const Header = () => {
   return (
     <Box
       as="header"
-      className={`relative border-none bg-white font-medium ${
-        isOpen ? '!z-[1500]' : ''
-      }`}
+      className={`relative font-medium ${
+        transparent
+          ? 'border-none bg-transparent'
+          : 'border-b-[1px] border-b-gray-200 bg-white '
+      } ${isOpen ? '!z-[1500]' : 'z-10'}`}
       py={5}
-      borderBottom="1px"
-      borderColor="#E9E9E9"
     >
       <Container maxW="container.xl" className="md:relative">
         <Flex alignItems="center">
@@ -140,7 +152,7 @@ const Header = () => {
               </button>
             ) : (
               <Button colorScheme="primary" width={81}>
-                <Link href="/">登入</Link>
+                <Link href="/login">登入</Link>
               </Button>
             )}
 
@@ -163,7 +175,6 @@ const Header = () => {
           </Box>
         </Flex>
       </Container>
-
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
         <DrawerContent className="!top-20 !z-10" backgroundColor={'#F9F9F9'}>
           <DrawerHeader pt={5} pb={0}>
@@ -217,7 +228,7 @@ const Header = () => {
               </Box>
             ) : (
               <Button colorScheme="primary" width={'100%'}>
-                <Link href="/">登入</Link>
+                <Link href="/login">登入</Link>
               </Button>
             )}
           </DrawerFooter>

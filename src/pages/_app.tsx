@@ -3,6 +3,8 @@ import type { AppProps } from 'next/app';
 import { Noto_Sans_TC, Ubuntu } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Chakra } from '@/components';
+import '@/styles/banner.scss';
+import '@/styles/cases.scss';
 
 const noto_sans_tc = Noto_Sans_TC({
   weight: ['100', '300', '400', '500', '700', '900'],
