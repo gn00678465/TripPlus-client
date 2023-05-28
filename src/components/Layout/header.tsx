@@ -57,13 +57,9 @@ const Header = () => {
   ];
 
   useEffect(() => {
-    if (router.route === '/') {
-      const setBgColor = () => {
-        setTransparent(true);
-      };
-      setBgColor();
-    }
-  });
+    if (router.route === '/') setTransparent(true);
+    setOpenMemberMenu(false);
+  }, [router.route]);
   const memberBtnRef = useRef<HTMLButtonElement>(null);
   const memberMenuRef = useRef<HTMLDivElement>(null);
 
