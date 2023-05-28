@@ -18,4 +18,13 @@ declare namespace User {
   interface rank {
     comment: string;
   }
+
+  interface Bonus {
+    title: string;
+    sendDate: string;
+    expirationDate: string;
+    bonus: number;
+    transactionId: string;
+    isProject: boolean;
+  }
 }
