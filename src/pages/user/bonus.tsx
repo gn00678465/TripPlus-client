@@ -56,10 +56,10 @@ const Bonus: App.NextPageWithLayout = () => {
       }
 
       if (data.products.length > 0) {
-        products = data.projects.map((item) => {
+        products = data.products.map((item) => {
           return {
             ...item,
-            isProject: true
+            isProject: false
           };
         });
       }
