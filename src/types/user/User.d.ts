@@ -32,4 +32,13 @@ declare namespace User {
     type: string;
     updatedAt: string;
   }
+
+  interface Bonus {
+    title: string;
+    sendDate: string;
+    expirationDate: string;
+    bonus: number;
+    transactionId: string;
+    isProject: boolean;
+  }
 }

@@ -19,3 +19,7 @@ export function apiGetFollows() {
 export function apiDeleteFollow(id: string) {
   return request.delete<ApiUser.Follows>(`/user/follow/${id}`);
 }
+
+export function apiGetBonus() {
+  return request.get<ApiUser.Bonus>('/user/bonus');
+}

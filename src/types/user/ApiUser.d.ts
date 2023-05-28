@@ -53,4 +53,19 @@ declare namespace ApiUser {
     type: string;
     updatedAt: string;
   }
+
+  interface BonusList {
+    title: string;
+    sendDate: string;
+    expirationDate: string;
+    transactionId: string;
+    bonus: number;
+  }
+
+  interface Bonus {
+    TotalBonus: number;
+    userBonus: number;
+    projects: BonusList[];
+    products: BonusList[];
+  }
 }
