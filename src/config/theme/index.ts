@@ -14,7 +14,8 @@ const colors = {
   success: tailwind.theme?.colors?.success,
   light: tailwind.theme?.colors?.light,
   gray: tailwind.theme?.colors?.gray,
-  'secondary-lignt': tailwind.theme?.colors?.['secondary-lignt']
+  'secondary-lignt': tailwind.theme?.colors?.['secondary-lignt'],
+  red: tailwind.theme?.colors?.red
 };
 
 const components = {
