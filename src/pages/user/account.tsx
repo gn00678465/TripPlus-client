@@ -30,6 +30,7 @@ import { useFileReader } from '@/hooks';
 import dayjs from 'dayjs';
 import toObject from 'dayjs/plugin/toObject';
 import utc from 'dayjs/plugin/utc';
+import Loading from '@/components/Loading';
 
 dayjs.extend(toObject);
 dayjs.extend(utc);
@@ -87,7 +88,7 @@ const Account: App.NextPageWithLayout = () => {
   } = useForm<User.AccountForm>();
 
   // queries
-  const { data: account } = useSWR(
+  const { data: account, isLoading } = useSWR(
     ['get', '/api/user/account'],
     apiGetUserAccount,
     {
@@ -177,6 +178,8 @@ const Account: App.NextPageWithLayout = () => {
     await updateAccount(params);
     setLoading(false);
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
