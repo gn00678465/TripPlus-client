@@ -19,6 +19,20 @@ declare namespace User {
     comment: string;
   }
 
+  interface Follows {
+    id: string;
+    title: string;
+    category: string;
+    team: string;
+    teamId: string;
+    keyVision: string;
+    target?: string;
+    progressRate: number;
+    countDownDays?: number;
+    type: string;
+    updatedAt: string;
+  }
+
   interface Bonus {
     title: string;
     sendDate: string;

@@ -4,15 +4,32 @@ import { GetStaticProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
 import type { ReactElement } from 'react';
-import { Box, Container, Heading, Flex, Button } from '@chakra-ui/react';
+import { useState } from 'react';
+import {
+  Box,
+  Container,
+  Heading,
+  Flex,
+  Button,
+  useToast
+} from '@chakra-ui/react';
 import { currency } from '@/utils';
+import useSWR, { useSWRConfig } from 'swr';
+import useSWRMutation from 'swr/mutation';
+import { apiGetFollows, apiDeleteFollow, apiGetProposer } from '@/api/index';
+import Loading from '@/components/Loading';
+import Card from '@/components/Card';
+import dayjs from 'dayjs';
+
+const breadcrumb = [
+  { name: '首頁', url: '/' },
+  { name: '會員中心', url: '/user/account' },
+  { name: '追蹤專案', url: '/user/followings' }
+];
 
 const Followings: App.NextPageWithLayout = () => {
-  const breadcrumb = [
-    { name: '首頁', url: '/' },
-    { name: '會員中心', url: '/user/account' },
-    { name: '追蹤專案', url: '/user/followings' }
-  ];
+  const { mutate } = useSWRConfig();
+  const toast = useToast();
 
   const getCategory = (value: number) => {
     switch (value) {
@@ -27,61 +44,134 @@ const Followings: App.NextPageWithLayout = () => {
     }
   };
 
-  const list = [
-    {
-      id: 0,
-      image: 'https://picsum.photos/300/300?random=1',
-      title:
-        '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      category: getCategory(0),
-      team: '臺灣世界展望會',
-      price: currency(10000000, 'zh-TW', 'TWD'),
-      deadline: 3,
-      progress: 20
-    },
-    {
-      id: 1,
-      image: 'https://picsum.photos/300/300?random=2',
-      title:
-        '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      category: getCategory(0),
-      team: '臺灣世界展望會',
-      price: currency(10000000, 'zh-TW', 'TWD'),
-      deadline: 5,
-      progress: 50
-    },
-    {
-      id: 2,
-      image: 'https://picsum.photos/300/300?random=3',
-      title:
-        '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      category: getCategory(0),
-      team: '臺灣世界展望會',
-      price: currency(10000000, 'zh-TW', 'TWD'),
-      deadline: 10,
-      progress: 80
-    },
-    {
-      id: 3,
-      image: 'https://picsum.photos/300/300?random=4',
-      title:
-        '台灣世界展望會「籃海計畫」|用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      category: getCategory(0),
-      team: '臺灣世界展望會',
-      price: currency(10000000, 'zh-TW', 'TWD'),
-      deadline: 3,
-      progress: 100
+  const [list, setList] = useState<User.Follows[]>([]);
+  const [cancelIdx, setCancelIdx] = useState<number | null>(null);
+  const [isGetFollowsEnd, setIsGetFollowsEnd] = useState(false);
+
+  const { trigger: getProposer } = useSWRMutation(
+    'proposer',
+    (url, { arg }: { arg: string }) => apiGetProposer(arg)
+  );
+
+  const fetchTeam = async (teamId: string) => {
+    const data = await getProposer(teamId);
+    if (data && data.status === 'Success') {
+      return data.data.team.title;
     }
-  ];
+    return '';
+  };
+
+  const getFollows = async (data: ApiUser.Follows) => {
+    const followsList: User.Follows[] = [];
+
+    await Promise.all(
+      data.follows.map(async (item) => {
+        if (item.productId) {
+          const teamTitle = await fetchTeam(item.productId.teamId);
+
+          followsList.push({
+            id: item.productId.id,
+            title: item.productId.title,
+            category: getCategory(item.productId.category),
+            teamId: item.productId.teamId,
+            team: teamTitle,
+            keyVision: item.productId.keyVision,
+            progressRate: 100,
+            type: item.productId.type,
+            updatedAt: item.productId.updatedAt
+          });
+        }
+
+        if (item.projectId) {
+          const teamTitle = await fetchTeam(item.projectId.teamId);
+
+          followsList.push({
+            id: item.projectId.id,
+            title: item.projectId.title,
+            category: getCategory(item.projectId.category),
+            teamId: item.projectId.teamId,
+            team: teamTitle,
+            keyVision: item.projectId.keyVision,
+            target: currency(item.projectId.target, 'zh-TW', 'TWD'),
+            progressRate: item.projectId.progressRate,
+            countDownDays: item.projectId.countDownDays,
+            type: item.projectId.type,
+            updatedAt: item.projectId.updatedAt
+          });
+        }
+      })
+    );
+
+    const listSort = followsList.sort((a, b) => {
+      const timestampA = dayjs(a.updatedAt).valueOf();
+      const timestampB = dayjs(b.updatedAt).valueOf();
+      return timestampB - timestampA;
+    });
+
+    setList(() => {
+      setIsGetFollowsEnd(true);
+      return listSort;
+    });
+  };
+
+  const { data: follows } = useSWR(
+    ['get', '/api/user/follows'],
+    apiGetFollows,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          getFollows(data.data);
+        }
+      }
+    }
+  );
+
+  const { trigger: deleteFollow } = useSWRMutation(
+    ['delete', '/api/user/follow'],
+    (url, { arg }: { arg: string }) => apiDeleteFollow(arg),
+    {
+      onSuccess: async (data, key, config) => {
+        await mutate(['get', '/api/user/follows']);
+        setCancelIdx(null);
+        toast({
+          status: 'success',
+          position: 'top',
+          duration: 3000,
+          isClosable: true,
+          containerStyle: {
+            width: '100%',
+            maxWidth: '100%'
+          },
+          render: () => (
+            <Box
+              color="white"
+              p={3}
+              bg="secondary-emphasis.400"
+              textAlign={'center'}
+            >
+              已取消追蹤，將來的最新消息將不會再主動通知您
+            </Box>
+          )
+        });
+      }
+    }
+  );
+
+  const cancelFollow = (id: string, idx: number | null) => {
+    if (idx !== null) setCancelIdx(idx);
+    deleteFollow(id);
+  };
+
+  const isLoading = !follows || !isGetFollowsEnd;
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
       <Head>
         <title>會員中心-追蹤專案-TripPlus+</title>
       </Head>
-
       <UserHeader breadcrumb={breadcrumb} />
-
       <Box pt={3} className="pb-10 md:pb-20">
         <Container maxW={'container.xl'}>
           <Heading
@@ -95,79 +185,37 @@ const Followings: App.NextPageWithLayout = () => {
 
           <Box backgroundColor={'white'} className="p-5 md:p-10">
             <Flex flexWrap={'wrap'}>
-              {list.map((item) => (
-                <Box
-                  key={item.id}
-                  className="mb-16 mt-3 w-full md:w-1/3 md:px-3"
-                >
+              {list.length <= 0 ? (
+                <Box textAlign={'center'} w={'full'}>
+                  目前沒有追蹤專案，立即去
                   <Link
-                    href="/"
-                    className="relative flex w-full items-start justify-end rounded-lg bg-[length:100%] bg-center pb-[70%] transition-all duration-500 ease-in-out hover:bg-[length:120%]"
-                    style={{ backgroundImage: `url(${item.image})` }}
+                    href="/projects"
+                    className="text-secondary-emphasis hover:text-secondary-emphasis-400"
                   >
-                    <div className="absolute right-3 top-3 rounded bg-[#F15761] px-2 py-1 text-xs text-white md:text-sm">
-                      紅利回饋
-                    </div>
+                    探索
                   </Link>
-
-                  <Box>
-                    <div className="mt-4 text-xs text-gray-500 md:text-sm">
-                      {item.category}
-                    </div>
-                    <Link
-                      href="/"
-                      className="mt-1 line-clamp-2 font-medium transition-colors hover:text-secondary-emphasis md:mt-2 md:text-xl"
-                    >
-                      {item.title}
-                    </Link>
-                    <Link
-                      href="/"
-                      className="mt-1 text-xs text-secondary-emphasis hover:text-secondary-emphasis-400 md:mt-2 md:text-sm"
-                    >
-                      {item.team}
-                    </Link>
-                  </Box>
-
-                  <Box className="mt-4 md:mt-6">
-                    <div className="text-lg font-medium text-gray-900 md:text-xl">
-                      {item.price}
-                    </div>
-                    <Box
-                      bgColor={'gray.200'}
-                      width={'100%'}
-                      height={'6px'}
-                      borderRadius={8}
-                      className="mt-3 md:mt-4"
-                    >
-                      <div
-                        className="h-full rounded-xl bg-primary"
-                        style={{ width: `${item.progress}%` }}
-                      ></div>
-                    </Box>
-                    <Flex
-                      justifyContent={'space-between'}
-                      color={'gray.900'}
-                      className="mt-3 text-sm md:mt-[1.125rem] md:text-base"
-                    >
-                      <div>{item.progress}%</div>
-                      <div>
-                        <span className="text-xs md:text-sm">倒數</span>
-                        <span className="px-1">{item.deadline}</span>
-                        <span className="text-xs md:text-sm">天</span>
-                      </div>
-                    </Flex>
-                  </Box>
-
-                  <Button
-                    colorScheme="primary"
-                    width={'100%'}
-                    mt={4}
-                    variant="outline"
-                  >
-                    取消追蹤
-                  </Button>
+                  ！
                 </Box>
-              ))}
+              ) : (
+                list.map((item, idx) => (
+                  <Card
+                    item={item}
+                    key={item.id}
+                    content={
+                      <Button
+                        colorScheme="primary"
+                        width={'100%'}
+                        mt={4}
+                        variant="outline"
+                        onClick={() => cancelFollow(item.id, idx)}
+                        isLoading={cancelIdx === idx}
+                      >
+                        取消追蹤
+                      </Button>
+                    }
+                  />
+                ))
+              )}
             </Flex>
           </Box>
         </Container>
