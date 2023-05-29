@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { Layout } from '@/components';
+import { Carousel } from '@/components/Swiper';
 import type { ReactElement } from 'react';
 import {
   Box,
@@ -17,7 +18,14 @@ import {
   Progress,
   Text,
   Divider,
-  Icon
+  Icon,
+  Center,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  UnorderedList,
+  ListItem
 } from '@chakra-ui/react';
 import BreadcrumbList from '@/components/Breadcrumb';
 import { MdBookmarkBorder } from 'react-icons/md';
@@ -283,13 +291,162 @@ const SummaryBlock = () => {
                   <p className="text-sm text-gray-600 md:text-base">31894406</p>
                 </li>
                 <li className="mt-auto">
-                  <SocialBlock />
+                  <SocialBlock display={{ base: 'none', md: 'flex' }} />
                 </li>
               </ul>
             </Flex>
             <SocialBlock display={{ base: 'flex', md: 'none' }} />
           </Box>
         </Flex>
+      </Container>
+    </Box>
+  );
+};
+
+const PlanCard = () => {
+  return (
+    <Card maxW="416px" w="full" p={{ base: 4, md: 6 }}>
+      <CardHeader p="0">
+        <AspectRatio
+          mb={{ base: 3 }}
+          borderRadius={8}
+          overflow="hidden"
+          ratio={4 / 3}
+          maxH={{ base: '120px' }}
+          w="full"
+        >
+          <Image
+            fill
+            src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+            alt="提案者 Logo"
+          ></Image>
+        </AspectRatio>
+        <Text fontSize={{ base: 'md' }} fontWeight="medium">
+          100元 - 理念認同，可於本方案的「加碼」欄中，自由增加贊助金額
+        </Text>
+      </CardHeader>
+      <CardBody py={{ base: 4 }} px="0">
+        <p className="mb-1 space-x-1 text-lg font-medium">
+          <span>NT$</span>
+          <span>100</span>
+        </p>
+        <div className="mb-4 space-x-2 md:mb-6">
+          <Tag
+            px={{ base: 2 }}
+            py={{ base: 1 }}
+            className="space-x-1"
+            backgroundColor="gray.200"
+            color="gray.600"
+            borderRadius={4}
+            fontSize={{ base: 'xs' }}
+          >
+            <span>已被贊助</span>
+            <span className="text-sm">12</span>
+            <span>次</span>
+          </Tag>
+          <Tag
+            px={{ base: 2 }}
+            py={{ base: 1 }}
+            className="space-x-1"
+            backgroundColor="secondary"
+            color="secondary-emphasis.500"
+            borderRadius={4}
+            fontSize={{ base: 'xs' }}
+          >
+            <span>剩餘</span>
+            <span className="text-sm">72</span>
+            <span>個</span>
+          </Tag>
+        </div>
+        <Box fontSize={{ base: 'xs' }} color="gray.600">
+          <Text mb={{ base: 1 }}>您將收到</Text>
+          <UnorderedList>
+            <ListItem>捐款收據</ListItem>
+            <ListItem>一封協會致贈的電子感謝函</ListItem>
+            <ListItem>一封協會完成專案的成果報告</ListItem>
+          </UnorderedList>
+        </Box>
+        <Divider my={{ base: 4 }}></Divider>
+        <Text color="gray.600" fontSize={{ base: 'xs' }}>
+          預計 2023 年 07 月出貨
+        </Text>
+        <Text color="gray.600" fontSize={{ base: 'xs' }}>
+          贊助專案可享
+          <span className="text-secondary-emphasis-500">0.5%</span>
+          紅利回饋
+        </Text>
+      </CardBody>
+      <CardFooter p="0">
+        <Button w="full" py={{ base: 2 }} colorScheme="primary">
+          贊助
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+const PlansBlock = () => {
+  const plans = [
+    {
+      _id: '645c91c5666244ff5b1f3533',
+      projectId: '645b436d20590d1a6d38ebd7',
+      title: 'example plan',
+      price: 1000,
+      content: 'example content ',
+      isAllowMulti: 1,
+      isDelete: 1,
+      createdAt: '2023-05-11T06:57:09.378Z',
+      updatedAt: '2023-05-11T06:57:09.378Z',
+      __v: 0
+    },
+    {
+      _id: '645c91d8666244ff5b1f3536',
+      projectId: '645b436d20590d1a6d38ebd7',
+      title: 'edit plan',
+      price: 777898,
+      content: '7777777',
+      isAllowMulti: 0,
+      isDelete: 1,
+      createdAt: '2023-05-11T06:57:28.997Z',
+      updatedAt: '2023-05-15T02:17:56.672Z',
+      __v: 0
+    },
+    {
+      _id: '645c93e2c7c7f6a1e36c5c2c',
+      projectId: '645b436d20590d1a6d38ebd7',
+      title: 'edit plan',
+      price: 777898,
+      content: '7777777',
+      isAllowMulti: 0,
+      isDelete: 0,
+      createdAt: '2023-05-11T07:06:10.028Z',
+      updatedAt: '2023-05-15T02:14:59.453Z',
+      __v: 0
+    },
+    {
+      _id: '645c97ef85ed310e3818dfa7',
+      projectId: '645b436d20590d1a6d38ebd7',
+      title: 'example plan',
+      price: 989898,
+      content: 'example content ',
+      isAllowMulti: 0,
+      isDelete: 0,
+      createdAt: '2023-05-11T07:23:27.017Z',
+      updatedAt: '2023-05-11T07:23:27.017Z',
+      __v: 0
+    }
+  ];
+
+  return (
+    <Box backgroundColor="gray.100" py={{ base: 10 }}>
+      <Container px={{ base: 3, xl: 0 }} maxW="1296px">
+        <Center mb={{ base: 5 }}>
+          <Heading fontSize={{ base: '28px' }} fontWeight="bold">
+            贊助方案
+          </Heading>
+        </Center>
+        <Carousel data={plans} card={(item) => <PlanCard />} />
+        {/* <PlanCard></PlanCard> */}
       </Container>
     </Box>
   );
@@ -302,7 +459,7 @@ const ProjectContent: App.NextPageWithLayout = () => {
       <SummaryBlock></SummaryBlock>
       step
       <Box></Box>
-      <Box></Box>
+      <PlansBlock></PlansBlock>
     </>
   );
 };
