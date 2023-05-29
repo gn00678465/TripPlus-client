@@ -48,33 +48,18 @@ const Followings: App.NextPageWithLayout = () => {
   const [cancelIdx, setCancelIdx] = useState<number | null>(null);
   const [isGetFollowsEnd, setIsGetFollowsEnd] = useState(false);
 
-  const { trigger: getProposer } = useSWRMutation(
-    'proposer',
-    (url, { arg }: { arg: string }) => apiGetProposer(arg)
-  );
-
-  const fetchTeam = async (teamId: string) => {
-    const data = await getProposer(teamId);
-    if (data && data.status === 'Success') {
-      return data.data.team.title;
-    }
-    return '';
-  };
-
   const getFollows = async (data: ApiUser.Follows) => {
     const followsList: User.Follows[] = [];
 
     await Promise.all(
       data.follows.map(async (item) => {
         if (item.productId) {
-          const teamTitle = await fetchTeam(item.productId.teamId);
-
           followsList.push({
             id: item.productId.id,
             title: item.productId.title,
             category: getCategory(item.productId.category),
-            teamId: item.productId.teamId,
-            team: teamTitle,
+            teamId: item.productId.teamId._id,
+            team: item.productId.teamId.title,
             keyVision: item.productId.keyVision,
             progressRate: 100,
             type: item.productId.type,
@@ -83,14 +68,12 @@ const Followings: App.NextPageWithLayout = () => {
         }
 
         if (item.projectId) {
-          const teamTitle = await fetchTeam(item.projectId.teamId);
-
           followsList.push({
             id: item.projectId.id,
             title: item.projectId.title,
             category: getCategory(item.projectId.category),
-            teamId: item.projectId.teamId,
-            team: teamTitle,
+            teamId: item.projectId.teamId._id,
+            team: item.projectId.teamId.title,
             keyVision: item.projectId.keyVision,
             target: currency(item.projectId.target, 'zh-TW', 'TWD'),
             progressRate: item.projectId.progressRate,
