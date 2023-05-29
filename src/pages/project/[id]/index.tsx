@@ -10,14 +10,19 @@ import {
   AspectRatio,
   Link,
   Flex,
+  FlexProps,
   Button,
+  IconButton,
   Container,
   Progress,
   Text,
-  Divider
+  Divider,
+  Icon
 } from '@chakra-ui/react';
 import BreadcrumbList from '@/components/Breadcrumb';
 import { MdBookmarkBorder } from 'react-icons/md';
+import { FaFacebookF, FaInstagram } from 'react-icons/fa';
+import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { currencyTWD } from '@/utils';
 
 const HeaderBlock = () => {
@@ -184,8 +189,110 @@ const HeaderBlock = () => {
   );
 };
 
+const SocialBlock = ({ ...rest }: FlexProps) => (
+  <Flex columnGap={{ base: 2 }} {...rest}>
+    <IconButton
+      aria-label="website"
+      variant="outline"
+      borderRadius="full"
+      icon={<Icon as={FiGlobe} boxSize={{ base: '18px' }} />}
+    />
+    <IconButton
+      aria-label="facebook"
+      variant="outline"
+      borderRadius="full"
+      icon={<Icon as={FaFacebookF} boxSize={{ base: '18px' }} />}
+    />
+    <IconButton
+      aria-label="instagram"
+      variant="outline"
+      borderRadius="full"
+      icon={<Icon as={FaInstagram} boxSize={{ base: '18px' }} />}
+    />
+    <Button
+      ml={{ base: 'auto' }}
+      leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
+      colorScheme="primary"
+    >
+      聯絡提案者
+    </Button>
+  </Flex>
+);
+
 const SummaryBlock = () => {
-  return <Box></Box>;
+  return (
+    <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }}>
+      <Container px={{ base: 3, xl: 0 }} maxW="1296px">
+        <Flex
+          flexDirection={{ base: 'column', md: 'row' }}
+          rowGap={{ base: 6, md: 0 }}
+          columnGap={{ base: 0, md: '100px' }}
+          w="full"
+        >
+          <Box maxW={{ base: 'full', md: '45%', xl: '598px' }}>
+            <Heading
+              as="h4"
+              fontSize={{ base: 'md', md: 'lg' }}
+              fontWeight="medium"
+              mb={{ base: 4, md: 6 }}
+              color="gray.900"
+            >
+              專案摘要
+            </Heading>
+            <Text
+              fontSize={{ base: 'sm', md: 'md' }}
+              lineHeight={{ base: '21px', md: '24px' }}
+              pl={{ base: 4, md: 6 }}
+              borderLeftColor={{ base: 'gray.300' }}
+              borderLeftWidth={{ base: '1px' }}
+              borderLeftStyle={{ base: 'solid' }}
+              color="gray.600"
+            >
+              社團法人雲林縣聽語障福利協進會將貫徹「聾人事務,聾人參與」的精神，由聾人導覽員量身打造一個專屬於聾人團員的遊程活動，活動完全符合聾人視覺無障礙的需求，預計辦理2場次的斗六小旅行活動，每一場活動都會結合雲林在地美食、走在地人才知道的小秘境、還有結合聽障職人的手作點心，實現聾式態度！
+            </Text>
+          </Box>
+          <Box w="full">
+            <Heading
+              as="h4"
+              fontSize={{ base: 'md', md: 'lg' }}
+              fontWeight="medium"
+              mb={{ base: 4, md: 6 }}
+              color="gray.900"
+            >
+              關於提案者
+            </Heading>
+            <Flex
+              columnGap={{ base: 4, md: 6 }}
+              mb={{ base: 4, md: 0 }}
+              pos="relative"
+            >
+              <AspectRatio ratio={4 / 3} maxW={{ base: '160px' }} w="full">
+                <Image
+                  fill
+                  src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+                  alt="提案者 Logo"
+                ></Image>
+              </AspectRatio>
+              <ul className="flex w-full flex-col justify-center gap-y-2 text-xs tracking-[1px] md:justify-start md:gap-y-1 md:text-sm">
+                <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
+                  <p className="text-gray-500">提案者名稱</p>
+                  <p className="text-gray-600">社團法人台灣一起夢想公益協會</p>
+                </li>
+                <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
+                  <p className="text-gray-500">統一編號</p>
+                  <p className="text-sm text-gray-600 md:text-base">31894406</p>
+                </li>
+                <li className="mt-auto">
+                  <SocialBlock />
+                </li>
+              </ul>
+            </Flex>
+            <SocialBlock display={{ base: 'flex', md: 'none' }} />
+          </Box>
+        </Flex>
+      </Container>
+    </Box>
+  );
 };
 
 const ProjectContent: App.NextPageWithLayout = () => {
