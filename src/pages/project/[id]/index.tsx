@@ -28,20 +28,13 @@ import {
   CardFooter,
   UnorderedList,
   ListItem,
-  Collapse,
   useDisclosure,
-  Step,
-  StepIndicator,
-  StepNumber,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
-  useSteps
+  useSteps,
+  Image as Img
 } from '@chakra-ui/react';
 import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
-import { MdBookmarkBorder } from 'react-icons/md';
-import { FaFacebookF, FaInstagram, FaCheck, FaCircle } from 'react-icons/fa';
+import { MdBookmarkBorder, MdOutlineKeyboardArrowDown } from 'react-icons/md';
+import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { currencyTWD } from '@/utils';
 
@@ -631,14 +624,29 @@ const ProjectContent: App.NextPageWithLayout = () => {
 
   return (
     <>
-      <Box>
+      <Box
+        className="space-y-3 md:space-y-4"
+        color="gray.600"
+        fontSize={{ base: 'sm', md: 'md' }}
+      >
         <Text>
           他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
         </Text>
         <Text>
           因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
         </Text>
-        <Heading>你有參加過導覽的經驗嗎？</Heading>
+        <AspectRatio
+          ratio={10 / 3}
+          borderRadius={8}
+          overflow="hidden"
+          objectFit="cover"
+          objectPosition="center"
+        >
+          <Img src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" />
+        </AspectRatio>
+        <Heading fontSize={{ base: 'lg', md: 'xl' }}>
+          你有參加過導覽的經驗嗎？
+        </Heading>
         <Text>
           導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
         </Text>
@@ -646,7 +654,12 @@ const ProjectContent: App.NextPageWithLayout = () => {
           近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
         </Text>
       </Box>
-      <Center></Center>
+      <Center mt={{ base: 6, md: 10 }}>
+        <Text textAlign="center" color="secondary-emphasis.500">
+          <Text mb={{ base: 1 }}>閱讀更多</Text>
+          <Icon as={MdOutlineKeyboardArrowDown} boxSize={{ base: 5, md: 6 }} />
+        </Text>
+      </Center>
     </>
   );
 };
