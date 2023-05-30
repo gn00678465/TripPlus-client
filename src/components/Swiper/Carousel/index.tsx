@@ -9,9 +9,9 @@ import { IconType } from 'react-icons';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-export interface PlansSwiperProps extends SwiperProps {
-  data: any[];
-  card: (arg: any) => JSX.Element;
+export interface PlansSwiperProps<T> extends SwiperProps {
+  data: T[];
+  card: (arg: T) => JSX.Element;
 }
 
 interface NavigationButtonProps extends Omit<IconButtonProps, 'icon'> {
@@ -47,7 +47,7 @@ const NavigationButton = ({ icon, ...rest }: NavigationButtonProps) => {
   );
 };
 
-const Carousel = ({ data, card, ...rest }: PlansSwiperProps) => {
+function Carousel<T>({ data, card, ...rest }: PlansSwiperProps<T>) {
   const swiperRef = useRef<SwiperType>();
 
   return (
@@ -116,6 +116,6 @@ const Carousel = ({ data, card, ...rest }: PlansSwiperProps) => {
       </style>
     </>
   );
-};
+}
 
 export default Carousel;
