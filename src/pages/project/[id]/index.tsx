@@ -36,6 +36,7 @@ import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
 import { MdBookmarkBorder, MdOutlineKeyboardArrowDown } from 'react-icons/md';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
+import { BsCheck2, BsCircleFill } from 'react-icons/bs';
 import { currencyTWD } from '@/utils';
 
 interface BlockProps extends Omit<BoxProps, 'id'> {
@@ -341,13 +342,90 @@ const StepBlock = () => {
   ];
 
   const { activeStep } = useSteps({
-    index: 1,
+    index: 0,
     count: steps.length
   });
 
+  interface StepProps {
+    title: string;
+    index: number;
+    complete?: ReactNode;
+    incomplete?: ReactNode;
+  }
+  const Step = ({ title, index, complete, incomplete }: StepProps) => {
+    return (
+      <Box textAlign="center">
+        <Box mb={2} display="inline-block">
+          {activeStep >= index ? (
+            <Box
+              w="full"
+              h="full"
+              maxW="36px"
+              maxH="36px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              p={2}
+              backgroundColor="primary.500"
+              color="white"
+              borderRadius="50%"
+            >
+              {complete}
+            </Box>
+          ) : (
+            <Box
+              w="full"
+              h="full"
+              maxW="36px"
+              maxH="36px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              p={2}
+              backgroundColor="transparent"
+              color="gray.100"
+              borderRadius="50%"
+            >
+              {incomplete}
+            </Box>
+          )}
+        </Box>
+        <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.600">
+          {title}
+        </Text>
+      </Box>
+    );
+  };
+
   return (
-    <Center>
-      <Box w="full" maxW="660px" pos="relative"></Box>
+    <Center px={{ base: 3, md: 0 }} mt={{ base: 6, md: 10 }}>
+      <Flex
+        w="full"
+        maxW="660px"
+        pos="relative"
+        alignItems="center"
+        justifyContent="space-between"
+        _before={{
+          content: '""',
+          position: 'absolute',
+          width: 'calc(100% - 48px)',
+          height: '2px',
+          backgroundColor: 'gray.100',
+          left: '24px',
+          top: '18px',
+          zIndex: -1
+        }}
+      >
+        {steps.map((step, index) => (
+          <Step
+            key={index}
+            index={index}
+            complete={<Icon as={BsCheck2} boxSize={5} />}
+            incomplete={<Icon as={BsCircleFill} />}
+            {...step}
+          />
+        ))}
+      </Flex>
     </Center>
   );
 };
@@ -655,10 +733,10 @@ const ProjectContent: App.NextPageWithLayout = () => {
         </Text>
       </Box>
       <Center mt={{ base: 6, md: 10 }}>
-        <Text textAlign="center" color="secondary-emphasis.500">
+        <Box textAlign="center" color="secondary-emphasis.500">
           <Text mb={{ base: 1 }}>閱讀更多</Text>
           <Icon as={MdOutlineKeyboardArrowDown} boxSize={{ base: 5, md: 6 }} />
-        </Text>
+        </Box>
       </Center>
     </>
   );
