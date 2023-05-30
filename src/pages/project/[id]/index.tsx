@@ -1,11 +1,13 @@
 import { GetServerSideProps } from 'next';
 import NextLink from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { Layout } from '@/components';
 import { Carousel } from '@/components/Swiper';
 import type { ReactElement } from 'react';
 import {
   Box,
+  BoxProps,
   Heading,
   Tag,
   AspectRatio,
@@ -27,17 +29,41 @@ import {
   UnorderedList,
   ListItem
 } from '@chakra-ui/react';
-import BreadcrumbList from '@/components/Breadcrumb';
+import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
 import { MdBookmarkBorder } from 'react-icons/md';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { currencyTWD } from '@/utils';
 
-const HeaderBlock = () => {
+interface BlockProps extends Omit<BoxProps, 'id'> {
+  id?: string | string[];
+}
+
+const HeaderBlock = ({ id, ...rest }: BlockProps) => {
+  const menu: Breadcrumb[] = [
+    {
+      name: '首頁',
+      url: '/'
+    },
+    {
+      name: '社會計畫',
+      url: '/'
+    },
+    {
+      name: '「跟著手語去旅行」| 讓聾人打造一個專屬於聾人團員的遊程活動！',
+      url: '/'
+    }
+  ];
+
   return (
-    <Box py={{ base: 6 }}>
+    <Box py={{ base: 6 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="1296px">
-        {/* <BreadcrumbList /> */}
+        <BreadcrumbList
+          display={{ base: 'none', lg: 'block' }}
+          fontSize={{ base: 'sm' }}
+          my={{ base: 5, xl: 10 }}
+          breadcrumb={menu}
+        />
         <Flex
           columnGap={{ base: 2 }}
           alignItems="center"
@@ -227,9 +253,9 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
   </Flex>
 );
 
-const SummaryBlock = () => {
+const SummaryBlock = ({ id, ...rest }: BlockProps) => {
   return (
-    <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }}>
+    <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="1296px">
         <Flex
           flexDirection={{ base: 'column', md: 'row' }}
@@ -298,6 +324,97 @@ const SummaryBlock = () => {
             <SocialBlock display={{ base: 'flex', md: 'none' }} />
           </Box>
         </Flex>
+      </Container>
+    </Box>
+  );
+};
+
+const StepBlock = () => {
+  return <div>step</div>;
+};
+
+interface MenuItem {
+  title: string;
+  href: string;
+  isActive?: boolean;
+}
+interface TabListProps extends FlexProps {
+  menu: MenuItem[];
+}
+const TabList = ({ menu, ...rest }: TabListProps) => {
+  return (
+    <Flex
+      w="full"
+      pb={{ base: 3, lg: 6 }}
+      borderBottomColor={{ base: 'gray.200' }}
+      borderBottomWidth={{ base: 1 }}
+      borderBottomStyle={{ base: 'solid' }}
+      justifyContent={{ base: 'center' }}
+      columnGap={{ base: 5, lg: 10 }}
+      {...rest}
+    >
+      {menu.map((item) => (
+        <Link
+          pos="relative"
+          key={item.href}
+          as={NextLink}
+          href={item.href}
+          fontSize={{ base: 'xs', md: 'sm' }}
+          textDecoration={{ base: 'none' }}
+          aria-current={item?.isActive ? 'page' : undefined}
+          _hover={{}}
+          _activeLink={{
+            color: 'secondary-emphasis.500',
+            textDecoration: 'none',
+            _after: {
+              base: {
+                content: '""',
+                position: 'absolute',
+                width: '100%',
+                height: '2px',
+                backgroundColor: 'secondary-emphasis.500',
+                left: 0,
+                bottom: '-12px'
+              },
+              lg: {
+                bottom: '-24px'
+              }
+            }
+          }}
+        >
+          {item.title}
+        </Link>
+      ))}
+    </Flex>
+  );
+};
+
+const ContentBlock = ({ id, ...rest }: BlockProps) => {
+  const menu: MenuItem[] = [
+    {
+      title: '專案介紹',
+      href: `/project/${id}`,
+      isActive: true
+    },
+    {
+      title: '資訊揭露與承諾',
+      href: `/project/${id}/disclosures`
+    },
+    {
+      title: '最新消息',
+      href: `/project/${id}/news`
+    },
+    {
+      title: '常見問題',
+      href: `/project/${id}/faqs`
+    }
+  ];
+
+  return (
+    <Box py={{ base: 10, md: 20 }} {...rest}>
+      <TabList menu={menu} />
+      <Container pt={{ base: 6, md: 10 }} maxW="1296px">
+        Content
       </Container>
     </Box>
   );
@@ -394,7 +511,7 @@ const PlanCard = () => {
   );
 };
 
-const PlansBlock = () => {
+const PlansBlock = ({ id, ...rest }: BlockProps) => {
   const plans = [
     {
       _id: '645c91c5666244ff5b1f3533',
@@ -447,7 +564,7 @@ const PlansBlock = () => {
   ];
 
   return (
-    <Box backgroundColor="gray.100" py={{ base: 10 }}>
+    <Box backgroundColor="gray.100" py={{ base: 10 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="1296px">
         <Center mb={{ base: 5 }}>
           <Heading fontSize={{ base: '28px' }} fontWeight="bold">
@@ -461,13 +578,15 @@ const PlansBlock = () => {
 };
 
 const ProjectContent: App.NextPageWithLayout = () => {
+  const router = useRouter();
+  const { id } = router.query;
   return (
     <>
-      <HeaderBlock></HeaderBlock>
-      <SummaryBlock></SummaryBlock>
-      step
-      <Box></Box>
-      <PlansBlock></PlansBlock>
+      <HeaderBlock id={id}></HeaderBlock>
+      <SummaryBlock id={id}></SummaryBlock>
+      <StepBlock></StepBlock>
+      <ContentBlock id={id}></ContentBlock>
+      <PlansBlock id={id}></PlansBlock>
     </>
   );
 };
