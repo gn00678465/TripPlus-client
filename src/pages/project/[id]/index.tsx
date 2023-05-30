@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Layout } from '@/components';
 import { Carousel } from '@/components/Swiper';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import {
   Box,
   BoxProps,
@@ -27,11 +27,21 @@ import {
   CardBody,
   CardFooter,
   UnorderedList,
-  ListItem
+  ListItem,
+  Collapse,
+  useDisclosure,
+  Step,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps
 } from '@chakra-ui/react';
 import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
 import { MdBookmarkBorder } from 'react-icons/md';
-import { FaFacebookF, FaInstagram } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaCheck, FaCircle } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { currencyTWD } from '@/utils';
 
@@ -330,18 +340,34 @@ const SummaryBlock = ({ id, ...rest }: BlockProps) => {
 };
 
 const StepBlock = () => {
-  return <div>step</div>;
+  const steps = [
+    { title: '企劃目的' },
+    { title: '款項分配' },
+    { title: '回饋品寄送' },
+    { title: '實際執行' }
+  ];
+
+  const { activeStep } = useSteps({
+    index: 1,
+    count: steps.length
+  });
+
+  return (
+    <Center>
+      <Box w="full" maxW="660px" pos="relative"></Box>
+    </Center>
+  );
 };
 
 interface MenuItem {
   title: string;
   href: string;
-  isActive?: boolean;
 }
 interface TabListProps extends FlexProps {
   menu: MenuItem[];
+  path: string;
 }
-const TabList = ({ menu, ...rest }: TabListProps) => {
+const TabList = ({ menu, path, ...rest }: TabListProps) => {
   return (
     <Flex
       w="full"
@@ -361,7 +387,7 @@ const TabList = ({ menu, ...rest }: TabListProps) => {
           href={item.href}
           fontSize={{ base: 'xs', md: 'sm' }}
           textDecoration={{ base: 'none' }}
-          aria-current={item?.isActive ? 'page' : undefined}
+          aria-current={path === item.href ? 'page' : undefined}
           _hover={{}}
           _activeLink={{
             color: 'secondary-emphasis.500',
@@ -389,12 +415,14 @@ const TabList = ({ menu, ...rest }: TabListProps) => {
   );
 };
 
-const ContentBlock = ({ id, ...rest }: BlockProps) => {
+const ContentBlock = ({ id, children, ...rest }: BlockProps) => {
+  const router = useRouter();
+
+  const path = router.asPath;
   const menu: MenuItem[] = [
     {
       title: '專案介紹',
-      href: `/project/${id}`,
-      isActive: true
+      href: `/project/${id}`
     },
     {
       title: '資訊揭露與承諾',
@@ -412,9 +440,9 @@ const ContentBlock = ({ id, ...rest }: BlockProps) => {
 
   return (
     <Box py={{ base: 10, md: 20 }} {...rest}>
-      <TabList menu={menu} />
-      <Container pt={{ base: 6, md: 10 }} maxW="1296px">
-        Content
+      <TabList menu={menu} path={path} />
+      <Container pt={{ base: 6, md: 10 }} maxW="856px">
+        {children}
       </Container>
     </Box>
   );
@@ -577,7 +605,11 @@ const PlansBlock = ({ id, ...rest }: BlockProps) => {
   );
 };
 
-const ProjectContent: App.NextPageWithLayout = () => {
+interface ProjectLayoutProps {
+  children: ReactNode;
+}
+
+export const ProjectLayout = ({ children }: ProjectLayoutProps) => {
   const router = useRouter();
   const { id } = router.query;
   return (
@@ -585,8 +617,36 @@ const ProjectContent: App.NextPageWithLayout = () => {
       <HeaderBlock id={id}></HeaderBlock>
       <SummaryBlock id={id}></SummaryBlock>
       <StepBlock></StepBlock>
-      <ContentBlock id={id}></ContentBlock>
+      <ContentBlock id={id}>{children}</ContentBlock>
       <PlansBlock id={id}></PlansBlock>
+    </>
+  );
+};
+
+const ProjectContent: App.NextPageWithLayout = () => {
+  const { getDisclosureProps, getButtonProps } = useDisclosure();
+
+  const buttonProps = getButtonProps();
+  const disclosureProps = getDisclosureProps();
+
+  return (
+    <>
+      <Box>
+        <Text>
+          他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
+        </Text>
+        <Text>
+          因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
+        </Text>
+        <Heading>你有參加過導覽的經驗嗎？</Heading>
+        <Text>
+          導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
+        </Text>
+        <Text>
+          近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
+        </Text>
+      </Box>
+      <Center></Center>
     </>
   );
 };
@@ -602,7 +662,7 @@ export default ProjectContent;
 ProjectContent.getLayout = function (page: ReactElement) {
   return (
     <Layout headerProps={{ backgroundColor: 'gray.100' }}>
-      <Box>{page}</Box>
+      <ProjectLayout>{page}</ProjectLayout>
     </Layout>
   );
 };
