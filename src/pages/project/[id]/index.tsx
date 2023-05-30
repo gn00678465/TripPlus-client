@@ -305,7 +305,16 @@ const SummaryBlock = () => {
 
 const PlanCard = () => {
   return (
-    <Card maxW="416px" w="full" p={{ base: 4, md: 6 }}>
+    <Card
+      maxW="416px"
+      w="full"
+      p={{ base: 4, md: 6 }}
+      transition="all 0.2s ease-in-out"
+      _hover={{
+        top: '-2px',
+        boxShadow: '0px 8px 60px rgba(0, 0, 0, 0.1);'
+      }}
+    >
       <CardHeader p="0">
         <AspectRatio
           mb={{ base: 3 }}
@@ -446,7 +455,6 @@ const PlansBlock = () => {
           </Heading>
         </Center>
         <Carousel data={plans} card={(item) => <PlanCard />} />
-        {/* <PlanCard></PlanCard> */}
       </Container>
     </Box>
   );
