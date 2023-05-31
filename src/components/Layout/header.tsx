@@ -52,7 +52,7 @@ const Header = () => {
 
   const menu = [
     { title: '首頁', url: '/', isShowPc: false },
-    { title: '探索', url: '/', isShowPc: true },
+    { title: '探索', url: '/projects', isShowPc: true },
     { title: '提案', url: '/', isShowPc: true }
   ];
 
