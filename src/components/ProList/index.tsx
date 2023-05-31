@@ -52,7 +52,7 @@ const ProList = () => {
         title: item.title,
         category: getCategory(item.category),
         team: item.teamId.title,
-        teamId: item.teamId.id,
+        teamId: item.teamId._id,
         keyVision: item.keyVision,
         target: currency(item.target, 'zh-TW', 'TWD'),
         progressRate: item.progressRate,
