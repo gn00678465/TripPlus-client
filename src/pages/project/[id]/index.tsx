@@ -323,11 +323,11 @@ const SummaryBlock = ({ id, ...rest }: BlockProps) => {
               </AspectRatio>
               <ul className="flex w-full flex-col justify-center gap-y-2 text-xs tracking-[1px] md:justify-start md:gap-y-1 md:text-sm">
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
-                  <p className="w-[75px] text-gray-500">提案者名稱</p>
+                  <p className="min-w-[75px] text-gray-500">提案者名稱</p>
                   <p className="text-gray-600">社團法人台灣一起夢想公益協會</p>
                 </li>
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
-                  <p className="w-[75px] text-gray-500">統一編號</p>
+                  <p className="min-w-[75px] text-gray-500">統一編號</p>
                   <p className="text-sm text-gray-600 md:text-base">31894406</p>
                 </li>
                 <li className="mt-auto">
