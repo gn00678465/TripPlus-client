@@ -31,11 +31,16 @@ declare namespace ApiUser {
     productId?: FollowsProduct;
   }
 
+  interface TeamId {
+    _id: string;
+    title: string;
+  }
+
   interface FollowsProject {
     id: string;
     title: string;
     category: number;
-    teamId: string;
+    teamId: TeamId;
     keyVision: string;
     target: number;
     progressRate: number;
@@ -48,7 +53,7 @@ declare namespace ApiUser {
     id: string;
     title: string;
     category: number;
-    teamId: string;
+    teamId: TeamId;
     keyVision: string;
     type: string;
     updatedAt: string;
