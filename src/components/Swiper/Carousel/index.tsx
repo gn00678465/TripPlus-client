@@ -83,7 +83,7 @@ function Carousel<T>({ data, card, ...rest }: PlansSwiperProps<T>) {
           ))}
         </Swiper>
         <NavigationButton
-          display={{ base: 'none', xl: 'block' }}
+          display={{ base: 'none', '2xl': 'block' }}
           aria-label="previous"
           pos="absolute"
           top="50%"
@@ -93,7 +93,7 @@ function Carousel<T>({ data, card, ...rest }: PlansSwiperProps<T>) {
           onClick={() => swiperRef.current?.slidePrev()}
         />
         <NavigationButton
-          display={{ base: 'none', xl: 'block' }}
+          display={{ base: 'none', '2xl': 'block' }}
           aria-label="next"
           pos="absolute"
           top="50%"

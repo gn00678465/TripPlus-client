@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -138,7 +139,7 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
               <Progress
                 value={80}
                 borderRadius="full"
-                size={{ base: 'sm', lg: 'md' }}
+                height="6px"
                 colorScheme="primary"
                 my={{ base: 3, lg: 4 }}
               ></Progress>
@@ -204,8 +205,14 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
               <Button
                 px={{ lg: '60px' }}
                 colorScheme="secondary-emphasis"
-                leftIcon={<MdBookmarkBorder />}
+                leftIcon={
+                  <Icon as={MdBookmarkBorder} boxSize={{ base: 5, md: 6 }} />
+                }
                 variant="outline"
+                _hover={{
+                  color: 'white',
+                  backgroundColor: 'secondary-emphasis.500'
+                }}
               >
                 追蹤專案
               </Button>
@@ -234,18 +241,21 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
       variant="outline"
       borderRadius="full"
       icon={<Icon as={FiGlobe} boxSize={{ base: '18px' }} />}
+      _hover={{ bgColor: 'white' }}
     />
     <IconButton
       aria-label="facebook"
       variant="outline"
       borderRadius="full"
       icon={<Icon as={FaFacebookF} boxSize={{ base: '18px' }} />}
+      _hover={{ bgColor: 'white' }}
     />
     <IconButton
       aria-label="instagram"
       variant="outline"
       borderRadius="full"
       icon={<Icon as={FaInstagram} boxSize={{ base: '18px' }} />}
+      _hover={{ bgColor: 'white' }}
     />
     <Button
       ml={{ base: 'auto' }}
@@ -262,12 +272,12 @@ const SummaryBlock = ({ id, ...rest }: BlockProps) => {
     <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="1296px">
         <Flex
-          flexDirection={{ base: 'column', md: 'row' }}
-          rowGap={{ base: 6, md: 0 }}
-          columnGap={{ base: 0, md: '100px' }}
+          flexDirection={{ base: 'column', lg: 'row' }}
+          rowGap={{ base: 6, lg: 0 }}
+          columnGap={{ base: 0, lg: '100px' }}
           w="full"
         >
-          <Box maxW={{ base: 'full', md: '45%', xl: '598px' }}>
+          <Box maxW={{ base: 'full', lg: '45%', xl: '598px' }}>
             <Heading
               as="h4"
               fontSize={{ base: 'md', md: 'lg' }}
@@ -313,11 +323,11 @@ const SummaryBlock = ({ id, ...rest }: BlockProps) => {
               </AspectRatio>
               <ul className="flex w-full flex-col justify-center gap-y-2 text-xs tracking-[1px] md:justify-start md:gap-y-1 md:text-sm">
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
-                  <p className="text-gray-500">提案者名稱</p>
+                  <p className="w-[75px] text-gray-500">提案者名稱</p>
                   <p className="text-gray-600">社團法人台灣一起夢想公益協會</p>
                 </li>
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
-                  <p className="text-gray-500">統一編號</p>
+                  <p className="w-[75px] text-gray-500">統一編號</p>
                   <p className="text-sm text-gray-600 md:text-base">31894406</p>
                 </li>
                 <li className="mt-auto">
@@ -522,6 +532,7 @@ const ContentBlock = ({ id, children, ...rest }: BlockProps) => {
 const PlanCard = () => {
   return (
     <Card
+      mx="auto"
       maxW="416px"
       w="full"
       p={{ base: 4, md: 6 }}
@@ -702,6 +713,11 @@ const ProjectContent: App.NextPageWithLayout = () => {
 
   return (
     <>
+      <Head>
+        <title>
+          「跟著手語去旅行」| 讓聾人打造一個專屬於聾人團員的遊程活動！-TripPlus+
+        </title>
+      </Head>
       <Box
         className="space-y-3 md:space-y-4"
         color="gray.600"
@@ -733,7 +749,15 @@ const ProjectContent: App.NextPageWithLayout = () => {
         </Text>
       </Box>
       <Center mt={{ base: 6, md: 10 }}>
-        <Box textAlign="center" color="secondary-emphasis.500">
+        <Box
+          as="button"
+          textAlign="center"
+          color="secondary-emphasis.500"
+          transition="color 0.3s ease-in-out"
+          _hover={{
+            color: 'secondary-emphasis.600'
+          }}
+        >
           <Text mb={{ base: 1 }}>閱讀更多</Text>
           <Icon as={MdOutlineKeyboardArrowDown} boxSize={{ base: 5, md: 6 }} />
         </Box>
