@@ -1,6 +1,7 @@
 import Pagination from '@/components/Pagination';
 import { useState } from 'react';
 import Card from '@/components/Card';
+import Loading from '@/components/Loading';
 import useSWR, { useSWRConfig } from 'swr';
 import { apiGetProject } from '@/api/index';
 import { currency } from '@/utils';
@@ -64,18 +65,22 @@ const ProList = () => {
     setList(() => items);
   };
 
-  const { data: projectsList } = useSWR('/api/project', apiGetProject, {
-    onSuccess(data, key, config) {
-      if (data && data.status === 'Success') {
-        getProjects(data.data);
-        setPage({
-          page: data.data.page,
-          limit: data.data.limit,
-          totalPages: data.data.totalPages
-        });
+  const { data: projectsList, isLoading } = useSWR(
+    '/api/project',
+    apiGetProject,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          getProjects(data.data);
+          setPage({
+            page: data.data.page,
+            limit: data.data.limit,
+            totalPages: data.data.totalPages
+          });
+        }
       }
     }
-  });
+  );
 
   const onPageChange = (page: number) => {
     console.log(page);
@@ -85,6 +90,8 @@ const ProList = () => {
     setSortType(value);
     mutate('/api/project');
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <Box pt={10} className="pb-10 md:pb-20">
