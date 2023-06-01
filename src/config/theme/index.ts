@@ -14,7 +14,7 @@ const colors = {
   success: tailwind.theme?.colors?.success,
   light: tailwind.theme?.colors?.light,
   gray: tailwind.theme?.colors?.gray,
-  'secondary-lignt': tailwind.theme?.colors?.['secondary-lignt'],
+  'secondary-light': tailwind.theme?.colors?.['secondary-light'],
   red: tailwind.theme?.colors?.red
 };
 
@@ -93,6 +93,11 @@ const components = {
 
 export const theme = extendTheme({
   colors,
-  breakpoints: tailwind.theme.screens,
+  breakpoints: { base: '0px', ...tailwind.theme.screens },
+  sizes: {
+    container: {
+      ...tailwind.theme.screens
+    }
+  },
   components
 });
