@@ -75,7 +75,7 @@ const Checkout = () => {
     <>
       <Box as="section" className="border-b-[1px] border-b-gray-200">
         <Container maxW="container.xl">
-          <Flex>
+          <Flex className="flex-col items-center md:flex-row md:items-start">
             <Image
               src={project.imgUrl}
               alt={project.title}
@@ -124,12 +124,16 @@ const Checkout = () => {
       </Box>
       <Box as="section">
         <Container maxW="container.xl">
-          <Flex pt={10} pb={5}>
-            <Box as="section">
+          <Flex
+            pt={10}
+            pb={5}
+            className="flex-col-reverse items-center md:flex-row md:items-start"
+          >
+            <Box as="section" w={{ xs: '100%', md: 'auto' }}>
               <Box
                 p={6}
-                w={420}
-                className="rounded-lg border-[1px] border-b-gray-200 bg-white"
+                w={{ xs: '100%', md: 420 }}
+                className="mt-6 rounded-lg border-[1px] border-b-gray-200 bg-white md:mt-0"
               >
                 <Box className="aspect-ratio aspect-ratio-19x10 relative">
                   <Image
@@ -167,7 +171,7 @@ const Checkout = () => {
                   <Text>贊助專案可享 0.5% 紅利回饋</Text>
                 </Box>
               </Box>
-              <Box as="section" w={420} py={6}>
+              <Box as="section" w={{ xs: '100%', md: 420 }} py={6}>
                 <Box className="mb-4 flex items-center justify-between">
                   <span>運費</span>
                   <span>$0</span>
@@ -220,7 +224,7 @@ const Checkout = () => {
                 </Button>
               </Box>
             </Box>
-            <Box as="section" pl={8} w="100%">
+            <Box as="section" pl={{ xs: 0, md: 8 }} w="100%">
               <Box p={4} className="rounded bg-white">
                 <Heading fontSize={{ xs: '20px', md: '22px' }} mb={3}>
                   會員資料
