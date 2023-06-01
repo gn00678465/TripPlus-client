@@ -1,5 +1,6 @@
+import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
-import { ProjectLayout } from '.';
+import { ProjectLayout, ProjectLayoutProps } from '.';
 import { Layout } from '@/components';
 import {
   Accordion,
@@ -11,10 +12,42 @@ import {
   Text,
   Divider
 } from '@chakra-ui/react';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import { SWRConfig } from 'swr';
+import { request, safeAwait } from '@/utils';
+import { utc2Local } from '@/utils';
 
-dayjs.extend(utc);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params || {};
+
+  const [err, res] = await safeAwait<ApiProject.Project>(
+    request(`/project/${id}`)
+  );
+  if (err && err.message === '路由資訊錯誤') {
+    return {
+      notFound: true
+    };
+  }
+  if (res) {
+    return {
+      props: {
+        id,
+        data: res.data,
+        fallback: {
+          [`/project/${id}`]: res
+        }
+      }
+    };
+  }
+  return {
+    props: {}
+  };
+};
+
+interface ProjectContentProps extends ProjectLayoutProps {
+  fallback: {
+    [key: string]: ApiProject.Project;
+  };
+}
 
 interface FAQ {
   question: string;
@@ -63,7 +96,7 @@ const FAQItem = ({ question, answer, updatedAt, count }: FAQItemProps) => {
               更新時間
             </Text>
             <Text as="span" fontSize={{ base: 'md' }} color="gray.600">
-              {dayjs(updatedAt).local().format('YYYY.MM.DD HH:mm')}
+              {utc2Local(updatedAt).format('YYYY.MM.DD HH:mm')}
             </Text>
           </p>
         </AccordionPanel>
@@ -72,7 +105,10 @@ const FAQItem = ({ question, answer, updatedAt, count }: FAQItemProps) => {
   );
 };
 
-const ProjectFAQs: App.NextPageWithLayout = () => {
+const ProjectFAQs: App.NextPageWithLayout<ProjectContentProps> = ({
+  id,
+  fallback
+}) => {
   const faqs: FAQ[] = [
     {
       question: '為什麼會是由社團法人台灣一起夢想公益協會提案？',
@@ -88,26 +124,28 @@ const ProjectFAQs: App.NextPageWithLayout = () => {
   ];
 
   return (
-    <Box className="space-y-4 md:space-y-6">
-      {faqs.map((item, index) => (
-        <FAQItem
-          key={index}
-          count={index + 1}
-          question={item.question}
-          answer={item.answer}
-          updatedAt={item.updatedAt}
-        />
-      ))}
-    </Box>
+    <SWRConfig value={{ fallback }}>
+      <ProjectLayout id={id}>
+        <>
+          <Box className="space-y-4 md:space-y-6">
+            {faqs.map((item, index) => (
+              <FAQItem
+                key={index}
+                count={index + 1}
+                question={item.question}
+                answer={item.answer}
+                updatedAt={item.updatedAt}
+              />
+            ))}
+          </Box>
+        </>
+      </ProjectLayout>
+    </SWRConfig>
   );
 };
 
 export default ProjectFAQs;
 
 ProjectFAQs.getLayout = function (page: ReactElement) {
-  return (
-    <Layout headerProps={{ backgroundColor: 'gray.100' }}>
-      <ProjectLayout>{page}</ProjectLayout>
-    </Layout>
-  );
+  return <Layout headerProps={{ backgroundColor: 'gray.100' }}>{page}</Layout>;
 };

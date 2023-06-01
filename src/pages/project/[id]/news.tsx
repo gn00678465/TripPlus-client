@@ -1,5 +1,6 @@
+import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
-import { ProjectLayout } from '.';
+import { ProjectLayout, ProjectLayoutProps } from '.';
 import { Layout } from '@/components';
 import {
   Box,
@@ -12,10 +13,36 @@ import {
 } from '@chakra-ui/react';
 import { BsBell } from 'react-icons/bs';
 import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import { SWRConfig } from 'swr';
+import { request, safeAwait } from '@/utils';
+import { utc2Local } from '@/utils';
 
-dayjs.extend(utc);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params || {};
+
+  const [err, res] = await safeAwait<ApiProject.Project>(
+    request(`/project/${id}`)
+  );
+  if (err && err.message === '路由資訊錯誤') {
+    return {
+      notFound: true
+    };
+  }
+  if (res) {
+    return {
+      props: {
+        id,
+        data: res.data,
+        fallback: {
+          [`/project/${id}`]: res
+        }
+      }
+    };
+  }
+  return {
+    props: {}
+  };
+};
 
 interface News {
   title: string;
@@ -63,7 +90,7 @@ const NewsItem = ({ title, content, publishedAt }: NewsItemProps) => {
             發佈日期
           </Text>
           <Text as="span" fontSize={{ base: 'sm', md: 'md' }} color="gray.600">
-            {dayjs(publishedAt).local().format('YYYY.MM.DD HH:mm')}
+            {utc2Local(publishedAt).format('YYYY.MM.DD HH:mm')}
           </Text>
           <Button
             display={{ base: 'none', md: 'flex' }}
@@ -100,7 +127,16 @@ const NewsItem = ({ title, content, publishedAt }: NewsItemProps) => {
   );
 };
 
-const ProjectNews: App.NextPageWithLayout = () => {
+interface ProjectContentProps extends ProjectLayoutProps {
+  fallback: {
+    [key: string]: ApiProject.Project;
+  };
+}
+
+const ProjectNews: App.NextPageWithLayout<ProjectContentProps> = ({
+  id,
+  fallback
+}) => {
   const news: News[] = [
     {
       title: '您的捐款已於05/15星期一100%到社團法人雲林縣聽語障福利協進會',
@@ -121,20 +157,22 @@ const ProjectNews: App.NextPageWithLayout = () => {
   ];
 
   return (
-    <Box className="space-y-2 md:space-y-4">
-      {news.map((item, index) => (
-        <NewsItem key={index} {...item} />
-      ))}
-    </Box>
+    <SWRConfig value={{ fallback }}>
+      <ProjectLayout id={id}>
+        <>
+          <Box className="space-y-2 md:space-y-4">
+            {news.map((item, index) => (
+              <NewsItem key={index} {...item} />
+            ))}
+          </Box>
+        </>
+      </ProjectLayout>
+    </SWRConfig>
   );
 };
 
 export default ProjectNews;
 
 ProjectNews.getLayout = function (page: ReactElement) {
-  return (
-    <Layout headerProps={{ backgroundColor: 'gray.100' }}>
-      <ProjectLayout>{page}</ProjectLayout>
-    </Layout>
-  );
+  return <Layout headerProps={{ backgroundColor: 'gray.100' }}>{page}</Layout>;
 };

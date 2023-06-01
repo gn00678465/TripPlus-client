@@ -3,10 +3,11 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Layout } from '@/components';
+import { Layout, ImageFallback } from '@/components';
 import { Carousel } from '@/components/Swiper';
-import { useState } from 'react';
-import type { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import useSWR, { SWRConfig } from 'swr';
+import userSWRMutation from 'swr/mutation';
 import {
   Box,
   BoxProps,
@@ -32,6 +33,7 @@ import {
   ListItem,
   useDisclosure,
   useSteps,
+  useToast,
   Image as Img
 } from '@chakra-ui/react';
 import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
@@ -39,28 +41,76 @@ import { MdBookmarkBorder, MdOutlineKeyboardArrowDown } from 'react-icons/md';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { BsCheck2, BsCircleFill } from 'react-icons/bs';
-import { currencyTWD, replaceTWDSymbol } from '@/utils';
-import { request, safeAwait } from '@/utils';
+import {
+  currencyTWD,
+  request,
+  safeAwait,
+  swrFetch,
+  replaceTWDSymbol,
+  utc2Local
+} from '@/utils';
+import { apiGetProjectInfo, apiPostFollow } from '@/api';
+import NoImage from '@/assets/images/user/user-image.png';
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params || {};
+
+  const [err, res] = await safeAwait<ApiProject.Project>(
+    request(`/project/${id}`)
+  );
+  if (
+    (err && err.message === '路由資訊錯誤') ||
+    err.message === '專案 id 資訊錯誤，找不到專案'
+  ) {
+    return {
+      notFound: true
+    };
+  }
+  if (res) {
+    return {
+      props: {
+        id,
+        fallback: {
+          [`/project/${id}`]: res
+        }
+      }
+    };
+  }
+  return {
+    props: {}
+  };
+};
 
 interface BoxBlockProps extends Omit<BoxProps, 'id'> {
   id?: string | string[];
-  data?: any;
+  data?: ApiProject.Project;
 }
 const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
+  const categoryMap: Record<number, string> = {
+    0: '社會計畫',
+    1: '創新設計',
+    2: '精選商品'
+  };
+
   const menu: Breadcrumb[] = [
     {
       name: '首頁',
       url: '/'
     },
     {
-      name: '社會計畫',
-      url: '/'
+      name: categoryMap[data?.category as number],
+      url: `/projects?category=${data?.category}`
     },
     {
-      name: '「跟著手語去旅行」| 讓聾人打造一個專屬於聾人團員的遊程活動！',
-      url: '/'
+      name: data?.title as string,
+      url: `/project/${id}`
     }
   ];
+
+  const { trigger } = userSWRMutation(
+    '/api/user/follow',
+    (url, { arg }: { arg: string }) => apiPostFollow(arg)
+  );
 
   console.log(data);
 
@@ -74,7 +124,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
           breadcrumb={menu}
         />
         <Flex
-          columnGap={{ base: 2 }}
+          columnGap={{ base: 2, lg: 3 }}
           alignItems="center"
           mb={{ base: 3, lg: 5 }}
         >
@@ -83,14 +133,15 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
           </Tag>
           <Link
             as={NextLink}
-            href="/"
-            fontSize={{ base: 'xs' }}
+            href={`/projects?category=${data?.category}`}
+            fontSize={{ base: 'xs', md: 'sm' }}
             _hover={{
               textDecoration: 'none'
             }}
+            fontWeight={400}
             color="gray.600"
           >
-            社會計畫
+            {categoryMap[data?.category as number]}
           </Link>
         </Flex>
         <Flex
@@ -105,7 +156,14 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             mb={{ base: 4, lg: 0 }}
             overflow="hidden"
           >
-            <Image fill src={data.keyVision} alt={data.title} />
+            <ImageFallback
+              src={data?.keyVision as string}
+              fallbackSrc={NoImage.src}
+              alt={data?.title as string}
+              fill
+              priority
+              sizes="(max-width: 768px) 100%, (max-width: 1200px) 50vw, 33vw"
+            />
           </AspectRatio>
           <Flex flexDirection="column">
             <Flex flexDirection={{ base: 'column' }}>
@@ -114,7 +172,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                 fontSize={{ base: 'sm', lg: 'md' }}
                 mb={{ base: 2, lg: 3 }}
               >
-                {data.teamId.title}
+                {data?.teamId.title}
               </Text>
               <Heading
                 as="h3"
@@ -125,7 +183,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                 color="gray.900"
                 className="md:line-clamp-2"
               >
-                「跟著手語去旅行」| 讓聾人打造一個專屬於聾人團員的遊程活動！
+                {data?.title}
               </Heading>
               <Text
                 fontSize={{ base: '20px', lg: '36px' }}
@@ -133,11 +191,11 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
               >
                 NT$
                 <span className="ml-1">
-                  {replaceTWDSymbol(currencyTWD(328300))}
+                  {replaceTWDSymbol(currencyTWD(data?.sum))}
                 </span>
               </Text>
               <Progress
-                value={80}
+                value={data?.progressRate}
                 borderRadius="full"
                 height="6px"
                 colorScheme="primary"
@@ -151,7 +209,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                 <span>目標金額</span>
                 <span className="ml-2 text-sm lg:text-base">NT$</span>
                 <span className="ml-1 text-sm lg:text-base">
-                  {replaceTWDSymbol(currencyTWD(328300))}
+                  {replaceTWDSymbol(currencyTWD(data?.target))}
                 </span>
               </Text>
               <ul className="flex h-[44px] items-center justify-between gap-x-2 lg:justify-start">
@@ -160,7 +218,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                     剩餘時間
                   </p>
                   <p className="text-lg  text-gray-900 lg:text-xl">
-                    <span className="font-medium">43</span>
+                    <span className="font-medium">{data?.countDownDays}</span>
                     <span className="ml-1 lg:text-lg">天</span>
                   </p>
                 </li>
@@ -170,7 +228,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                     贊助人數
                   </p>
                   <p className="text-lg  text-gray-900 lg:text-xl">
-                    <span className="font-medium">43</span>
+                    <span className="font-medium">{data?.sponsorCount}</span>
                     <span className="ml-1 lg:text-lg">人</span>
                   </p>
                 </li>
@@ -180,7 +238,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                     募資達成率
                   </p>
                   <p className="text-lg  font-medium text-gray-900 lg:text-xl">
-                    <span>50</span>
+                    <span>{data?.progressRate}</span>
                     <span className="ml-1">%</span>
                   </p>
                 </li>
@@ -194,7 +252,11 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             >
               專案期間
               <span className="ml-2 text-sm lg:text-base">
-                2022.12.12 12:00 – 2023.01.17 23:59
+                {utc2Local(data?.startTime as string).format(
+                  'YYYY.MM.DD HH:mm'
+                )}{' '}
+                –{' '}
+                {utc2Local(data?.endTime as string).format('YYYY.MM.DD HH:mm')}
               </span>
             </Text>
             <Flex
@@ -212,6 +274,17 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                 _hover={{
                   color: 'white',
                   backgroundColor: 'secondary-emphasis.500'
+                }}
+                onClick={() => {
+                  trigger(id as string, {
+                    onError(err, key, config) {
+                      console.log('error');
+                    },
+                    onSuccess(data, key, config) {
+                      console.log('success');
+                    }
+                  });
+                  console.log(id);
                 }}
               >
                 追蹤專案
@@ -234,9 +307,17 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   );
 };
 
-const SocialBlock = ({ ...rest }: FlexProps) => (
+interface SocialBlockProps extends FlexProps {
+  team?: ApiProject.Team;
+}
+
+const SocialBlock = ({ team, ...rest }: SocialBlockProps) => (
   <Flex columnGap={{ base: 2 }} {...rest}>
     <IconButton
+      as="a"
+      target="_blank"
+      href={team?.website as string}
+      cursor="pointer"
       aria-label="website"
       variant="outline"
       borderRadius="full"
@@ -244,6 +325,10 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
       _hover={{ bgColor: 'white' }}
     />
     <IconButton
+      as="a"
+      target="_blank"
+      href={team?.facebook as string}
+      cursor="pointer"
       aria-label="facebook"
       variant="outline"
       borderRadius="full"
@@ -251,6 +336,10 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
       _hover={{ bgColor: 'white' }}
     />
     <IconButton
+      as="a"
+      target="_blank"
+      href={team?.instagram as string}
+      cursor="pointer"
       aria-label="instagram"
       variant="outline"
       borderRadius="full"
@@ -267,7 +356,7 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
   </Flex>
 );
 
-const SummaryBlock = ({ id, ...rest }: BoxBlockProps) => {
+const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   return (
     <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="container.xl">
@@ -277,7 +366,7 @@ const SummaryBlock = ({ id, ...rest }: BoxBlockProps) => {
           columnGap={{ base: 0, lg: '100px' }}
           w="full"
         >
-          <Box maxW={{ base: 'full', lg: '45%', xl: '598px' }}>
+          <Box maxW={{ base: 'full', lg: '45%', xl: '598px' }} w="full">
             <Heading
               as="h4"
               fontSize={{ base: 'md', md: 'lg' }}
@@ -296,7 +385,7 @@ const SummaryBlock = ({ id, ...rest }: BoxBlockProps) => {
               borderLeftStyle={{ base: 'solid' }}
               color="gray.600"
             >
-              社團法人雲林縣聽語障福利協進會將貫徹「聾人事務,聾人參與」的精神，由聾人導覽員量身打造一個專屬於聾人團員的遊程活動，活動完全符合聾人視覺無障礙的需求，預計辦理2場次的斗六小旅行活動，每一場活動都會結合雲林在地美食、走在地人才知道的小秘境、還有結合聽障職人的手作點心，實現聾式態度！
+              {data?.content}
             </Text>
           </Box>
           <Box w="full">
@@ -315,27 +404,36 @@ const SummaryBlock = ({ id, ...rest }: BoxBlockProps) => {
               pos="relative"
             >
               <AspectRatio ratio={4 / 3} maxW={{ base: '160px' }} w="full">
-                <Image
+                <ImageFallback
+                  src={data?.teamId.photo as string}
+                  fallbackSrc={NoImage.src}
+                  alt={data?.teamId.title as string}
                   fill
-                  src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
-                  alt="提案者 Logo"
-                ></Image>
+                />
               </AspectRatio>
               <ul className="flex w-full flex-col justify-center gap-y-2 text-xs tracking-[1px] md:justify-start md:gap-y-1 md:text-sm">
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
                   <p className="min-w-[75px] text-gray-500">提案者名稱</p>
-                  <p className="text-gray-600">社團法人台灣一起夢想公益協會</p>
+                  <p className="text-gray-600">{data?.teamId.title}</p>
                 </li>
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
                   <p className="min-w-[75px] text-gray-500">統一編號</p>
-                  <p className="text-sm text-gray-600 md:text-base">31894406</p>
+                  <p className="text-sm text-gray-600 md:text-base">
+                    {data?.teamId.taxId}
+                  </p>
                 </li>
                 <li className="mt-auto">
-                  <SocialBlock display={{ base: 'none', md: 'flex' }} />
+                  <SocialBlock
+                    team={data?.teamId}
+                    display={{ base: 'none', md: 'flex' }}
+                  />
                 </li>
               </ul>
             </Flex>
-            <SocialBlock display={{ base: 'flex', md: 'none' }} />
+            <SocialBlock
+              team={data?.teamId}
+              display={{ base: 'flex', md: 'none' }}
+            />
           </Box>
         </Flex>
       </Container>
@@ -530,7 +628,8 @@ const ContentBlock = ({ id, children, ...rest }: BoxBlockProps) => {
   );
 };
 
-const PlanCard = () => {
+interface PlanCardProps extends ApiProject.Plan {}
+const PlanCard = (props: PlanCardProps) => {
   return (
     <Card
       mx="auto"
@@ -559,13 +658,13 @@ const PlanCard = () => {
           ></Image>
         </AspectRatio>
         <Text fontSize={{ base: 'md' }} fontWeight="medium">
-          100元 - 理念認同，可於本方案的「加碼」欄中，自由增加贊助金額
+          {props.price}元 - {props.title}
         </Text>
       </CardHeader>
       <CardBody py={{ base: 4 }} px="0">
         <p className="mb-1 space-x-1 text-lg font-medium">
           <span>NT$</span>
-          <span>100</span>
+          <span>{props.price}</span>
         </p>
         <div className="mb-4 space-x-2 md:mb-6">
           <Tag
@@ -614,65 +713,22 @@ const PlanCard = () => {
         </Text>
       </CardBody>
       <CardFooter p="0">
-        <Button w="full" py={{ base: 2 }} colorScheme="primary">
-          贊助
-        </Button>
+        <NextLink
+          href={`/checkout?project=${props?.projectId}&reward=${props?._id}`}
+          passHref
+          legacyBehavior
+        >
+          <Button w="full" py={{ base: 2 }} colorScheme="primary">
+            贊助
+          </Button>
+        </NextLink>
       </CardFooter>
     </Card>
   );
 };
 
-const PlansBlock = ({ id, ...rest }: BoxBlockProps) => {
-  const plans = [
-    {
-      _id: '645c91c5666244ff5b1f3533',
-      projectId: '645b436d20590d1a6d38ebd7',
-      title: 'example plan',
-      price: 1000,
-      content: 'example content ',
-      isAllowMulti: 1,
-      isDelete: 1,
-      createdAt: '2023-05-11T06:57:09.378Z',
-      updatedAt: '2023-05-11T06:57:09.378Z',
-      __v: 0
-    },
-    {
-      _id: '645c91d8666244ff5b1f3536',
-      projectId: '645b436d20590d1a6d38ebd7',
-      title: 'edit plan',
-      price: 777898,
-      content: '7777777',
-      isAllowMulti: 0,
-      isDelete: 1,
-      createdAt: '2023-05-11T06:57:28.997Z',
-      updatedAt: '2023-05-15T02:17:56.672Z',
-      __v: 0
-    },
-    {
-      _id: '645c93e2c7c7f6a1e36c5c2c',
-      projectId: '645b436d20590d1a6d38ebd7',
-      title: 'edit plan',
-      price: 777898,
-      content: '7777777',
-      isAllowMulti: 0,
-      isDelete: 0,
-      createdAt: '2023-05-11T07:06:10.028Z',
-      updatedAt: '2023-05-15T02:14:59.453Z',
-      __v: 0
-    },
-    {
-      _id: '645c97ef85ed310e3818dfa7',
-      projectId: '645b436d20590d1a6d38ebd7',
-      title: 'example plan',
-      price: 989898,
-      content: 'example content ',
-      isAllowMulti: 0,
-      isDelete: 0,
-      createdAt: '2023-05-11T07:23:27.017Z',
-      updatedAt: '2023-05-11T07:23:27.017Z',
-      __v: 0
-    }
-  ];
+const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
+  const plans = (data && data.plans) || [];
 
   return (
     <Box backgroundColor="gray.100" py={{ base: 10 }} {...rest}>
@@ -682,37 +738,45 @@ const PlansBlock = ({ id, ...rest }: BoxBlockProps) => {
             贊助方案
           </Heading>
         </Center>
-        <Carousel data={plans} card={(item) => <PlanCard />} />
+        <Carousel data={plans} card={(item) => <PlanCard {...item} />} />
       </Container>
     </Box>
   );
 };
 
-interface ProjectLayoutProps {
-  children: ReactElement<ProjectContentProps>;
+export interface ProjectLayoutProps {
+  children: ReactNode;
+  id?: string | string[];
 }
 
-export const ProjectLayout = ({ children }: ProjectLayoutProps) => {
-  const { id, data } = children?.props || {};
+export const ProjectLayout = ({ children, id }: ProjectLayoutProps) => {
+  const { data } = useSWR(id ? `/project/${id}` : null, () =>
+    swrFetch(apiGetProjectInfo(id as string))
+  );
+
   return (
     <>
-      <HeaderBlock id={id} data={data}></HeaderBlock>
-      <SummaryBlock id={id}></SummaryBlock>
+      <Head>
+        <title>{`${data?.data?.title}-TripPlus+`}</title>
+      </Head>
+      <HeaderBlock id={id} data={data?.data}></HeaderBlock>
+      <SummaryBlock id={id} data={data?.data}></SummaryBlock>
       <StepBlock></StepBlock>
       <ContentBlock id={id}>{children}</ContentBlock>
-      <PlansBlock id={id}></PlansBlock>
+      <PlansBlock id={id} data={data?.data}></PlansBlock>
     </>
   );
 };
 
-interface ProjectContentProps {
-  id: string;
-  data: any;
+interface ProjectContentProps extends ProjectLayoutProps {
+  fallback: {
+    [key: string]: ApiProject.Project;
+  };
 }
 
 const ProjectContent: App.NextPageWithLayout<ProjectContentProps> = ({
   id,
-  data
+  fallback
 }) => {
   const { getDisclosureProps, getButtonProps } = useDisclosure();
 
@@ -720,85 +784,64 @@ const ProjectContent: App.NextPageWithLayout<ProjectContentProps> = ({
   const disclosureProps = getDisclosureProps();
 
   return (
-    <>
-      <Head>
-        <title>{`${data.title}-TripPlus+`}</title>
-      </Head>
-      <Box
-        className="space-y-3 md:space-y-4"
-        color="gray.600"
-        fontSize={{ base: 'sm', md: 'md' }}
-      >
-        <Text>
-          他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
-        </Text>
-        <Text>
-          因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
-        </Text>
-        <AspectRatio
-          ratio={10 / 3}
-          borderRadius={8}
-          overflow="hidden"
-          objectFit="cover"
-          objectPosition="center"
-        >
-          <Img src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" />
-        </AspectRatio>
-        <Heading fontSize={{ base: 'lg', md: 'xl' }}>
-          你有參加過導覽的經驗嗎？
-        </Heading>
-        <Text>
-          導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
-        </Text>
-        <Text>
-          近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
-        </Text>
-      </Box>
-      <Center mt={{ base: 6, md: 10 }}>
-        <Box
-          as="button"
-          textAlign="center"
-          color="secondary-emphasis.500"
-          transition="color 0.3s ease-in-out"
-          _hover={{
-            color: 'secondary-emphasis.600'
-          }}
-        >
-          <Text mb={{ base: 1 }}>閱讀更多</Text>
-          <Icon as={MdOutlineKeyboardArrowDown} boxSize={{ base: 5, md: 6 }} />
-        </Box>
-      </Center>
-    </>
+    <SWRConfig value={{ fallback }}>
+      <ProjectLayout id={id}>
+        <>
+          <Box
+            className="space-y-3 md:space-y-4"
+            color="gray.600"
+            fontSize={{ base: 'sm', md: 'md' }}
+          >
+            <Text>
+              他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
+            </Text>
+            <Text>
+              因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
+            </Text>
+            <AspectRatio
+              ratio={10 / 3}
+              borderRadius={8}
+              overflow="hidden"
+              objectFit="cover"
+              objectPosition="center"
+            >
+              <Img src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" />
+            </AspectRatio>
+            <Heading fontSize={{ base: 'lg', md: 'xl' }}>
+              你有參加過導覽的經驗嗎？
+            </Heading>
+            <Text>
+              導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
+            </Text>
+            <Text>
+              近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
+            </Text>
+          </Box>
+          <Center mt={{ base: 6, md: 10 }}>
+            <Box
+              as="button"
+              textAlign="center"
+              color="secondary-emphasis.500"
+              transition="color 0.3s ease-in-out"
+              _hover={{
+                color: 'secondary-emphasis.600'
+              }}
+            >
+              <Text mb={{ base: 1 }}>閱讀更多</Text>
+              <Icon
+                as={MdOutlineKeyboardArrowDown}
+                boxSize={{ base: 5, md: 6 }}
+              />
+            </Box>
+          </Center>
+        </>
+      </ProjectLayout>
+    </SWRConfig>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.query;
-  const [err, res] = await safeAwait<{ id: string }>(request(`/project/${id}`));
-  if (err && err.message === '路由資訊錯誤') {
-    return {
-      notFound: true
-    };
-  }
-  if (res) {
-    return {
-      props: {
-        id,
-        data: res.data
-      }
-    };
-  }
-  return {
-    props: {}
-  };
 };
 
 export default ProjectContent;
 
 ProjectContent.getLayout = function (page: ReactElement<ProjectContentProps>) {
-  return (
-    <Layout headerProps={{ backgroundColor: 'gray.100' }}>
-      <ProjectLayout>{page}</ProjectLayout>
-    </Layout>
-  );
+  return <Layout headerProps={{ backgroundColor: 'gray.100' }}>{page}</Layout>;
 };
