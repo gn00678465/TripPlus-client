@@ -178,7 +178,7 @@ const Checkout = () => {
                 </Box>
                 <Box className="mb-4 flex items-center justify-between">
                   <span>選擇數量</span>
-                  <NumberInput defaultValue={1}>
+                  <NumberInput defaultValue={1} min={1}>
                     <NumberInputField />
                     <NumberInputStepper>
                       <NumberIncrementStepper />
@@ -190,6 +190,7 @@ const Checkout = () => {
                   <Box className="mb-4 flex items-center justify-between">
                     <span>額外贊助</span>
                     <NumberInput
+                      min={0}
                       onChange={(valueString) =>
                         setExtraMoney(parse(valueString))
                       }
