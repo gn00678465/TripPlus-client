@@ -14,3 +14,7 @@ export function currency(
 export function currencyTWD(num: number) {
   return currency(num, 'zh-TW', 'TWD');
 }
+
+export function replaceTWDSymbol(currency: string, str: string = '') {
+  return currency.replace('$', str);
+}

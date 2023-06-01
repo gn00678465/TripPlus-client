@@ -38,7 +38,7 @@ import { MdBookmarkBorder, MdOutlineKeyboardArrowDown } from 'react-icons/md';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { BsCheck2, BsCircleFill } from 'react-icons/bs';
-import { currencyTWD } from '@/utils';
+import { currencyTWD, replaceTWDSymbol } from '@/utils';
 
 interface BlockProps extends Omit<BoxProps, 'id'> {
   id?: string | string[];
@@ -133,7 +133,7 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
               >
                 NT$
                 <span className="ml-1">
-                  {currencyTWD(328300).replace('$', '')}
+                  {replaceTWDSymbol(currencyTWD(328300))}
                 </span>
               </Text>
               <Progress
@@ -151,7 +151,7 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
                 <span>目標金額</span>
                 <span className="ml-2 text-sm lg:text-base">NT$</span>
                 <span className="ml-1 text-sm lg:text-base">
-                  {currencyTWD(328300)}
+                  {replaceTWDSymbol(currencyTWD(328300))}
                 </span>
               </Text>
               <ul className="flex h-[44px] items-center justify-between gap-x-2 lg:justify-start">
