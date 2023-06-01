@@ -6,7 +6,7 @@ const nextConfig = {
     BASE_API_URL: process.env.BASE_API_URL
   },
   images: {
-    domains: ['res.cloudinary.com', 'picsum.photos'],
+    domains: ['res.cloudinary.com', 'picsum.photos', 'images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
