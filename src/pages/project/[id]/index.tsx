@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Layout } from '@/components';
 import { Carousel } from '@/components/Swiper';
+import { useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import {
   Box,
@@ -39,12 +40,13 @@ import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import { BsCheck2, BsCircleFill } from 'react-icons/bs';
 import { currencyTWD, replaceTWDSymbol } from '@/utils';
+import { request, safeAwait } from '@/utils';
 
-interface BlockProps extends Omit<BoxProps, 'id'> {
+interface BoxBlockProps extends Omit<BoxProps, 'id'> {
   id?: string | string[];
+  data?: any;
 }
-
-const HeaderBlock = ({ id, ...rest }: BlockProps) => {
+const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   const menu: Breadcrumb[] = [
     {
       name: '首頁',
@@ -59,6 +61,8 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
       url: '/'
     }
   ];
+
+  console.log(data);
 
   return (
     <Box py={{ base: 6 }} {...rest}>
@@ -101,11 +105,7 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
             mb={{ base: 4, lg: 0 }}
             overflow="hidden"
           >
-            <Image
-              fill
-              src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
-              alt="「跟著手語去旅行」| 讓聾人打造一個專屬於聾人團員的遊程活動！"
-            />
+            <Image fill src={data.keyVision} alt={data.title} />
           </AspectRatio>
           <Flex flexDirection="column">
             <Flex flexDirection={{ base: 'column' }}>
@@ -114,7 +114,7 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
                 fontSize={{ base: 'sm', lg: 'md' }}
                 mb={{ base: 2, lg: 3 }}
               >
-                社團法人台灣一起夢想公益協會
+                {data.teamId.title}
               </Text>
               <Heading
                 as="h3"
@@ -267,7 +267,7 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
   </Flex>
 );
 
-const SummaryBlock = ({ id, ...rest }: BlockProps) => {
+const SummaryBlock = ({ id, ...rest }: BoxBlockProps) => {
   return (
     <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="container.xl">
@@ -497,7 +497,7 @@ const TabList = ({ menu, path, ...rest }: TabListProps) => {
   );
 };
 
-const ContentBlock = ({ id, children, ...rest }: BlockProps) => {
+const ContentBlock = ({ id, children, ...rest }: BoxBlockProps) => {
   const router = useRouter();
 
   const path = router.asPath;
@@ -622,7 +622,7 @@ const PlanCard = () => {
   );
 };
 
-const PlansBlock = ({ id, ...rest }: BlockProps) => {
+const PlansBlock = ({ id, ...rest }: BoxBlockProps) => {
   const plans = [
     {
       _id: '645c91c5666244ff5b1f3533',
@@ -689,15 +689,14 @@ const PlansBlock = ({ id, ...rest }: BlockProps) => {
 };
 
 interface ProjectLayoutProps {
-  children: ReactNode;
+  children: ReactElement<ProjectContentProps>;
 }
 
 export const ProjectLayout = ({ children }: ProjectLayoutProps) => {
-  const router = useRouter();
-  const { id } = router.query;
+  const { id, data } = children?.props || {};
   return (
     <>
-      <HeaderBlock id={id}></HeaderBlock>
+      <HeaderBlock id={id} data={data}></HeaderBlock>
       <SummaryBlock id={id}></SummaryBlock>
       <StepBlock></StepBlock>
       <ContentBlock id={id}>{children}</ContentBlock>
@@ -706,7 +705,15 @@ export const ProjectLayout = ({ children }: ProjectLayoutProps) => {
   );
 };
 
-const ProjectContent: App.NextPageWithLayout = () => {
+interface ProjectContentProps {
+  id: string;
+  data: any;
+}
+
+const ProjectContent: App.NextPageWithLayout<ProjectContentProps> = ({
+  id,
+  data
+}) => {
   const { getDisclosureProps, getButtonProps } = useDisclosure();
 
   const buttonProps = getButtonProps();
@@ -715,9 +722,7 @@ const ProjectContent: App.NextPageWithLayout = () => {
   return (
     <>
       <Head>
-        <title>
-          「跟著手語去旅行」| 讓聾人打造一個專屬於聾人團員的遊程活動！-TripPlus+
-        </title>
+        <title>{`${data.title}-TripPlus+`}</title>
       </Head>
       <Box
         className="space-y-3 md:space-y-4"
@@ -767,7 +772,22 @@ const ProjectContent: App.NextPageWithLayout = () => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+  const [err, res] = await safeAwait<{ id: string }>(request(`/project/${id}`));
+  if (err && err.message === '路由資訊錯誤') {
+    return {
+      notFound: true
+    };
+  }
+  if (res) {
+    return {
+      props: {
+        id,
+        data: res.data
+      }
+    };
+  }
   return {
     props: {}
   };
@@ -775,7 +795,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default ProjectContent;
 
-ProjectContent.getLayout = function (page: ReactElement) {
+ProjectContent.getLayout = function (page: ReactElement<ProjectContentProps>) {
   return (
     <Layout headerProps={{ backgroundColor: 'gray.100' }}>
       <ProjectLayout>{page}</ProjectLayout>
