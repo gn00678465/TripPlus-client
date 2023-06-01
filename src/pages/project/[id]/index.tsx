@@ -62,7 +62,7 @@ const HeaderBlock = ({ id, ...rest }: BlockProps) => {
 
   return (
     <Box py={{ base: 6 }} {...rest}>
-      <Container px={{ base: 3, xl: 0 }} maxW="1296px">
+      <Container px={{ base: 3, xl: 0 }} maxW="container.xl">
         <BreadcrumbList
           display={{ base: 'none', lg: 'block' }}
           fontSize={{ base: 'sm' }}
@@ -270,7 +270,7 @@ const SocialBlock = ({ ...rest }: FlexProps) => (
 const SummaryBlock = ({ id, ...rest }: BlockProps) => {
   return (
     <Box backgroundColor="gray.100" py={{ base: 6, md: 10 }} {...rest}>
-      <Container px={{ base: 3, xl: 0 }} maxW="1296px">
+      <Container px={{ base: 3, xl: 0 }} maxW="container.xl">
         <Flex
           flexDirection={{ base: 'column', lg: 'row' }}
           rowGap={{ base: 6, lg: 0 }}
@@ -466,6 +466,7 @@ const TabList = ({ menu, path, ...rest }: TabListProps) => {
           key={item.href}
           as={NextLink}
           href={item.href}
+          fontWeight={500}
           fontSize={{ base: 'xs', md: 'sm' }}
           textDecoration={{ base: 'none' }}
           aria-current={path === item.href ? 'page' : undefined}
@@ -675,7 +676,7 @@ const PlansBlock = ({ id, ...rest }: BlockProps) => {
 
   return (
     <Box backgroundColor="gray.100" py={{ base: 10 }} {...rest}>
-      <Container px={{ base: 3, xl: 0 }} maxW="1296px">
+      <Container px={{ base: 3, xl: 0 }} maxW="container.xl">
         <Center mb={{ base: 5 }}>
           <Heading fontSize={{ base: '28px' }} fontWeight="bold">
             贊助方案

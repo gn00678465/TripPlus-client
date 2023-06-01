@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Swiper, SwiperSlide, SwiperProps } from 'swiper/react';
 import { Swiper as SwiperType, Pagination } from 'swiper';
 import { IconButton, Icon, IconButtonProps } from '@chakra-ui/react';
-import { MdArrowBackIosNew, MdArrowForwardIos } from 'react-icons/md';
+import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import { IconType } from 'react-icons';
 
 // Import Swiper styles
@@ -89,7 +89,7 @@ function Carousel<T>({ data, card, ...rest }: PlansSwiperProps<T>) {
           top="50%"
           left="0"
           sx={{ transform: 'translate(-84px, calc(-50% - 40px))' }}
-          icon={MdArrowBackIosNew}
+          icon={MdChevronLeft}
           onClick={() => swiperRef.current?.slidePrev()}
         />
         <NavigationButton
@@ -99,7 +99,7 @@ function Carousel<T>({ data, card, ...rest }: PlansSwiperProps<T>) {
           top="50%"
           right="0"
           sx={{ transform: 'translate(84px, calc(-50% - 40px))' }}
-          icon={MdArrowForwardIos}
+          icon={MdChevronRight}
           onClick={() => swiperRef.current?.slideNext()}
         />
         <div className="carousel-pagination mt-5 text-center md:mt-10"></div>
