@@ -16,7 +16,8 @@ import {
   DrawerContent,
   DrawerFooter,
   Input,
-  Icon
+  Icon,
+  BoxProps
 } from '@chakra-ui/react';
 
 import { AiOutlineSearch } from 'react-icons/ai';
@@ -29,7 +30,7 @@ import UserImage from '@/assets/images/user/user-image.png';
 import MemberMenu from './member-menu';
 import Logo from '@/assets/images/logo.png';
 
-const Header = () => {
+const Header = ({ ...rest }: BoxProps) => {
   const router = useRouter();
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const loginStatus = useAuthStore((state) => state.getters.isLogin);
@@ -93,6 +94,7 @@ const Header = () => {
           : 'border-b-[1px] border-b-gray-200 bg-white '
       } ${isOpen ? '!z-[1500]' : 'z-10'}`}
       py={5}
+      {...rest}
     >
       <Container maxW="container.xl" className="md:relative">
         <Flex alignItems="center">
