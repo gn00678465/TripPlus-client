@@ -59,8 +59,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     request(`/project/${id}`)
   );
   if (
-    (err && err.message === '路由資訊錯誤') ||
-    err.message === '專案 id 資訊錯誤，找不到專案'
+    err &&
+    (err.message === '路由資訊錯誤' ||
+      err.message === '專案 id 資訊錯誤，找不到專案')
   ) {
     return {
       notFound: true
