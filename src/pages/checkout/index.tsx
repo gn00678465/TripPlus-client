@@ -30,6 +30,7 @@ import {
   Textarea,
   Checkbox
 } from '@chakra-ui/react';
+import { GetStaticProps } from 'next';
 
 const Checkout = () => {
   const project = {
@@ -319,6 +320,12 @@ const Checkout = () => {
       </Box>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  return {
+    props: {}
+  };
 };
 
 export default Checkout;
