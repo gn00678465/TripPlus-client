@@ -136,8 +136,12 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             as={NextLink}
             href={`/projects?category=${data?.category}`}
             fontSize={{ base: 'xs', md: 'sm' }}
+            transition="all 0.3s ease-in-out"
             _hover={{
-              textDecoration: 'none'
+              textDecoration: 'none',
+              color: 'gray.500',
+              filter:
+                'drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06))'
             }}
             fontWeight={400}
             color="gray.600"
@@ -569,7 +573,15 @@ const TabList = ({ menu, path, ...rest }: TabListProps) => {
           fontSize={{ base: 'xs', md: 'sm' }}
           textDecoration={{ base: 'none' }}
           aria-current={path === item.href ? 'page' : undefined}
-          _hover={{}}
+          transition="all 0.3s ease-in-out"
+          sx={{
+            ':not([aria-current="page"]):hover': {
+              color: 'secondary-emphasis.500',
+              filter:
+                'drop-shadow(0 20px 13px rgb(0 142 134 / 0.08)) drop-shadow(0 8px 5px rgb(0 142 134 / 0.15));',
+              textDecoration: 'none'
+            }
+          }}
           _activeLink={{
             color: 'secondary-emphasis.500',
             textDecoration: 'none',
