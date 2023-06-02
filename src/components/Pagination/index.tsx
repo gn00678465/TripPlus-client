@@ -15,8 +15,6 @@ const Pagination = ({
   onPageChange
 }: PaginationProps) => {
   const setPages = (page: number) => {
-    console.log(page);
-
     if (totalPage <= 6) {
       return Array.from(
         { length: totalPage },

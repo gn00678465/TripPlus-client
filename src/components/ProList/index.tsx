@@ -85,7 +85,6 @@ const ProList = () => {
       revalidateOnMount: false,
       onSuccess(data, key, config) {
         if (data && data.status === 'Success') {
-          console.log('useSWR');
           getProjects(data.data);
           setPage({
             page: data.data.page,
