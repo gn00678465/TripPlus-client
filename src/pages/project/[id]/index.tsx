@@ -1,11 +1,10 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import NextLink from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Layout, ImageFallback } from '@/components';
 import { Carousel } from '@/components/Swiper';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import useSWR, { SWRConfig } from 'swr';
 import userSWRMutation from 'swr/mutation';
 import {
@@ -25,18 +24,13 @@ import {
   Divider,
   Icon,
   Center,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  UnorderedList,
-  ListItem,
   useDisclosure,
   useSteps,
   useToast,
   Image as Img
 } from '@chakra-ui/react';
 import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
+import { PlanCard } from '@/components/Project';
 import { MdBookmarkBorder, MdOutlineKeyboardArrowDown } from 'react-icons/md';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
@@ -446,7 +440,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   );
 };
 
-const StepBlock = () => {
+const StepBlock = ({ data }: { data?: ApiProject.Project }) => {
   const steps = [
     { title: '企劃目的' },
     { title: '款項分配' },
@@ -455,7 +449,7 @@ const StepBlock = () => {
   ];
 
   const { activeStep } = useSteps({
-    index: 0,
+    index: (data?.histories.length || 0) - 1,
     count: steps.length
   });
 
@@ -641,105 +635,6 @@ const ContentBlock = ({ id, children, ...rest }: BoxBlockProps) => {
   );
 };
 
-interface PlanCardProps extends ApiProject.Plan {}
-const PlanCard = (props: PlanCardProps) => {
-  return (
-    <Card
-      mx="auto"
-      maxW="416px"
-      w="full"
-      p={{ base: 4, md: 6 }}
-      transition="all 0.2s ease-in-out"
-      _hover={{
-        top: '-2px',
-        boxShadow: '0px 8px 60px rgba(0, 0, 0, 0.1);'
-      }}
-    >
-      <CardHeader p="0">
-        <AspectRatio
-          mb={{ base: 3 }}
-          borderRadius={8}
-          overflow="hidden"
-          ratio={4 / 3}
-          maxH={{ base: '120px' }}
-          w="full"
-        >
-          <Image
-            fill
-            src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
-            alt="提案者 Logo"
-          ></Image>
-        </AspectRatio>
-        <Text fontSize={{ base: 'md' }} fontWeight="medium">
-          {props.price}元 - {props.title}
-        </Text>
-      </CardHeader>
-      <CardBody py={{ base: 4 }} px="0">
-        <p className="mb-1 space-x-1 text-lg font-medium">
-          <span>NT$</span>
-          <span>{props.price}</span>
-        </p>
-        <div className="mb-4 space-x-2 md:mb-6">
-          <Tag
-            px={{ base: 2 }}
-            py={{ base: 1 }}
-            className="space-x-1"
-            backgroundColor="gray.200"
-            color="gray.600"
-            borderRadius={4}
-            fontSize={{ base: 'xs' }}
-          >
-            <span>已被贊助</span>
-            <span className="text-sm">12</span>
-            <span>次</span>
-          </Tag>
-          <Tag
-            px={{ base: 2 }}
-            py={{ base: 1 }}
-            className="space-x-1"
-            backgroundColor="secondary"
-            color="secondary-emphasis.500"
-            borderRadius={4}
-            fontSize={{ base: 'xs' }}
-          >
-            <span>剩餘</span>
-            <span className="text-sm">72</span>
-            <span>個</span>
-          </Tag>
-        </div>
-        <Box fontSize={{ base: 'xs' }} color="gray.600">
-          <Text mb={{ base: 1 }}>您將收到</Text>
-          <UnorderedList>
-            <ListItem>捐款收據</ListItem>
-            <ListItem>一封協會致贈的電子感謝函</ListItem>
-            <ListItem>一封協會完成專案的成果報告</ListItem>
-          </UnorderedList>
-        </Box>
-        <Divider my={{ base: 4 }}></Divider>
-        <Text color="gray.600" fontSize={{ base: 'xs' }}>
-          預計 2023 年 07 月出貨
-        </Text>
-        <Text color="gray.600" fontSize={{ base: 'xs' }}>
-          贊助專案可享
-          <span className="text-secondary-emphasis-500">0.5%</span>
-          紅利回饋
-        </Text>
-      </CardBody>
-      <CardFooter p="0">
-        <NextLink
-          href={`/checkout?project=${props?.projectId}&reward=${props?._id}`}
-          passHref
-          legacyBehavior
-        >
-          <Button w="full" py={{ base: 2 }} colorScheme="primary">
-            贊助
-          </Button>
-        </NextLink>
-      </CardFooter>
-    </Card>
-  );
-};
-
 const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   const plans = (data && data.plans) || [];
 
@@ -751,14 +646,19 @@ const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             贊助方案
           </Heading>
         </Center>
-        <Carousel data={plans} card={(item) => <PlanCard {...item} />} />
+        <Carousel
+          data={plans}
+          card={(item) => (
+            <PlanCard {...item} photo={data?.keyVision as string} />
+          )}
+        />
       </Container>
     </Box>
   );
 };
 
 export interface ProjectLayoutProps {
-  children: ReactNode;
+  children: ReactNode | ((arg?: ApiProject.Project) => ReactNode);
   id?: string | string[];
 }
 
@@ -774,8 +674,10 @@ export const ProjectLayout = ({ children, id }: ProjectLayoutProps) => {
       </Head>
       <HeaderBlock id={id} data={data?.data}></HeaderBlock>
       <SummaryBlock id={id} data={data?.data}></SummaryBlock>
-      <StepBlock></StepBlock>
-      <ContentBlock id={id}>{children}</ContentBlock>
+      <StepBlock data={data?.data} />
+      <ContentBlock id={id}>
+        {typeof children === 'function' ? children(data?.data) : children}
+      </ContentBlock>
       <PlansBlock id={id} data={data?.data}></PlansBlock>
     </>
   );
@@ -799,55 +701,57 @@ const ProjectContent: App.NextPageWithLayout<ProjectContentProps> = ({
   return (
     <SWRConfig value={{ fallback }}>
       <ProjectLayout id={id}>
-        <>
-          <Box
-            className="space-y-3 md:space-y-4"
-            color="gray.600"
-            fontSize={{ base: 'sm', md: 'md' }}
-          >
-            <Text>
-              他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
-            </Text>
-            <Text>
-              因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
-            </Text>
-            <AspectRatio
-              ratio={10 / 3}
-              borderRadius={8}
-              overflow="hidden"
-              objectFit="cover"
-              objectPosition="center"
-            >
-              <Img src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" />
-            </AspectRatio>
-            <Heading fontSize={{ base: 'lg', md: 'xl' }}>
-              你有參加過導覽的經驗嗎？
-            </Heading>
-            <Text>
-              導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
-            </Text>
-            <Text>
-              近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
-            </Text>
-          </Box>
-          <Center mt={{ base: 6, md: 10 }}>
+        {(data) => (
+          <>
             <Box
-              as="button"
-              textAlign="center"
-              color="secondary-emphasis.500"
-              transition="color 0.3s ease-in-out"
-              _hover={{
-                color: 'secondary-emphasis.600'
-              }}
+              className="space-y-3 md:space-y-4"
+              color="gray.600"
+              fontSize={{ base: 'sm', md: 'md' }}
             >
-              <Text mb={{ base: 1 }}>閱讀更多</Text>
-              <Icon
-                as={MdOutlineKeyboardArrowDown}
-                boxSize={{ base: 5, md: 6 }}
-              />
+              <Text>
+                他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
+              </Text>
+              <Text>
+                因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
+              </Text>
+              <AspectRatio
+                ratio={10 / 3}
+                borderRadius={8}
+                overflow="hidden"
+                objectFit="cover"
+                objectPosition="center"
+              >
+                <Img src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" />
+              </AspectRatio>
+              <Heading fontSize={{ base: 'lg', md: 'xl' }}>
+                你有參加過導覽的經驗嗎？
+              </Heading>
+              <Text>
+                導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
+              </Text>
+              <Text>
+                近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
+              </Text>
             </Box>
-          </Center>
-        </>
+            <Center mt={{ base: 6, md: 10 }}>
+              <Box
+                as="button"
+                textAlign="center"
+                color="secondary-emphasis.500"
+                transition="color 0.3s ease-in-out"
+                _hover={{
+                  color: 'secondary-emphasis.600'
+                }}
+              >
+                <Text mb={{ base: 1 }}>閱讀更多</Text>
+                <Icon
+                  as={MdOutlineKeyboardArrowDown}
+                  boxSize={{ base: 5, md: 6 }}
+                />
+              </Box>
+            </Center>
+          </>
+        )}
       </ProjectLayout>
     </SWRConfig>
   );

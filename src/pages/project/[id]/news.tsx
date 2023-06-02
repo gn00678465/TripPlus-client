@@ -159,13 +159,13 @@ const ProjectNews: App.NextPageWithLayout<ProjectContentProps> = ({
   return (
     <SWRConfig value={{ fallback }}>
       <ProjectLayout id={id}>
-        <>
+        {(data) => (
           <Box className="space-y-2 md:space-y-4">
             {news.map((item, index) => (
               <NewsItem key={index} {...item} />
             ))}
           </Box>
-        </>
+        )}
       </ProjectLayout>
     </SWRConfig>
   );
