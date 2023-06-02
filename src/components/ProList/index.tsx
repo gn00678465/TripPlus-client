@@ -1,13 +1,15 @@
 import Pagination from '@/components/Pagination';
-import { useState } from 'react';
+import { useState, ChangeEvent, useEffect, useCallback } from 'react';
 import Card from '@/components/Card';
 import Loading from '@/components/Loading';
 import useSWR, { useSWRConfig } from 'swr';
 import { apiGetProject } from '@/api/index';
 import { currency } from '@/utils';
 import { Box, Container, Center, Flex, Select } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+
 const category = [
-  { name: '全部主題', value: 'all' },
+  { name: '全部主題', value: '' },
   { name: '社會計劃', value: 0 },
   { name: '創新設計', value: 1 },
   { name: '精選商品', value: 2 }
@@ -22,6 +24,8 @@ const tabs = [
 ];
 
 const ProList = () => {
+  const router = useRouter();
+  const { pathname } = router;
   const { mutate } = useSWRConfig();
 
   const getCategory = (value: number) => {
@@ -45,6 +49,15 @@ const ProList = () => {
   });
   const [sortType, setSortType] = useState('recently_launched');
 
+  const [categoryValue, setCategoryValue] = useState('');
+
+  const [queryParams, setQueryParams] = useState({
+    sort: 'recently_launched',
+    category: '',
+    page: '1',
+    limit: '9'
+  });
+
   const getProjects = (data: ApiProject.Projects) => {
     const items = data.items.map((item) => {
       return {
@@ -65,12 +78,14 @@ const ProList = () => {
     setList(() => items);
   };
 
-  const { data: projectsList, isLoading } = useSWR(
-    '/api/project',
-    apiGetProject,
+  const { data: projectList, isLoading } = useSWR(
+    ['/api/project', queryParams],
+    async ([key, queryParams]) => await apiGetProject(queryParams),
     {
+      revalidateOnMount: false,
       onSuccess(data, key, config) {
         if (data && data.status === 'Success') {
+          console.log('useSWR');
           getProjects(data.data);
           setPage({
             page: data.data.page,
@@ -82,14 +97,44 @@ const ProList = () => {
     }
   );
 
+  const mutateData = useCallback(() => {
+    if (pathname === '/projects') {
+      mutate(['/api/project', queryParams]);
+    } else {
+      // TODO:產品 API，暫先接專案
+      mutate(['/api/project', queryParams]);
+    }
+  }, [pathname, mutate, queryParams]);
+
   const onPageChange = (page: number) => {
-    console.log(page);
+    setQueryParams((state) => ({
+      ...state,
+      page: String(page)
+    }));
+    mutateData();
   };
 
   const changeSortType = (value: string) => {
     setSortType(value);
-    mutate('/api/project');
+    setQueryParams((state) => ({
+      ...state,
+      sort: value
+    }));
+    mutateData();
   };
+
+  const changeCategory = (e: ChangeEvent<HTMLSelectElement>) => {
+    setCategoryValue(e.target.value);
+    setQueryParams((state) => ({
+      ...state,
+      category: e.target.value
+    }));
+    mutateData();
+  };
+
+  useEffect(() => {
+    mutateData();
+  }, [mutateData]);
 
   if (isLoading) return <Loading />;
 
@@ -97,7 +142,11 @@ const ProList = () => {
     <Box pt={10} className="pb-10 md:pb-20">
       <Container maxW={'container.xl'}>
         <Flex className="flex-col md:flex-row md:justify-between">
-          <Select w={{ base: 'full', md: 200 }}>
+          <Select
+            w={{ base: 'full', md: 200 }}
+            value={categoryValue}
+            onChange={changeCategory}
+          >
             {category.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.name}
@@ -134,18 +183,24 @@ const ProList = () => {
         </Flex>
 
         <Flex flexWrap={'wrap'} pt={10}>
-          {list.map((item) => (
-            <Card item={item} key={item.id} />
-          ))}
+          {list.length <= 0 ? (
+            <Box textAlign={'center'} w={'full'} fontWeight={500} mt={4}>
+              尚無資料
+            </Box>
+          ) : (
+            list.map((item) => <Card item={item} key={item.id} />)
+          )}
         </Flex>
 
-        <Center mt={10}>
-          <Pagination
-            totalPage={page.totalPages}
-            currentPage={page.page}
-            onPageChange={onPageChange}
-          />
-        </Center>
+        {list.length > 0 && (
+          <Center mt={10}>
+            <Pagination
+              totalPage={page.totalPages}
+              currentPage={page.page}
+              onPageChange={onPageChange}
+            />
+          </Center>
+        )}
       </Container>
     </Box>
   );

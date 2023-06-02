@@ -18,4 +18,11 @@ declare namespace ApiProject {
     type: string;
     updatedAt: string;
   }
+
+  interface ProjectsParams {
+    sort?: string;
+    category?: string;
+    page: string;
+    limit: string;
+  }
 }
