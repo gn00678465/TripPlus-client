@@ -108,6 +108,7 @@ const Checkout = () => {
               <Progress
                 colorScheme="primary"
                 size="sm"
+                h={'6px'}
                 value={project.currentStatus}
                 className="mb-2 mt-3 rounded-[6px] !bg-gray-200"
               />
@@ -168,7 +169,11 @@ const Checkout = () => {
                 </Box>
                 <Box fontSize={{ xs: '12px', md: '14px' }} py={4}>
                   <Text>預計 2023 年 07 月出貨</Text>
-                  <Text>贊助專案可享 0.5% 紅利回饋</Text>
+                  <Text>
+                    贊助專案可享
+                    <span className="text-secondary-emphasis"> 0.5% </span>
+                    紅利回饋
+                  </Text>
                 </Box>
               </Box>
               <Box as="section" w={{ xs: '100%', md: 420 }} py={6}>
