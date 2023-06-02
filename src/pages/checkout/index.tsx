@@ -73,6 +73,9 @@ const Checkout = () => {
 
   return (
     <>
+      <Head>
+        <title>填寫訂單資料-TripPlus+</title>
+      </Head>
       <Box as="section" className="border-b-[1px] border-b-gray-200">
         <Container maxW="container.xl">
           <Flex className="flex-col items-center md:flex-row md:items-start">
