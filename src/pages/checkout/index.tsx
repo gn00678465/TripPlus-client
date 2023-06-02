@@ -84,6 +84,7 @@ const Checkout = () => {
               alt={project.title}
               width={300}
               height={210}
+              priority
             ></Image>
             <Box pl={4} py={4}>
               <Link
@@ -146,6 +147,7 @@ const Checkout = () => {
                     width={368}
                     height={140}
                     className="aspect-ratio-object rounded-lg"
+                    priority
                   ></Image>
                 </Box>
                 <Box className="border-b-[1px] border-gray-200 pb-[60px]">
