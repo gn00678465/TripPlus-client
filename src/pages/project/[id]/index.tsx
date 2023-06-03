@@ -560,7 +560,9 @@ const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             <PlanCard
               {...item}
               photo={data?.keyVision as string}
-              sendMonth="07"
+              sendMonth={utc2Local(data?.endTime as string)
+                .add(2, 'month')
+                .format('MM')}
             />
           )}
         />
