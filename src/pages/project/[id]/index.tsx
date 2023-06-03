@@ -26,7 +26,13 @@ import {
   Image as Img
 } from '@chakra-ui/react';
 import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
-import { PlanCard, Step, Folder, FollowButton } from '@/components/Project';
+import {
+  PlanCard,
+  Step,
+  Folder,
+  FollowButton,
+  Content
+} from '@/components/Project';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
 import {
@@ -622,9 +628,11 @@ const ProjectContent: App.NextPageWithLayout<ProjectContentProps> = ({
       <ProjectLayout id={id} isFollowed={isFollowed}>
         {(data) => (
           <Folder>
-            <div
-              dangerouslySetInnerHTML={{ __html: data?.content ?? '' }}
-            ></div>
+            <Content>
+              <div
+                dangerouslySetInnerHTML={{ __html: data?.content ?? '' }}
+              ></div>
+            </Content>
           </Folder>
         )}
       </ProjectLayout>

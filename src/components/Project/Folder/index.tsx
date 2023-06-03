@@ -49,7 +49,7 @@ export const Folder = ({ children }: FolderProps) => {
           </Center>
         )}
       </Box>
-      <style jsx global>
+      <style jsx>
         {`
           .folder {
             max-height: 600px;
