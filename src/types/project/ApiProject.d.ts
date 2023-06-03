@@ -94,7 +94,7 @@ declare namespace ApiProject {
     startTime: string;
     endTime: string;
     target: number;
-    category: 0 | 1;
+    category: 0 | 1 | 2;
     sum: number;
     sponsorCount: number;
     isShowTarget: 0 | 1;

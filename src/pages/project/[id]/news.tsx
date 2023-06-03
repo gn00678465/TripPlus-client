@@ -1,6 +1,10 @@
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
-import { ProjectLayout, ProjectLayoutProps } from '.';
+import {
+  ProjectLayout,
+  ProjectLayoutProps,
+  getServerSideProps as getSSRProps
+} from '.';
 import { Layout } from '@/components';
 import {
   Box,
@@ -14,35 +18,9 @@ import {
 import { BsBell } from 'react-icons/bs';
 import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
 import { SWRConfig } from 'swr';
-import { request, safeAwait } from '@/utils';
 import { utc2Local } from '@/utils';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params || {};
-
-  const [err, res] = await safeAwait<ApiProject.Project>(
-    request(`/project/${id}`)
-  );
-  if (err && err.message === '路由資訊錯誤') {
-    return {
-      notFound: true
-    };
-  }
-  if (res) {
-    return {
-      props: {
-        id,
-        data: res.data,
-        fallback: {
-          [`/project/${id}`]: res
-        }
-      }
-    };
-  }
-  return {
-    props: {}
-  };
-};
+export const getServerSideProps: GetServerSideProps = getSSRProps;
 
 interface News {
   title: string;
@@ -135,6 +113,7 @@ interface ProjectContentProps extends ProjectLayoutProps {
 
 const ProjectNews: App.NextPageWithLayout<ProjectContentProps> = ({
   id,
+  isFollowed,
   fallback
 }) => {
   const news: News[] = [
@@ -158,12 +137,23 @@ const ProjectNews: App.NextPageWithLayout<ProjectContentProps> = ({
 
   return (
     <SWRConfig value={{ fallback }}>
-      <ProjectLayout id={id}>
+      <ProjectLayout id={id} isFollowed={isFollowed}>
         {(data) => (
           <Box className="space-y-2 md:space-y-4">
-            {news.map((item, index) => (
-              <NewsItem key={index} {...item} />
-            ))}
+            {(data?.news.length &&
+              data?.news.map((item, index) => (
+                <NewsItem key={index} {...item} />
+              ))) || (
+              <Box
+                textAlign="center"
+                py="10"
+                bg="gray.100"
+                borderRadius={8}
+                color="gray.900"
+              >
+                目前沒有最新消息
+              </Box>
+            )}
           </Box>
         )}
       </ProjectLayout>

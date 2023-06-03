@@ -1,6 +1,10 @@
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
-import { ProjectLayout, ProjectLayoutProps } from '.';
+import {
+  ProjectLayout,
+  ProjectLayoutProps,
+  getServerSideProps as getSSRProps
+} from '.';
 import { Layout } from '@/components';
 import {
   Accordion,
@@ -13,35 +17,9 @@ import {
   Divider
 } from '@chakra-ui/react';
 import { SWRConfig } from 'swr';
-import { request, safeAwait } from '@/utils';
 import { utc2Local } from '@/utils';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params || {};
-
-  const [err, res] = await safeAwait<ApiProject.Project>(
-    request(`/project/${id}`)
-  );
-  if (err && err.message === '路由資訊錯誤') {
-    return {
-      notFound: true
-    };
-  }
-  if (res) {
-    return {
-      props: {
-        id,
-        data: res.data,
-        fallback: {
-          [`/project/${id}`]: res
-        }
-      }
-    };
-  }
-  return {
-    props: {}
-  };
-};
+export const getServerSideProps: GetServerSideProps = getSSRProps;
 
 interface ProjectContentProps extends ProjectLayoutProps {
   fallback: {
@@ -108,11 +86,12 @@ const FAQItem = ({
 
 const ProjectFAQs: App.NextPageWithLayout<ProjectContentProps> = ({
   id,
+  isFollowed,
   fallback
 }) => {
   return (
     <SWRConfig value={{ fallback }}>
-      <ProjectLayout id={id}>
+      <ProjectLayout id={id} isFollowed={isFollowed}>
         {(data) => (
           <Box className="space-y-4 md:space-y-6">
             {data?.faqs.map((item, index) => (

@@ -47,6 +47,7 @@ const RemainTag = ({ count }: { count: number }) => (
 
 export interface PlanCardProps extends ApiProject.Plan {
   photo: string;
+  sendMonth: string;
 }
 
 export const PlanCard = (props: PlanCardProps) => {
@@ -73,8 +74,9 @@ export const PlanCard = (props: PlanCardProps) => {
         >
           <Image
             fill
-            src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
-            alt="提案者 Logo"
+            src={props.photo}
+            alt={props.title}
+            sizes="(max-width: 768px) 100%, (max-width: 1200px) 50vw, 33vw"
           ></Image>
         </AspectRatio>
         <Text fontSize={{ base: 'md' }} fontWeight="medium">
@@ -103,7 +105,7 @@ export const PlanCard = (props: PlanCardProps) => {
         </Box>
         <Divider my={{ base: 4 }}></Divider>
         <Text color="gray.600" fontSize={{ base: 'xs' }}>
-          預計 2023 年 07 月出貨
+          預計 2023 年 {props.sendMonth} 月出貨
         </Text>
         <Text color="gray.600" fontSize={{ base: 'xs' }}>
           贊助專案可享

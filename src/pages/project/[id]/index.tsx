@@ -4,9 +4,8 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { Layout, ImageFallback } from '@/components';
 import { Carousel } from '@/components/Swiper';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useMemo, MouseEvent } from 'react';
 import useSWR, { SWRConfig } from 'swr';
-import userSWRMutation from 'swr/mutation';
 import {
   Box,
   BoxProps,
@@ -24,17 +23,12 @@ import {
   Divider,
   Icon,
   Center,
-  useDisclosure,
-  useSteps,
-  useToast,
   Image as Img
 } from '@chakra-ui/react';
 import BreadcrumbList, { type Breadcrumb } from '@/components/Breadcrumb';
-import { PlanCard } from '@/components/Project';
-import { MdBookmarkBorder, MdOutlineKeyboardArrowDown } from 'react-icons/md';
+import { PlanCard, Step, Folder, FollowButton } from '@/components/Project';
 import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 import { FiGlobe, FiMessageSquare } from 'react-icons/fi';
-import { BsCheck2, BsCircleFill } from 'react-icons/bs';
 import {
   currencyTWD,
   request,
@@ -43,11 +37,27 @@ import {
   replaceTWDSymbol,
   utc2Local
 } from '@/utils';
-import { apiGetProjectInfo, apiPostFollow } from '@/api';
+import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
+import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
+  const { token } = context.req.cookies;
+
+  let isFollowed: 0 | 1 = 0;
+
+  if (token) {
+    const [err, res] = await safeAwait<ApiUser.Follows>(
+      request('/user/follows', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    );
+    if (res && res.status === 'Success') {
+      const result = res.data.follows.find((item) => item.projectId?.id === id);
+      isFollowed = !result ? 0 : 1;
+    }
+  }
 
   const [err, res] = await safeAwait<ApiProject.Project>(
     request(`/project/${id}`)
@@ -65,6 +75,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         id,
+        isFollowed,
         fallback: {
           [`/project/${id}`]: res
         }
@@ -79,21 +90,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 interface BoxBlockProps extends Omit<BoxProps, 'id'> {
   id?: string | string[];
   data?: ApiProject.Project;
+  isFollowed?: 0 | 1;
 }
-const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
-  const categoryMap: Record<number, string> = {
-    0: '社會計畫',
-    1: '創新設計',
-    2: '精選商品'
-  };
-
+const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
   const menu: Breadcrumb[] = [
     {
       name: '首頁',
       url: '/'
     },
     {
-      name: categoryMap[data?.category as number],
+      name: categoryEnum[data?.category as number],
       url: `/projects?category=${data?.category}`
     },
     {
@@ -102,12 +108,18 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
     }
   ];
 
-  const { trigger } = userSWRMutation(
-    '/api/user/follow',
-    (url, { arg }: { arg: string }) => apiPostFollow(arg)
-  );
-
-  console.log(data);
+  const handleScroll = (
+    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
+  ) => {
+    e.preventDefault();
+    const href = (e.target as HTMLButtonElement).dataset.href;
+    const targetId = href?.replace(/.*\#/, '');
+    if (!targetId) return;
+    const elem = document.getElementById(targetId);
+    elem?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  };
 
   return (
     <Box py={{ base: 6 }} {...rest}>
@@ -140,7 +152,7 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             fontWeight={400}
             color="gray.600"
           >
-            {categoryMap[data?.category as number]}
+            {categoryEnum[data?.category as number]}
           </Link>
         </Flex>
         <Flex
@@ -263,38 +275,16 @@ const HeaderBlock = ({ id, data, ...rest }: BoxBlockProps) => {
               rowGap={{ base: 3, lg: 0 }}
               columnGap={{ base: 0, lg: 4 }}
             >
-              <Button
-                px={{ lg: '60px' }}
-                colorScheme="secondary-emphasis"
-                leftIcon={
-                  <Icon as={MdBookmarkBorder} boxSize={{ base: 5, md: 6 }} />
-                }
-                variant="outline"
-                _hover={{
-                  color: 'white',
-                  backgroundColor: 'secondary-emphasis.500'
-                }}
-                onClick={() => {
-                  trigger(id as string, {
-                    onError(err, key, config) {
-                      console.log('error');
-                    },
-                    onSuccess(data, key, config) {
-                      console.log('success');
-                    }
-                  });
-                  console.log(id);
-                }}
-              >
-                追蹤專案
-              </Button>
+              <FollowButton id={id} isFollowed={isFollowed} />
               <Button
                 px={{ lg: '60px' }}
                 className="text-secondary-emphasis"
                 backgroundColor="secondary"
+                data-href="#plans"
                 _hover={{
                   backgroundColor: 'secondary-emphasis.50'
                 }}
+                onClick={handleScroll}
               >
                 贊助專案
               </Button>
@@ -408,6 +398,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                   fallbackSrc={NoImage.src}
                   alt={data?.teamId.title as string}
                   fill
+                  sizes="(max-width: 768px) 100%, (max-width: 1200px) 50vw, 33vw"
                 />
               </AspectRatio>
               <ul className="flex w-full flex-col justify-center gap-y-2 text-xs tracking-[1px] md:justify-start md:gap-y-1 md:text-sm">
@@ -441,100 +432,17 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
 };
 
 const StepBlock = ({ data }: { data?: ApiProject.Project }) => {
-  const steps = [
-    { title: '企劃目的' },
-    { title: '款項分配' },
-    { title: '回饋品寄送' },
-    { title: '實際執行' }
-  ];
+  const stepList = useMemo(() => {
+    if (data?.category === 2) return ProductStepEnum;
+    return projectStepEnum;
+  }, [data?.category]);
 
-  const { activeStep } = useSteps({
-    index: (data?.histories.length || 0) - 1,
-    count: steps.length
-  });
+  const step = useMemo(() => {
+    if (!data?.histories || data?.histories.length === 0) return -1;
+    return data.histories.length - 1;
+  }, [data?.histories]);
 
-  interface StepProps {
-    title: string;
-    index: number;
-    complete?: ReactNode;
-    incomplete?: ReactNode;
-  }
-  const Step = ({ title, index, complete, incomplete }: StepProps) => {
-    return (
-      <Box textAlign="center">
-        <Box mb={2} display="inline-block">
-          {activeStep >= index ? (
-            <Box
-              w="full"
-              h="full"
-              maxW="36px"
-              maxH="36px"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              p={2}
-              backgroundColor="primary.500"
-              color="white"
-              borderRadius="50%"
-            >
-              {complete}
-            </Box>
-          ) : (
-            <Box
-              w="full"
-              h="full"
-              maxW="36px"
-              maxH="36px"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              p={2}
-              backgroundColor="transparent"
-              color="gray.100"
-              borderRadius="50%"
-            >
-              {incomplete}
-            </Box>
-          )}
-        </Box>
-        <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.600">
-          {title}
-        </Text>
-      </Box>
-    );
-  };
-
-  return (
-    <Center px={{ base: 3, md: 0 }} mt={{ base: 6, md: 10 }}>
-      <Flex
-        w="full"
-        maxW="660px"
-        pos="relative"
-        alignItems="center"
-        justifyContent="space-between"
-        _before={{
-          content: '""',
-          position: 'absolute',
-          width: 'calc(100% - 48px)',
-          height: '2px',
-          backgroundColor: 'gray.100',
-          left: '24px',
-          top: '18px',
-          zIndex: -1
-        }}
-      >
-        {steps.map((step, index) => (
-          <Step
-            key={index}
-            index={index}
-            complete={<Icon as={BsCheck2} boxSize={5} />}
-            incomplete={<Icon as={BsCircleFill} />}
-            {...step}
-          />
-        ))}
-      </Flex>
-    </Center>
-  );
+  return <Step stepList={stepList} step={step} />;
 };
 
 interface MenuItem {
@@ -639,7 +547,7 @@ const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   const plans = (data && data.plans) || [];
 
   return (
-    <Box backgroundColor="gray.100" py={{ base: 10 }} {...rest}>
+    <Box id="plans" backgroundColor="gray.100" py={{ base: 10 }} {...rest}>
       <Container px={{ base: 3, xl: 0 }} maxW="container.xl">
         <Center mb={{ base: 5 }}>
           <Heading fontSize={{ base: '28px' }} fontWeight="bold">
@@ -649,7 +557,11 @@ const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
         <Carousel
           data={plans}
           card={(item) => (
-            <PlanCard {...item} photo={data?.keyVision as string} />
+            <PlanCard
+              {...item}
+              photo={data?.keyVision as string}
+              sendMonth="07"
+            />
           )}
         />
       </Container>
@@ -660,9 +572,14 @@ const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
 export interface ProjectLayoutProps {
   children: ReactNode | ((arg?: ApiProject.Project) => ReactNode);
   id?: string | string[];
+  isFollowed: 0 | 1;
 }
 
-export const ProjectLayout = ({ children, id }: ProjectLayoutProps) => {
+export const ProjectLayout = ({
+  children,
+  isFollowed,
+  id
+}: ProjectLayoutProps) => {
   const { data } = useSWR(id ? `/project/${id}` : null, () =>
     swrFetch(apiGetProjectInfo(id as string))
   );
@@ -672,7 +589,11 @@ export const ProjectLayout = ({ children, id }: ProjectLayoutProps) => {
       <Head>
         <title>{`${data?.data?.title}-TripPlus+`}</title>
       </Head>
-      <HeaderBlock id={id} data={data?.data}></HeaderBlock>
+      <HeaderBlock
+        id={id}
+        data={data?.data}
+        isFollowed={isFollowed}
+      ></HeaderBlock>
       <SummaryBlock id={id} data={data?.data}></SummaryBlock>
       <StepBlock data={data?.data} />
       <ContentBlock id={id}>
@@ -691,66 +612,18 @@ interface ProjectContentProps extends ProjectLayoutProps {
 
 const ProjectContent: App.NextPageWithLayout<ProjectContentProps> = ({
   id,
+  isFollowed,
   fallback
 }) => {
-  const { getDisclosureProps, getButtonProps } = useDisclosure();
-
-  const buttonProps = getButtonProps();
-  const disclosureProps = getDisclosureProps();
-
   return (
     <SWRConfig value={{ fallback }}>
-      <ProjectLayout id={id}>
+      <ProjectLayout id={id} isFollowed={isFollowed}>
         {(data) => (
-          <>
-            <Box
-              className="space-y-3 md:space-y-4"
-              color="gray.600"
-              fontSize={{ base: 'sm', md: 'md' }}
-            >
-              <Text>
-                他是聾人，也是目前雲林縣聽語障福利協進會的總幹事，在加入協會之前，他擔任樂器拋光師，擁有穩定收入能夠照養家庭，但在發現不是每個聾人都能跟他一樣有一份穩定的工作後，決定開始協會工作生涯，沒想到一做就是20多年。
-              </Text>
-              <Text>
-                因為本身是聾人，所以他更能夠深刻體會聾人的需求、看見了許多聾人的困境，他推動了許多聽語障相關計劃，不論是「聾文盲的識字教育計劃」、「聽語障環保清潔服務隊」等，也發現對於聾人來說，能夠有一個專屬的導覽是多麽期待的事情！
-              </Text>
-              <AspectRatio
-                ratio={10 / 3}
-                borderRadius={8}
-                overflow="hidden"
-                objectFit="cover"
-                objectPosition="center"
-              >
-                <Img src="https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" />
-              </AspectRatio>
-              <Heading fontSize={{ base: 'lg', md: 'xl' }}>
-                你有參加過導覽的經驗嗎？
-              </Heading>
-              <Text>
-                導覽活動對大家而言是多麼稀鬆平常的事情，到了現場可以選擇參加固定的導覽場次或是使用多媒體導覽機租借認識各種議題和作品，但是聾人呢？
-              </Text>
-              <Text>
-                近年來，雖然越來越多場館提供各種形式的手語導覽服務，甚至有聾人導覽員提供導覽服務，但是這些服務大多集中在北部，而多為聽人導覽員與手語翻譯員提供導覽服務。
-              </Text>
-            </Box>
-            <Center mt={{ base: 6, md: 10 }}>
-              <Box
-                as="button"
-                textAlign="center"
-                color="secondary-emphasis.500"
-                transition="color 0.3s ease-in-out"
-                _hover={{
-                  color: 'secondary-emphasis.600'
-                }}
-              >
-                <Text mb={{ base: 1 }}>閱讀更多</Text>
-                <Icon
-                  as={MdOutlineKeyboardArrowDown}
-                  boxSize={{ base: 5, md: 6 }}
-                />
-              </Box>
-            </Center>
-          </>
+          <Folder>
+            <div
+              dangerouslySetInnerHTML={{ __html: data?.content ?? '' }}
+            ></div>
+          </Folder>
         )}
       </ProjectLayout>
     </SWRConfig>
