@@ -46,6 +46,7 @@ import {
 import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
+import dayjs from 'dayjs';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
@@ -564,11 +565,16 @@ const PlansBlock = ({ id, data, ...rest }: BoxBlockProps) => {
           data={plans}
           card={(item) => (
             <PlanCard
-              {...item}
               photo={data?.keyVision as string}
+              sendYear={utc2Local(data?.endTime as string)
+                .add(2, 'month')
+                .format('YYYY')}
               sendMonth={utc2Local(data?.endTime as string)
                 .add(2, 'month')
                 .format('MM')}
+              bonus="0.5%"
+              isFinish={dayjs().isAfter(utc2Local(data?.endTime as string))}
+              {...item}
             />
           )}
         />
