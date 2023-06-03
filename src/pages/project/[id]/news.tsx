@@ -116,25 +116,6 @@ const ProjectNews: App.NextPageWithLayout<ProjectContentProps> = ({
   isFollowed,
   fallback
 }) => {
-  const news: News[] = [
-    {
-      title: '您的捐款已於05/15星期一100%到社團法人雲林縣聽語障福利協進會',
-      content: '您的捐款已於05/15星期一100%到社團法人雲林縣聽語障福利協進會',
-      publishedAt: '2023-05-15T02:13:05.639Z'
-    },
-    {
-      title: '集資正式結束，由衷感謝每位贊助者',
-      content: '集資正式結束，由衷感謝每位贊助者',
-      publishedAt: '2023-05-30T10:36:10.807Z'
-    },
-    {
-      title: '重要公告：募資計畫將延長期限！',
-      content:
-        '申請延長募資天數，希望能夠有更多的時間找到更多的贊助者一起支持這個專案！',
-      publishedAt: '2023-05-31T10:36:10.807Z'
-    }
-  ];
-
   return (
     <SWRConfig value={{ fallback }}>
       <ProjectLayout id={id} isFollowed={isFollowed}>
