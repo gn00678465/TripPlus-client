@@ -47,6 +47,7 @@ import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 import dayjs from 'dayjs';
+import { spawn } from 'child_process';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
@@ -236,8 +237,17 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                     剩餘時間
                   </p>
                   <p className="text-lg  text-gray-900 lg:text-xl">
-                    <span className="font-medium">{data?.countDownDays}</span>
-                    <span className="ml-1 lg:text-lg">天</span>
+                    {data?.countDownDays === 0 &&
+                    dayjs().isAfter(utc2Local(data?.endTime as string)) ? (
+                      <span className="lg:text-lg">已結束</span>
+                    ) : (
+                      <>
+                        <span className="font-medium">
+                          {data?.countDownDays}
+                        </span>
+                        <span className="ml-1 lg:text-lg">天</span>
+                      </>
+                    )}
                   </p>
                 </li>
                 <Divider orientation="vertical" mx={{ base: 0, lg: 6 }} />
