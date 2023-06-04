@@ -9,46 +9,11 @@ import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 
 SwiperCore.use([Navigation]);
 
-const Banner = () => {
-  const bannerList = [
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1630148494091-e1f9e2ba6cb3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80',
-      title: '帶上夢想．輕鬆出發',
-      subtitle: '超大容量行李箱，旅行必備良伴'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1541777458150-cb0f90c9da07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      title: '帶上夢想．輕鬆出發',
-      subtitle: '超大容量行李箱，旅行必備良伴'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1581553680321-4fffae59fccd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      title: '帶上夢想．輕鬆出發',
-      subtitle: '超大容量行李箱，旅行必備良伴'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1630148494091-e1f9e2ba6cb3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80',
-      title: '帶上夢想．輕鬆出發',
-      subtitle: '超大容量行李箱，旅行必備良伴'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1541777458150-cb0f90c9da07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      title: '帶上夢想．輕鬆出發',
-      subtitle: '超大容量行李箱，旅行必備良伴'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1581553680321-4fffae59fccd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      title: '帶上夢想．輕鬆出發',
-      subtitle: '超大容量行李箱，旅行必備良伴'
-    }
-  ];
+interface BannerProps {
+  bannerList: ApiHome.BannerItem[];
+}
 
+const Banner = ({ bannerList }: BannerProps) => {
   const prevRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLDivElement>(null);
 
@@ -89,12 +54,12 @@ const Banner = () => {
         onBeforeInit={onBeforeInit}
         modules={[Pagination, Autoplay]}
       >
-        {bannerList.map((banner, index) => {
+        {bannerList.map((banner: ApiHome.BannerItem, index) => {
           return (
             <SwiperSlide key={'banner' + index}>
               <Link href="#" className="aspect-ratio aspect-ratio-25x14">
                 <Image
-                  src={banner.imgUrl}
+                  src={banner.imageUrl}
                   alt="banner"
                   width={740}
                   height={414}

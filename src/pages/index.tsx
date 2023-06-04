@@ -1,5 +1,5 @@
 import { Layout } from '@/components';
-import type { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -17,6 +17,9 @@ import Banner from '@/components/Swiper/banner';
 import Cases from '@/components/Swiper/cases';
 import { CgInfinity } from 'react-icons/cg';
 import { MdChevronRight } from 'react-icons/md';
+import useSWR, { useSWRConfig } from 'swr';
+import { apiGetHome, apiGetHomeData, apiGetHomeBanner } from '@/api/index';
+import { currencyTWD, replaceTWDSymbol } from '@/utils';
 
 import {
   Text,
@@ -29,6 +32,75 @@ import {
 } from '@chakra-ui/react';
 
 const Index = () => {
+  const [bannerList, setBannerList] = useState<ApiHome.BannerItem[]>([]);
+  const [hotItemList, setHotItemList] = useState<ApiHome.Item[]>([]);
+  const [newItemList, setNewItemList] = useState<ApiHome.Item[]>([]);
+  const [caseList, setCaseList] = useState<ApiHome.Item[]>([]);
+  const [homeData, setHomeData] = useState<ApiHome.HomeData>({
+    sponsorCount: 0,
+    successCount: 0,
+    sum: 0
+  });
+
+  const { data } = useSWR(['get', '/api/home'], apiGetHome, {
+    onSuccess(data, key, config) {
+      if (data && data.status === 'Success') {
+        getHome(data.data);
+      }
+    }
+  });
+
+  const { data: statistics } = useSWR(
+    ['get', '/api/homeData'],
+    apiGetHomeData,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          getHomeData(data.data);
+        }
+      }
+    }
+  );
+
+  const { data: banner } = useSWR(
+    ['get', '/api/home/banner'],
+    apiGetHomeBanner,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          getHomeBanner(data.data);
+        }
+      }
+    }
+  );
+
+  const getHome = (data: ApiHome.Home) => {
+    setHotItemList(data.hot);
+    setNewItemList(data.latest);
+    setCaseList(data.success);
+  };
+
+  const getHomeData = (data: ApiHome.HomeData) => {
+    setHomeData(data);
+  };
+
+  const getHomeBanner = (data: ApiHome.BannerItem[]) => {
+    setBannerList(data);
+  };
+
+  const getCategory = (value: number) => {
+    switch (value) {
+      case 0:
+        return '社會計劃';
+      case 1:
+        return '創新設計';
+      case 2:
+        return '精選商品';
+      default:
+        return '';
+    }
+  };
+
   const category = [
     {
       title: '社會企劃',
@@ -74,76 +146,6 @@ const Index = () => {
       width: 50,
       height: 49,
       text: '專案進度公開透明'
-    }
-  ];
-
-  const hotItemList = [
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1603030908455-4a4588c0acdd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-      category: '社會企劃',
-      title:
-        '台灣世界展望會「籃海計畫」| 用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      team: '台灣世界展望會',
-      targetMoney: '10,000,000',
-      currentStatus: 1000,
-      countdownDays: 10
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1611489704164-6f73c62bd810?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80',
-      category: '創新設計',
-      title: 'ARKY Somnus Travel Pillow 咕咕旅行枕',
-      team: 'ARKY',
-      targetMoney: '10,000,000',
-      currentStatus: 1000,
-      countdownDays: 3
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      category: '社會企劃',
-      title:
-        '兒童鐵道美術館｜來自山林的大山箱｜「居家體驗、戶外探索」 二合一的親子美感教材，陪伴孩子走進自然',
-      team: '兒童鐵道圖書館',
-      targetMoney: '500,000',
-      currentStatus: 40,
-      countdownDays: 20
-    }
-  ];
-
-  const newItemList = [
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1603030908455-4a4588c0acdd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-      category: '社會企劃',
-      title:
-        '台灣世界展望會「籃海計畫」| 用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      team: '台灣世界展望會',
-      targetMoney: '100,000',
-      currentStatus: 40,
-      countdownDays: 50
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1611489704164-6f73c62bd810?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80',
-      category: '創新設計',
-      title: 'ARKY Somnus Travel Pillow 咕咕旅行枕',
-      team: 'ARKY',
-      targetMoney: '70,000',
-      currentStatus: 8,
-      countdownDays: 30
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      category: '社會企劃',
-      title:
-        '兒童鐵道美術館｜來自山林的大山箱｜「居家體驗、戶外探索」 二合一的親子美感教材，陪伴孩子走進自然',
-      team: '兒童鐵道圖書館',
-      targetMoney: '500,000',
-      currentStatus: 40,
-      countdownDays: 20
     }
   ];
 
@@ -211,7 +213,7 @@ const Index = () => {
           })}
         </Flex>
       </Box>
-      <Banner />
+      <Banner bannerList={bannerList} />
       <Box as="section" className="bg-gray-100 py-10 md:py-20">
         <Container maxW="container.xl">
           <Flex
@@ -240,7 +242,7 @@ const Index = () => {
               <MdChevronRight className="text-2xl" />
             </Link>
           </Flex>
-          <Box className="flex flex-wrap">
+          <Box>
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
               {hotItemList.map((item) => {
                 return (
@@ -250,7 +252,7 @@ const Index = () => {
                       className="aspect-ratio aspect-ratio-10x7 relative"
                     >
                       <Image
-                        src={item.imgUrl}
+                        src={item.keyVision}
                         alt={item.title}
                         width={800}
                         height={560}
@@ -271,7 +273,7 @@ const Index = () => {
                           fontSize={{ xs: '12px', md: '14px' }}
                           className="text-gray-600"
                         >
-                          {item.category}
+                          {getCategory(item.category)}
                         </Text>
                         <Link href="#">
                           <Heading
@@ -287,7 +289,7 @@ const Index = () => {
                           href="#"
                           className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
-                          {item.team}
+                          {item.teamId.title}
                         </Link>
                       </Box>
                       <Box>
@@ -296,12 +298,12 @@ const Index = () => {
                           fontWeight={500}
                           className="text-gray-900"
                         >
-                          ${item.targetMoney}
+                          {currencyTWD(item.target)}
                         </Text>
                         <Progress
                           colorScheme="primary"
                           size="sm"
-                          value={item.currentStatus}
+                          value={item.progressRate}
                           className="mb-[18px] mt-4 rounded-[6px] !bg-gray-200"
                         />
                         <Box className="flex justify-between">
@@ -309,10 +311,10 @@ const Index = () => {
                             fontSize={{ xs: '14px', md: '16px' }}
                             className="text-gray-900"
                           >
-                            {item.currentStatus}%
+                            {item.progressRate}%
                           </Text>
                           <Text fontSize={{ xs: '12px', md: '14px' }}>
-                            倒數 {item.countdownDays} 天
+                            倒數 {item.countDownDays} 天
                           </Text>
                         </Box>
                       </Box>
@@ -352,7 +354,7 @@ const Index = () => {
               <MdChevronRight className="text-2xl" />
             </Link>
           </Flex>
-          <Box className="flex flex-wrap">
+          <Box>
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
               {newItemList.map((item) => {
                 return (
@@ -362,7 +364,7 @@ const Index = () => {
                       className="aspect-ratio aspect-ratio-10x7 relative"
                     >
                       <Image
-                        src={item.imgUrl}
+                        src={item.keyVision}
                         alt={item.title}
                         width={800}
                         height={560}
@@ -383,7 +385,7 @@ const Index = () => {
                           fontSize={{ xs: '12px', md: '14px' }}
                           className="text-gray-600"
                         >
-                          {item.category}
+                          {getCategory(item.category)}
                         </Text>
                         <Link href="#">
                           <Heading
@@ -399,7 +401,7 @@ const Index = () => {
                           href="#"
                           className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
-                          {item.team}
+                          {item.teamId.title}
                         </Link>
                       </Box>
                       <Box>
@@ -408,12 +410,12 @@ const Index = () => {
                           fontWeight={500}
                           className="text-gray-900"
                         >
-                          ${item.targetMoney}
+                          {currencyTWD(item.target)}
                         </Text>
                         <Progress
                           colorScheme="primary"
                           size="sm"
-                          value={item.currentStatus}
+                          value={item.progressRate}
                           className="mb-[18px] mt-4 rounded-[6px] !bg-gray-200"
                         />
                         <Box className="flex justify-between">
@@ -421,10 +423,10 @@ const Index = () => {
                             fontSize={{ xs: '14px', md: '16px' }}
                             className="text-gray-900"
                           >
-                            {item.currentStatus}%
+                            {item.progressRate}%
                           </Text>
                           <Text fontSize={{ xs: '12px', md: '14px' }}>
-                            倒數 {item.countdownDays} 天
+                            倒數 {item.countDownDays} 天
                           </Text>
                         </Box>
                       </Box>
@@ -513,9 +515,9 @@ const Index = () => {
               <MdChevronRight className="text-2xl" />
             </Link>
           </Flex>
-          <Box className="flex flex-wrap">
+          <Box>
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
-              {productList.map((item) => {
+              {newItemList.map((item) => {
                 return (
                   <Flex direction="column" key={item.title}>
                     <Link
@@ -523,7 +525,7 @@ const Index = () => {
                       className="aspect-ratio aspect-ratio-10x7 relative"
                     >
                       <Image
-                        src={item.imgUrl}
+                        src={item.keyVision}
                         alt={item.title}
                         width={800}
                         height={560}
@@ -544,7 +546,7 @@ const Index = () => {
                           fontSize={{ xs: '12px', md: '14px' }}
                           className="text-gray-600"
                         >
-                          {item.category}
+                          {getCategory(item.category)}
                         </Text>
                         <Link href="#">
                           <Heading
@@ -560,7 +562,7 @@ const Index = () => {
                           href="#"
                           className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
-                          {item.team}
+                          {item.teamId.title}
                         </Link>
                       </Box>
                       <Box>
@@ -590,7 +592,7 @@ const Index = () => {
           <Heading className="mb-5 text-center text-[32px] font-bold md:mb-10">
             成功案例
           </Heading>
-          <Cases />
+          <Cases caseList={caseList} />
         </Container>
       </Box>
       <Box
@@ -615,7 +617,7 @@ const Index = () => {
             <Box className="mb-10 flex flex-col items-center md:mb-0">
               <Box className="mb-4 flex md:mb-6">
                 <span className="mr-2 text-[36px] md:text-[54px]">
-                  1,000,000
+                  {replaceTWDSymbol(currencyTWD(homeData.successCount))}
                 </span>
                 <span className="mt-5 text-[18px] md:mt-8 md:text-[24px]">
                   件
@@ -626,7 +628,7 @@ const Index = () => {
             <Box className="mb-10 flex flex-col items-center md:mx-[78px] md:mb-0 md:border-x-[1px] md:border-white/[.3] md:px-12">
               <Box className="mb-4 flex md:mb-6">
                 <span className="mr-2 text-[36px] md:text-[54px]">
-                  $100,000,000
+                  {currencyTWD(homeData.sum)}
                 </span>
                 <span className="mt-5 text-[18px] md:mt-8 md:text-[24px]">
                   元
@@ -637,7 +639,7 @@ const Index = () => {
             <Box className="flex flex-col items-center">
               <Box className="mb-4 flex md:mb-6">
                 <span className="mr-2 text-[36px] md:text-[54px]">
-                  10,000,000
+                  {replaceTWDSymbol(currencyTWD(homeData.sponsorCount))}
                 </span>
                 <span className="mt-5 text-[18px] md:mt-8 md:text-[24px]">
                   位

@@ -7,44 +7,27 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import { Text, Box, Heading, Flex } from '@chakra-ui/react';
+import { currencyTWD } from '@/utils';
 
 SwiperCore.use([Navigation]);
 
-const Cases = () => {
-  const CaseList = [
-    {
-      id: 1,
-      imgUrl:
-        'https://images.unsplash.com/photo-1603030908455-4a4588c0acdd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-      category: '社會企劃',
-      title:
-        '台灣世界展望會「籃海計畫」| 用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      team: '台灣世界展望會',
-      targetMoney: '10,000,000',
-      currentStatus: 20000
-    },
-    {
-      id: 2,
-      imgUrl:
-        'https://images.unsplash.com/photo-1611489704164-6f73c62bd810?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80',
-      category: '創新設計',
-      title: 'ARKY Somnus Travel Pillow 咕咕旅行枕',
-      team: 'ARKY',
-      targetMoney: '10,000,000',
-      currentStatus: 10000
-    },
-    {
-      id: 3,
-      imgUrl:
-        'https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      category: '社會企劃',
-      title:
-        '兒童鐵道美術館｜來自山林的大山箱｜「居家體驗、戶外探索」 二合一的親子美感教材，陪伴孩子走進自然',
-      team: '兒童鐵道圖書館',
-      targetMoney: '5,000,000',
-      currentStatus: 5000
+interface CasesProps {
+  caseList: ApiHome.Item[];
+}
+
+const Cases = ({ caseList }: CasesProps) => {
+  const getCategory = (value: number) => {
+    switch (value) {
+      case 0:
+        return '社會計劃';
+      case 1:
+        return '創新設計';
+      case 2:
+        return '精選商品';
+      default:
+        return '';
     }
-  ];
+  };
 
   const prevRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLDivElement>(null);
@@ -94,7 +77,7 @@ const Cases = () => {
         onBeforeInit={onBeforeInit}
         modules={[Pagination, Autoplay]}
       >
-        {CaseList.map((item, index) => {
+        {caseList.map((item, index) => {
           return (
             <SwiperSlide key={'case' + index}>
               <Link href="#">
@@ -102,7 +85,7 @@ const Cases = () => {
                   <Flex direction="column">
                     <Box className="aspect-ratio aspect-ratio-10x7">
                       <Image
-                        src={item.imgUrl}
+                        src={item.keyVision}
                         alt={item.title}
                         width={368}
                         height={260}
@@ -119,7 +102,7 @@ const Cases = () => {
                           fontSize={{ xs: '12px', md: '14px' }}
                           className="text-gray-600"
                         >
-                          {item.category}
+                          {getCategory(item.category)}
                         </Text>
                         <Heading
                           fontSize={{ xs: '16px', md: '20px' }}
@@ -130,7 +113,7 @@ const Cases = () => {
                           {item.title}
                         </Heading>
                         <Text className="text-xs leading-6 text-secondary-emphasis md:text-sm">
-                          {item.team}
+                          {item.teamId.title}
                         </Text>
                       </Box>
                       <Box className="mt-6">
@@ -139,7 +122,7 @@ const Cases = () => {
                             fontSize={{ xs: '18px', md: '20px' }}
                             className="font-ubuntu font-medium text-gray-900"
                           >
-                            ${item.targetMoney} | {item.currentStatus}%
+                            {currencyTWD(item.target)} | {item.progressRate}%
                           </Text>
                           <Text
                             fontSize={{ xs: '12px', md: '14px' }}
