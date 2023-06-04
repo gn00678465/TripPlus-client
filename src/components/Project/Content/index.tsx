@@ -19,18 +19,18 @@ export const Content = ({ children }: ContentProps) => {
           }
 
           .content p,
-          ol,
-          ul {
+          .content ol,
+          .content ul {
             color: #4f4f4f;
             margin-bottom: 0.75rem;
           }
 
           .content h1,
-          h2,
-          h3,
-          h4,
-          h5,
-          h6 {
+          .content h2,
+          .content h3,
+          .content h4,
+          .content h5,
+          .content h6 {
             font-size: 16px;
             line-height: 19px;
             letter-spacing: 1px;
@@ -63,11 +63,11 @@ export const Content = ({ children }: ContentProps) => {
             }
 
             .content h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6 {
+            .content h2,
+            .content h3,
+            .content h4,
+            .content h5,
+            .content h6 {
               font-size: 20px;
               line-height: 24px;
               letter-spacing: 1px;
@@ -76,8 +76,8 @@ export const Content = ({ children }: ContentProps) => {
             }
 
             .content p,
-            ol,
-            ul {
+            .content ol,
+            .content ul {
               margin-bottom: 1rem;
             }
           }
