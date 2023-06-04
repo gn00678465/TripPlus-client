@@ -149,32 +149,6 @@ const Index = () => {
     }
   ];
 
-  const productList = [
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1603030908455-4a4588c0acdd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-      category: '精選商品',
-      title:
-        '台灣世界展望會「籃海計畫」| 用籃球教育翻轉偏鄉孩子人生，追「球」夢想、站穩舞台！',
-      team: '台灣世界展望會'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1611489704164-6f73c62bd810?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80',
-      category: '精選商品',
-      title: 'ARKY Somnus Travel Pillow 咕咕旅行枕',
-      team: 'ARKY'
-    },
-    {
-      imgUrl:
-        'https://images.unsplash.com/photo-1437914983566-976d85602771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      category: '精選商品',
-      title:
-        '兒童鐵道美術館｜來自山林的大山箱｜「居家體驗、戶外探索」 二合一的親子美感教材，陪伴孩子走進自然',
-      team: '兒童鐵道圖書館'
-    }
-  ];
-
   return (
     <>
       <Head>
