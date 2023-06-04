@@ -25,7 +25,7 @@ const tabs = [
 
 const ProList = () => {
   const router = useRouter();
-  const { pathname } = router;
+  const { pathname, query } = router;
   const { mutate } = useSWRConfig();
 
   const getCategory = (value: number) => {
@@ -106,34 +106,74 @@ const ProList = () => {
   }, [pathname, mutate, queryParams]);
 
   const onPageChange = (page: number) => {
-    setQueryParams((state) => ({
-      ...state,
-      page: String(page)
-    }));
+    router.push({
+      pathname,
+      query: {
+        ...queryParams,
+        page: String(page)
+      }
+    });
     mutateData();
   };
 
   const changeSortType = (value: string) => {
     setSortType(value);
-    setQueryParams((state) => ({
-      ...state,
-      sort: value
-    }));
+    router.push({
+      pathname,
+      query: {
+        ...queryParams,
+        sort: value,
+        page: '1'
+      }
+    });
     mutateData();
   };
 
   const changeCategory = (e: ChangeEvent<HTMLSelectElement>) => {
     setCategoryValue(e.target.value);
-    setQueryParams((state) => ({
-      ...state,
-      category: e.target.value
-    }));
+    router.push({
+      pathname,
+      query: {
+        ...queryParams,
+        category: e.target.value,
+        page: '1'
+      }
+    });
     mutateData();
   };
 
   useEffect(() => {
     mutateData();
   }, [mutateData]);
+
+  useEffect(() => {
+    setQueryParams({
+      sort: Array.isArray(query.sort)
+        ? query.sort.slice(-1)[0]
+        : query.sort || 'recently_launched',
+      category: Array.isArray(query.category)
+        ? query.category.slice(-1)[0]
+        : query.category || '',
+      page: Array.isArray(query.page)
+        ? query.page.slice(-1)[0]
+        : query.page || '1',
+      limit: Array.isArray(query.limit)
+        ? query.limit.slice(-1)[0]
+        : query.limit || '9'
+    });
+
+    setCategoryValue(
+      Array.isArray(query.category)
+        ? query.category.slice(-1)[0]
+        : query.category || ''
+    );
+
+    setSortType(
+      Array.isArray(query.sort)
+        ? query.sort.slice(-1)[0]
+        : query.sort || 'recently_launched'
+    );
+  }, [query]);
 
   if (isLoading) return <Loading />;
 
