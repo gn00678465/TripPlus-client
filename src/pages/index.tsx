@@ -502,6 +502,7 @@ const Index = () => {
             </Link>
           </Flex>
           <Box>
+            {/* TODO: 待有商品資料後再進行修改 */}
             <Box className="grid grid-cols-1 gap-12 md:grid-cols-3">
               {newItemList.map((item) => {
                 return (

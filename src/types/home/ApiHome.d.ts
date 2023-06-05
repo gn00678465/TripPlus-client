@@ -50,9 +50,11 @@ declare namespace ApiHome {
   }
 
   interface BannerItem {
-    id: string;
+    _id: string;
     title: string;
     subtitle: string;
     imageUrl: string;
+    type: string;
+    link: string;
   }
 }

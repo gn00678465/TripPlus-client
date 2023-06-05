@@ -79,7 +79,7 @@ const Cases = ({ caseList }: CasesProps) => {
         {caseList.map((item, index) => {
           return (
             <SwiperSlide key={'case' + index}>
-              <Link href="#">
+              <Link href={`/project/${item._id}`}>
                 <Box className="rounded-lg bg-white p-6">
                   <Flex direction="column">
                     <Box className="aspect-ratio aspect-ratio-10x7">

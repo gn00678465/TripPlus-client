@@ -58,7 +58,11 @@ const Banner = ({ bannerList }: BannerProps) => {
         {bannerList.map((banner: ApiHome.BannerItem, index) => {
           return (
             <SwiperSlide key={'banner' + index}>
-              <Link href="#" className="aspect-ratio aspect-ratio-25x14">
+              {/* TODO: 待有專案資料後再進行修改 */}
+              <Link
+                href={`/project/${banner.link}`}
+                className="aspect-ratio aspect-ratio-25x14"
+              >
                 <Image
                   src={banner.imageUrl}
                   alt="banner"
