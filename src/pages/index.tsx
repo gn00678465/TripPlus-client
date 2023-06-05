@@ -20,6 +20,7 @@ import { MdChevronRight } from 'react-icons/md';
 import useSWR, { useSWRConfig } from 'swr';
 import { apiGetHome, apiGetHomeData, apiGetHomeBanner } from '@/api/index';
 import { currencyTWD, replaceTWDSymbol } from '@/utils';
+import { GetStaticProps } from 'next';
 
 import {
   Text,
@@ -651,6 +652,13 @@ const Index = () => {
     </>
   );
 };
+
+export const getStaticProps: GetStaticProps = async () => {
+  return {
+    props: {}
+  };
+};
+
 export default Index;
 
 Index.getLayout = function (page: ReactElement) {
