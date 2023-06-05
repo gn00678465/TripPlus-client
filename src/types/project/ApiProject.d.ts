@@ -19,6 +19,13 @@ declare namespace ApiProject {
     updatedAt: string;
   }
 
+  interface ProjectsParams {
+    sort?: string;
+    category?: string;
+    page: string;
+    limit: string;
+  }
+
   interface Plan {
     _id: string;
     projectId: string;

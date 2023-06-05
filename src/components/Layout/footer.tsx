@@ -60,7 +60,7 @@ const Footer = () => {
 
             <Spacer />
 
-            <Box color={'light'}>
+            <Box color={'light'} textAlign={'center'}>
               Copyright © 2023 TripPlus. All rights reserved.
             </Box>
           </Flex>
