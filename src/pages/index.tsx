@@ -21,7 +21,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import { apiGetHome, apiGetHomeData, apiGetHomeBanner } from '@/api/index';
 import { currencyTWD, replaceTWDSymbol } from '@/utils';
 import { GetStaticProps } from 'next';
-
+import Loading from '@/components/Loading';
 import {
   Text,
   Box,
@@ -63,7 +63,7 @@ const Index = () => {
     }
   );
 
-  const { data: banner } = useSWR(
+  const { data: banner, isLoading } = useSWR(
     ['get', '/api/home/banner'],
     apiGetHomeBanner,
     {
@@ -149,6 +149,8 @@ const Index = () => {
       text: '專案進度公開透明'
     }
   ];
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
