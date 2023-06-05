@@ -99,11 +99,15 @@ const Card = ({ item, content }: CardProps) => {
             className="mt-3 text-sm md:mt-[1.125rem] md:text-base"
           >
             <div>{item.progressRate}%</div>
-            <div>
-              <span className="text-xs md:text-sm">倒數</span>
-              <span className="px-1">{item.countDownDays}</span>
-              <span className="text-xs md:text-sm">天</span>
-            </div>
+            {item.countDownDays && item.countDownDays > 0 ? (
+              <div>
+                <span className="text-xs md:text-sm">倒數</span>
+                <span className="px-1">{item.countDownDays}</span>
+                <span className="text-xs md:text-sm">天</span>
+              </div>
+            ) : (
+              <div>已結束</div>
+            )}
           </Flex>
         ) : (
           <Flex
