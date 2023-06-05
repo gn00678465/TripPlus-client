@@ -57,7 +57,6 @@ const Cases = ({ caseList }: CasesProps) => {
       <Swiper
         spaceBetween={24}
         slidesPerView="auto"
-        centeredSlides={true}
         loop={true}
         breakpoints={{
           375: {
