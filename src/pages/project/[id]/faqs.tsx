@@ -1,5 +1,10 @@
+import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
-import { ProjectLayout } from '.';
+import {
+  ProjectLayout,
+  ProjectLayoutProps,
+  getServerSideProps as getSSRProps
+} from '.';
 import { Layout } from '@/components';
 import {
   Accordion,
@@ -11,21 +16,28 @@ import {
   Text,
   Divider
 } from '@chakra-ui/react';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import { SWRConfig } from 'swr';
+import { utc2Local } from '@/utils';
 
-dayjs.extend(utc);
+export const getServerSideProps: GetServerSideProps = getSSRProps;
 
-interface FAQ {
-  question: string;
-  answer: string;
-  updatedAt: string;
+interface ProjectContentProps extends ProjectLayoutProps {
+  fallback: {
+    [key: string]: ApiProject.Project;
+  };
 }
-interface FAQItemProps extends FAQ {
+
+interface FAQItemProps extends ApiProject.FAQ {
   count: number;
 }
 
-const FAQItem = ({ question, answer, updatedAt, count }: FAQItemProps) => {
+const FAQItem = ({
+  question,
+  answer,
+  updatedAt,
+  count,
+  ...rest
+}: FAQItemProps) => {
   return (
     <Accordion allowToggle p="0" backgroundColor="gray.100" borderRadius={8}>
       <AccordionItem p="0" border="none">
@@ -63,7 +75,7 @@ const FAQItem = ({ question, answer, updatedAt, count }: FAQItemProps) => {
               更新時間
             </Text>
             <Text as="span" fontSize={{ base: 'md' }} color="gray.600">
-              {dayjs(updatedAt).local().format('YYYY.MM.DD HH:mm')}
+              {utc2Local(updatedAt).format('YYYY.MM.DD HH:mm')}
             </Text>
           </p>
         </AccordionPanel>
@@ -72,42 +84,28 @@ const FAQItem = ({ question, answer, updatedAt, count }: FAQItemProps) => {
   );
 };
 
-const ProjectFAQs: App.NextPageWithLayout = () => {
-  const faqs: FAQ[] = [
-    {
-      question: '為什麼會是由社團法人台灣一起夢想公益協會提案？',
-      answer:
-        '一起夢想公益協會主要的服務內容，是協助微型社福得到更多的募款幫助，本次的專案單位：中華民國身障棒壘球協會為一起夢想支持的微型社福。 以下為',
-      updatedAt: '2023-05-11T07:23:27.017Z'
-    },
-    {
-      question: '請問會開立捐款收據嗎？',
-      answer: '會，當然會，哪次不會呢?',
-      updatedAt: '2023-05-12T06:02:36.245Z'
-    }
-  ];
-
+const ProjectFAQs: App.NextPageWithLayout<ProjectContentProps> = ({
+  id,
+  isFollowed,
+  fallback
+}) => {
   return (
-    <Box className="space-y-4 md:space-y-6">
-      {faqs.map((item, index) => (
-        <FAQItem
-          key={index}
-          count={index + 1}
-          question={item.question}
-          answer={item.answer}
-          updatedAt={item.updatedAt}
-        />
-      ))}
-    </Box>
+    <SWRConfig value={{ fallback }}>
+      <ProjectLayout id={id} isFollowed={isFollowed}>
+        {(data) => (
+          <Box className="space-y-4 md:space-y-6">
+            {data?.faqs.map((item, index) => (
+              <FAQItem key={index} count={index + 1} {...item} />
+            ))}
+          </Box>
+        )}
+      </ProjectLayout>
+    </SWRConfig>
   );
 };
 
 export default ProjectFAQs;
 
 ProjectFAQs.getLayout = function (page: ReactElement) {
-  return (
-    <Layout headerProps={{ backgroundColor: 'gray.100' }}>
-      <ProjectLayout>{page}</ProjectLayout>
-    </Layout>
-  );
+  return <Layout headerProps={{ backgroundColor: 'gray.100' }}>{page}</Layout>;
 };

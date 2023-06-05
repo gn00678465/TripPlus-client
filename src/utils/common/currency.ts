@@ -11,7 +11,8 @@ export function currency(
   }).format(num);
 }
 
-export function currencyTWD(num: number) {
+export function currencyTWD(num?: number) {
+  if (!num) return currency(0, 'zh-TW', 'TWD');
   return currency(num, 'zh-TW', 'TWD');
 }
 

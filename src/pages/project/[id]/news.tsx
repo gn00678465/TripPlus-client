@@ -1,5 +1,10 @@
+import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
-import { ProjectLayout } from '.';
+import {
+  ProjectLayout,
+  ProjectLayoutProps,
+  getServerSideProps as getSSRProps
+} from '.';
 import { Layout } from '@/components';
 import {
   Box,
@@ -12,10 +17,10 @@ import {
 } from '@chakra-ui/react';
 import { BsBell } from 'react-icons/bs';
 import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import { SWRConfig } from 'swr';
+import { utc2Local } from '@/utils';
 
-dayjs.extend(utc);
+export const getServerSideProps: GetServerSideProps = getSSRProps;
 
 interface News {
   title: string;
@@ -63,7 +68,7 @@ const NewsItem = ({ title, content, publishedAt }: NewsItemProps) => {
             發佈日期
           </Text>
           <Text as="span" fontSize={{ base: 'sm', md: 'md' }} color="gray.600">
-            {dayjs(publishedAt).local().format('YYYY.MM.DD HH:mm')}
+            {utc2Local(publishedAt).format('YYYY.MM.DD HH:mm')}
           </Text>
           <Button
             display={{ base: 'none', md: 'flex' }}
@@ -100,41 +105,45 @@ const NewsItem = ({ title, content, publishedAt }: NewsItemProps) => {
   );
 };
 
-const ProjectNews: App.NextPageWithLayout = () => {
-  const news: News[] = [
-    {
-      title: '您的捐款已於05/15星期一100%到社團法人雲林縣聽語障福利協進會',
-      content: '您的捐款已於05/15星期一100%到社團法人雲林縣聽語障福利協進會',
-      publishedAt: '2023-05-15T02:13:05.639Z'
-    },
-    {
-      title: '集資正式結束，由衷感謝每位贊助者',
-      content: '集資正式結束，由衷感謝每位贊助者',
-      publishedAt: '2023-05-30T10:36:10.807Z'
-    },
-    {
-      title: '重要公告：募資計畫將延長期限！',
-      content:
-        '申請延長募資天數，希望能夠有更多的時間找到更多的贊助者一起支持這個專案！',
-      publishedAt: '2023-05-31T10:36:10.807Z'
-    }
-  ];
+interface ProjectContentProps extends ProjectLayoutProps {
+  fallback: {
+    [key: string]: ApiProject.Project;
+  };
+}
 
+const ProjectNews: App.NextPageWithLayout<ProjectContentProps> = ({
+  id,
+  isFollowed,
+  fallback
+}) => {
   return (
-    <Box className="space-y-2 md:space-y-4">
-      {news.map((item, index) => (
-        <NewsItem key={index} {...item} />
-      ))}
-    </Box>
+    <SWRConfig value={{ fallback }}>
+      <ProjectLayout id={id} isFollowed={isFollowed}>
+        {(data) => (
+          <Box className="space-y-2 md:space-y-4">
+            {(data?.news.length &&
+              data?.news.map((item, index) => (
+                <NewsItem key={index} {...item} />
+              ))) || (
+              <Box
+                textAlign="center"
+                py="10"
+                bg="gray.100"
+                borderRadius={8}
+                color="gray.900"
+              >
+                目前沒有最新消息
+              </Box>
+            )}
+          </Box>
+        )}
+      </ProjectLayout>
+    </SWRConfig>
   );
 };
 
 export default ProjectNews;
 
 ProjectNews.getLayout = function (page: ReactElement) {
-  return (
-    <Layout headerProps={{ backgroundColor: 'gray.100' }}>
-      <ProjectLayout>{page}</ProjectLayout>
-    </Layout>
-  );
+  return <Layout headerProps={{ backgroundColor: 'gray.100' }}>{page}</Layout>;
 };

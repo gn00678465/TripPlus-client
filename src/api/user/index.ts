@@ -1,4 +1,5 @@
-import { request } from '../../config/axios';
+import { request } from '@/config/axios';
+import { AxiosRequestConfig } from 'axios';
 
 export function apiGetUserAccount() {
   return request.get<ApiUser.Account>('/user/account');
@@ -22,4 +23,8 @@ export function apiDeleteFollow(id: string) {
 
 export function apiGetBonus() {
   return request.get<ApiUser.Bonus>('/user/bonus');
+}
+
+export function apiPostFollow(id: string, config?: AxiosRequestConfig) {
+  return request.post<ApiUser.Follows>(`/user/follow/${id}`, config);
 }
