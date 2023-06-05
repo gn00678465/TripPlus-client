@@ -105,15 +105,15 @@ const Index = () => {
   const category = [
     {
       title: '社會企劃',
-      url: '/'
+      url: '/projects?sort=all&category=0'
     },
     {
       title: '創新設計',
-      url: '/'
+      url: '/projects?sort=all&category=1'
     },
     {
       title: '精選商品',
-      url: '/'
+      url: '/projects?sort=all&category=2'
     }
   ];
 
