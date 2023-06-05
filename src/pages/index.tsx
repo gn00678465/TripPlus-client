@@ -211,7 +211,10 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#" className="flex items-center text-sm md:text-base">
+            <Link
+              href="/projects?sort=hot_project"
+              className="flex items-center text-sm md:text-base"
+            >
               查看更多
               <MdChevronRight className="text-2xl" />
             </Link>
@@ -222,7 +225,7 @@ const Index = () => {
                 return (
                   <Flex direction="column" key={item.title}>
                     <Link
-                      href="#"
+                      href={`/project/${item._id}`}
                       className="aspect-ratio aspect-ratio-10x7 relative"
                     >
                       <Image
@@ -249,7 +252,7 @@ const Index = () => {
                         >
                           {getCategory(item.category)}
                         </Text>
-                        <Link href="#">
+                        <Link href={`/project/${item._id}`}>
                           <Heading
                             fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
@@ -260,7 +263,7 @@ const Index = () => {
                           </Heading>
                         </Link>
                         <Link
-                          href="#"
+                          href={`/organization/${item.teamId._id}`}
                           className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
                           {item.teamId.title}
@@ -323,7 +326,10 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#" className="flex items-center text-sm md:text-base">
+            <Link
+              href="/projects?sort=recently_launched"
+              className="flex items-center text-sm md:text-base"
+            >
               查看更多
               <MdChevronRight className="text-2xl" />
             </Link>
@@ -334,7 +340,7 @@ const Index = () => {
                 return (
                   <Flex direction="column" key={item.title}>
                     <Link
-                      href="#"
+                      href={`/project/${item._id}`}
                       className="aspect-ratio aspect-ratio-10x7 relative"
                     >
                       <Image
@@ -361,7 +367,7 @@ const Index = () => {
                         >
                           {getCategory(item.category)}
                         </Text>
-                        <Link href="#">
+                        <Link href={`/project/${item._id}`}>
                           <Heading
                             fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
@@ -372,7 +378,7 @@ const Index = () => {
                           </Heading>
                         </Link>
                         <Link
-                          href="#"
+                          href={`/organization/${item.teamId._id}`}
                           className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
                           {item.teamId.title}
@@ -484,7 +490,10 @@ const Index = () => {
                 className="absolute right-[-20px] top-0"
               ></Image>
             </Text>
-            <Link href="#" className="flex items-center text-sm md:text-base">
+            <Link
+              href="/projects?sort=all&category=2"
+              className="flex items-center text-sm md:text-base"
+            >
               查看更多
               <MdChevronRight className="text-2xl" />
             </Link>
@@ -495,7 +504,7 @@ const Index = () => {
                 return (
                   <Flex direction="column" key={item.title}>
                     <Link
-                      href="#"
+                      href={`/product/${item._id}`}
                       className="aspect-ratio aspect-ratio-10x7 relative"
                     >
                       <Image
@@ -522,7 +531,7 @@ const Index = () => {
                         >
                           {getCategory(item.category)}
                         </Text>
-                        <Link href="#">
+                        <Link href={`/product/${item._id}`}>
                           <Heading
                             fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
@@ -533,7 +542,7 @@ const Index = () => {
                           </Heading>
                         </Link>
                         <Link
-                          href="#"
+                          href={`/organization/${item.teamId._id}`}
                           className="text-xs leading-6 text-secondary-emphasis md:text-sm"
                         >
                           {item.teamId.title}
