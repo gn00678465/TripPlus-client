@@ -31,6 +31,7 @@ const Banner = ({ bannerList }: BannerProps) => {
         spaceBetween={100}
         slidesPerView="auto"
         centeredSlides={true}
+        initialSlide={2}
         loop={true}
         pagination={{
           clickable: true
