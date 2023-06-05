@@ -3,7 +3,7 @@ import { useState, ChangeEvent, useEffect, useCallback } from 'react';
 import Card from '@/components/Card';
 import Loading from '@/components/Loading';
 import useSWR, { useSWRConfig } from 'swr';
-import { apiGetProject } from '@/api/index';
+import { apiGetProject } from '@/api';
 import { currency } from '@/utils';
 import { Box, Container, Center, Flex, Select } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
