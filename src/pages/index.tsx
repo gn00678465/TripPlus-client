@@ -260,14 +260,14 @@ const Index = () => {
                             fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
                             my={2}
-                            className="line-clamp-2 text-gray-900"
+                            className="line-clamp-2 text-gray-900 hover:text-secondary-emphasis"
                           >
                             {item.title}
                           </Heading>
                         </Link>
                         <Link
                           href={`/organization/${item.teamId._id}`}
-                          className="text-xs leading-6 text-secondary-emphasis md:text-sm"
+                          className="text-xs leading-6 text-secondary-emphasis hover:text-secondary-emphasis-400 md:text-sm"
                         >
                           {item.teamId.title}
                         </Link>
@@ -375,14 +375,14 @@ const Index = () => {
                             fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
                             my={2}
-                            className="line-clamp-2 text-gray-900"
+                            className="line-clamp-2 text-gray-900 hover:text-secondary-emphasis"
                           >
                             {item.title}
                           </Heading>
                         </Link>
                         <Link
                           href={`/organization/${item.teamId._id}`}
-                          className="text-xs leading-6 text-secondary-emphasis md:text-sm"
+                          className="text-xs leading-6 text-secondary-emphasis hover:text-secondary-emphasis-400 md:text-sm"
                         >
                           {item.teamId.title}
                         </Link>
@@ -539,14 +539,14 @@ const Index = () => {
                             fontSize={{ xs: '16px', md: '20px' }}
                             fontWeight={500}
                             my={2}
-                            className="line-clamp-2 text-gray-900"
+                            className="line-clamp-2 text-gray-900 hover:text-secondary-emphasis"
                           >
                             {item.title}
                           </Heading>
                         </Link>
                         <Link
                           href={`/organization/${item.teamId._id}`}
-                          className="text-xs leading-6 text-secondary-emphasis md:text-sm"
+                          className="text-xs leading-6 text-secondary-emphasis hover:text-secondary-emphasis-400 md:text-sm"
                         >
                           {item.teamId.title}
                         </Link>
