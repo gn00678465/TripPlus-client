@@ -6,8 +6,8 @@ import type { ReactElement } from 'react';
 import { SWRConfig, unstable_serialize } from 'swr';
 import { handleQueryParams, safeAwait, request } from '@/utils';
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const paramsQuery = handleQueryParams(context.query);
-  const query = new URLSearchParams(paramsQuery).toString();
+  const queryParams = handleQueryParams(context.query);
+  const query = new URLSearchParams(queryParams).toString();
 
   const [err, res] = await safeAwait<ApiProject.Projects>(
     request(`/project?${query}`)
@@ -17,7 +17,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         fallback: {
-          [unstable_serialize(['/api/projects', paramsQuery])]: res
+          [unstable_serialize(['/api/projects', queryParams])]: res
         }
       }
     };

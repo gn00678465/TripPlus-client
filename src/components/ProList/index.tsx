@@ -56,7 +56,7 @@ const ProList = () => {
     isLoading,
     mutate: mutateProject
   } = useSWR(
-    [`/api/projects?page=${page.page}`, queryParams],
+    ['/api/projects', queryParams],
     async ([key, queryParams]) => await swrFetch(apiGetProject(queryParams))
   );
 
