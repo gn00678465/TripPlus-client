@@ -335,11 +335,11 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
               <Box as="section" w={{ xs: '100%', md: 420 }} py={6}>
                 <Box className="mb-4 flex items-center justify-between">
                   <span>運費</span>
-                  <span>${deliveryFee}</span>
+                  <span>{currencyTWD(deliveryFee)}</span>
                 </Box>
                 <Box className="mb-4 flex items-center justify-between">
                   <span>選項金額</span>
-                  <span>${reward.price}</span>
+                  <span>{currencyTWD(reward.price)}</span>
                 </Box>
                 <Box className="mb-4 flex items-center justify-between">
                   <span>選擇數量</span>
@@ -381,7 +381,7 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
                       colorScheme="primary"
                       {...register('isBonusUsed')}
                     >
-                      折抵 {bonus} 元
+                      折抵 {currencyTWD(bonus)} 元
                     </Checkbox>
                   </Box>
                 )}
@@ -389,7 +389,9 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
                 <Box className="mb-5 border-2 border-gray-200"></Box>
                 <Box className="mb-6 flex items-center justify-between">
                   <span className="text-lg font-bold">總計</span>
-                  <span className="text-lg font-bold">${totalMoney}</span>
+                  <span className="text-lg font-bold">
+                    {currencyTWD(totalMoney)}
+                  </span>
                 </Box>
                 <Button
                   colorScheme="primary"
