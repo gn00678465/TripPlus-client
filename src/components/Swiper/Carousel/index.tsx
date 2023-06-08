@@ -79,7 +79,9 @@ function Carousel<T>({ data, card, ...rest }: PlansSwiperProps<T>) {
           {...rest}
         >
           {data?.map((item, index) => (
-            <SwiperSlide key={index}>{card?.(item)}</SwiperSlide>
+            <SwiperSlide className="!h-auto" key={index}>
+              {card?.(item)}
+            </SwiperSlide>
           ))}
         </Swiper>
         <NavigationButton

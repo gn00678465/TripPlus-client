@@ -60,6 +60,7 @@ export const PlanCard = ({ isFinish, ...rest }: PlanCardProps) => {
       mx="auto"
       maxW="416px"
       w="full"
+      h="full"
       pos="relative"
       p={{ base: 4, md: 6 }}
       transition="all 0.2s ease-in-out"
