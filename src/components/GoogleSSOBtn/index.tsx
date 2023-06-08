@@ -1,14 +1,9 @@
-import NextLink from 'next/link';
 import { Button, Icon } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 
 export default function GoogleSSOBtn() {
   function handleGoogleSSO() {
-    const w = window.open(
-      'http://localhost:3005/auth/google',
-      'mozillaWindow',
-      'popup,width=500,height=700'
-    );
+    const w = window.open('http://localhost:3005/auth/google', 'mozillaWindow');
   }
 
   return (
