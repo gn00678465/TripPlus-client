@@ -3,10 +3,7 @@ import { FcGoogle } from 'react-icons/fc';
 
 export default function GoogleSSOBtn() {
   function handleGoogleSSO() {
-    const w = window.open(
-      `${process.env.BASE_API_URL}/auth/google`,
-      'mozillaWindow'
-    );
+    const w = window.open(`${process.env.BASE_API_URL}/auth/google`, '_self');
   }
 
   return (
