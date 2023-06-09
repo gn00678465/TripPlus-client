@@ -234,7 +234,7 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
                 className="rounded-lg"
               ></Image>
             </AspectRatio>
-            <Box className="py-4 pl-0 md:pl-4">
+            <Box className="min-w-[40%] py-4 pl-0 md:pl-4">
               <Link
                 href={`/organization/${proData.teamId._id}`}
                 className="block text-xs leading-6 text-secondary-emphasis md:text-sm"
