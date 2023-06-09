@@ -61,6 +61,7 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
         buyerEmail: '',
         buyerName: '',
         buyerPhone: '',
+        buyerAddress: '',
         recipient: '',
         recipientPhone: '',
         recipientEmail: '',
@@ -75,6 +76,7 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
     setValue('buyerEmail', accountData.email);
     setValue('buyerName', accountData.name);
     setValue('buyerPhone', accountData.phone ? accountData.phone : '');
+    setValue('buyerAddress', accountData.address ? accountData.address : '');
   };
 
   useEffect(() => {
@@ -82,14 +84,12 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
   }, []);
 
   const setRecipientInfo = () => {
-    const buyerPhone = getValues('buyerPhone');
-    setValue('recipientPhone', buyerPhone);
     setValue('recipient', accountData.name);
     setValue('recipientEmail', accountData.email);
-    setValue(
-      'recipientAddress',
-      accountData.address ? accountData.address : ''
-    );
+    const buyerPhone = getValues('buyerPhone');
+    setValue('recipientPhone', buyerPhone);
+    const buyerAddress = getValues('buyerAddress');
+    setValue('recipientAddress', buyerAddress);
   };
 
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
@@ -140,6 +140,7 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
     buyerEmail: string;
     buyerName: string;
     buyerPhone: string;
+    buyerAddress: string;
     count: string;
     isBonusUsed: boolean;
     note: string;
@@ -167,7 +168,7 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
         buyerName: data.buyerName,
         buyerPhone: data.buyerPhone,
         buyerEmail: data.buyerEmail,
-        buyerAddress: accountData.address as string,
+        buyerAddress: data.buyerAddress,
         shipAddress: data.recipientAddress,
         recipient: data.recipient,
         recipientPhone: data.recipientPhone,
@@ -421,9 +422,20 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
                   </FormControl>
                   <FormControl w="48%" isRequired>
                     <FormLabel>手機</FormLabel>
-                    <Input type="tel" {...register('buyerPhone')} />
+                    <Input
+                      type="tel"
+                      placeholder="請輸入手機"
+                      {...register('buyerPhone')}
+                    />
                   </FormControl>
                 </Flex>
+                <FormControl mt={3} isRequired>
+                  <FormLabel>地址</FormLabel>
+                  <Input
+                    placeholder="請輸入地址"
+                    {...register('buyerAddress')}
+                  />
+                </FormControl>
               </Box>
               <Box mt={5} p={4} className="rounded bg-white">
                 <Flex className="items-center justify-between">
