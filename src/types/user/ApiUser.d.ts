@@ -73,4 +73,41 @@ declare namespace ApiUser {
     projects: BonusList[];
     products: BonusList[];
   }
+
+  interface Order {
+    _id: string;
+    transactionId: string;
+    projectId: {
+      title: string;
+      type: string;
+      keyVision: string;
+    };
+    productId: {
+      title: string;
+      type: string;
+      keyVision: string;
+    };
+    payment: number;
+    paymentStatus: number;
+    createdAt: string;
+    total: number;
+    planId: {
+      title: string;
+      price: number;
+    };
+    note: string;
+    paidAt?: string;
+    buyerName: string;
+    buyerPhone: string;
+    buyerEmail: string;
+    buyerAddress: string;
+    recipient: string;
+    recipientPhone: string;
+    recipientEmail: string;
+    shipAddress: string;
+    shipment: number;
+    shipmentStatus: number;
+    shipDate?: string;
+    shipmentId?: string;
+  }
 }

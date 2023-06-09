@@ -1,28 +1,52 @@
 import Head from 'next/head';
-import Image from 'next/image';
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { Layout } from '@/components';
+import { GetServerSideProps } from 'next';
+import { Layout, ImageFallback } from '@/components';
 import UserHeader from '@/components/User/user-header';
 import type { ReactElement } from 'react';
 import { Box, Flex, Container, Heading, FormLabel } from '@chakra-ui/react';
+import { request, safeAwait } from '@/utils';
 import dayjs from 'dayjs';
+import NoImage from '@/assets/images/user/no-image.png';
 
-const Followings: App.NextPageWithLayout = () => {
-  const breadcrumb = [
-    { name: '首頁', url: '/' },
-    { name: '會員中心', url: '/user/account' },
-    { name: '交易紀錄', url: '/user/transactions' },
-    { name: '訂單資訊', url: '/user/orders' }
-  ];
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params || {};
+  const { token } = context.req.cookies;
+  if (!token) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    };
+  }
+
+  const [err, res] = await safeAwait<ApiUser.Order>(
+    request(`/user/order/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
+
+  if (err) {
+    return {
+      notFound: true
+    };
+  }
+
+  const getPayment = (payment: number) => {
+    switch (payment) {
+      case 0:
+        return '信用卡付款';
+      case 1:
+        return 'ATM轉帳';
+      case 2:
+        return '超商付款';
+    }
+  };
 
   const getShipment = (shipment: number) => {
     switch (shipment) {
       case 0:
-        return '信用卡付款';
-      case 1:
-        return '信用卡付款';
-      case 2:
-        return '超商付款';
+        return '宅配';
     }
   };
 
@@ -36,41 +60,63 @@ const Followings: App.NextPageWithLayout = () => {
         return '已抵達';
     }
   };
+  const resData = res.data;
 
-  const list = {
-    title: '為自由而站:烏克蘭難民援助計畫 #TaiwanStandsWithUkraine',
-    paymentStatus: 0,
-    id: 'REG1619481646443263',
-    createdAt: dayjs('2023-05-16T09:25:32.884Z').format(
-      'YYYY 年 MM 月 DD 日 hh:mm'
-    ),
-    total: '3000',
-    image: 'https://picsum.photos/400/500?random=1',
+  const isProject =
+    resData.projectId !== null && resData.projectId.type === 'project';
+
+  const data = {
+    title: isProject ? resData.projectId.title : resData.productId.title,
+    payment: getPayment(resData.payment),
+    paymentStatus: resData.paymentStatus,
+    id: resData._id,
+    transactionId: resData.transactionId,
+    createdAt: dayjs(resData.createdAt).format('YYYY 年 MM 月 DD 日 hh:mm'),
+    total: resData.total,
+    keyVision: isProject
+      ? resData.projectId.keyVision
+      : resData.productId.keyVision,
     plan: {
-      title: '自由支持 | 攜手前進',
-      price: '3000'
+      title: resData.planId.title,
+      price: resData.planId.price
     },
-    note: '無',
-    creditCard: '4929460590580904',
-    paidAt: dayjs('2023-05-16T09:25:32.884Z').format(
-      'YYYY 年 MM 月 DD 日 hh:mm'
-    ),
-    buyerName: '宋慧喬',
-    buyerPhone: '09123456789',
-    buyerEmail: 'test@gmail.com',
-    buyerAddress: '臺灣臺中市六角區六角路666號',
-    recipient: '王小明',
-    recipientPhone: '04-9989898#4301',
-    recipientEmail: 'test@gmail.com',
-    shipAddress: '台中市西屯區台灣大道7段2100號',
-    shipment: getShipment(0),
-    shipmentStatus: getShipmentStatus(0),
-    shipmentId: '1234567890',
-    shipDate: dayjs('2023-05-16T09:25:32.884Z').format(
-      'YYYY 年 MM 月 DD 日 hh:mm'
-    )
+    note: resData.note || '無',
+    paidAt: resData.paidAt
+      ? dayjs(resData.paidAt).format('YYYY 年 MM 月 DD 日 hh:mm')
+      : '',
+    buyerName: resData.buyerName,
+    buyerPhone: resData.buyerPhone,
+    buyerEmail: resData.buyerEmail,
+    buyerAddress: resData.buyerAddress,
+    recipient: resData.recipient,
+    recipientPhone: resData.recipientPhone,
+    recipientEmail: resData.recipientEmail,
+    shipAddress: resData.shipAddress,
+    shipment: getShipment(resData.shipment),
+    shipmentStatus: getShipmentStatus(resData.shipmentStatus),
+    shipmentId: resData.shipmentId || '',
+    shipDate: resData.shipDate
+      ? dayjs(resData.shipDate).format('YYYY 年 MM 月 DD 日 hh:mm')
+      : ''
   };
 
+  return {
+    props: { data }
+  };
+};
+
+const breadcrumb = [
+  { name: '首頁', url: '/' },
+  { name: '會員中心', url: '/user/account' },
+  { name: '交易紀錄', url: '/user/transactions' },
+  { name: '訂單資訊', url: '/user/orders' }
+];
+
+interface OrderProps {
+  data: User.Order;
+}
+
+const Order: App.NextPageWithLayout<OrderProps> = ({ data }) => {
   return (
     <>
       <Head>
@@ -100,35 +146,35 @@ const Followings: App.NextPageWithLayout = () => {
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   專案名稱
                 </FormLabel>
-                <Box color={'secondary-emphasis.500'}>{list.title}</Box>
+                <Box color={'secondary-emphasis.500'}>{data.title}</Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   交易狀態
                 </FormLabel>
-                <Box>{list.paymentStatus === 0 ? '未付款' : '完成付款'}</Box>
+                <Box>{data.paymentStatus === 0 ? '未付款' : '完成付款'}</Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   交易編號
                 </FormLabel>
-                <Box>{list.id}</Box>
+                <Box>{data.transactionId}</Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   交易成立時間
                 </FormLabel>
-                <Box>{list.createdAt}</Box>
+                <Box>{data.createdAt}</Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   訂單總額
                 </FormLabel>
-                <Box>NT$ {list.total}</Box>
+                <Box>NT$ {data.total}</Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">
@@ -153,23 +199,24 @@ const Followings: App.NextPageWithLayout = () => {
                     overflow={'hidden'}
                     className="mb-3 sm:mr-10"
                   >
-                    <Image
-                      src={list.image}
-                      alt=""
-                      width={80}
-                      height={80}
+                    <ImageFallback
+                      src={data.keyVision as string}
+                      fallbackSrc={NoImage.src}
+                      alt={data.title as string}
                       priority
+                      width={100}
+                      height={100}
                     />
                   </Box>
 
                   <Box lineHeight={2}>
                     <div>
-                      <div>{list.plan.title}</div>
-                      <div>NT$ {list.plan.price} X 1</div>
+                      <div>{data.plan.title}</div>
+                      <div>NT$ {data.plan.price} X 1</div>
                     </div>
                     <div className="mt-3">
-                      <div>請填入捐款收據抬頭：{list.recipient}</div>
-                      <div>備註：{list.note}</div>
+                      <div>請填入捐款收據抬頭：{data.recipient}</div>
+                      <div>備註：{data.note}</div>
                     </div>
                   </Box>
                 </Flex>
@@ -200,7 +247,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         付款方式
                       </FormLabel>
-                      <Box>信用卡</Box>
+                      <Box>{data.payment}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -210,28 +257,22 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         付款狀態
                       </FormLabel>
-                      <Box>完成付款</Box>
+                      <Box>
+                        {data.paymentStatus === 0 ? '未付款' : '完成付款'}
+                      </Box>
                     </Flex>
-                    <Flex className="flex-col md:flex-row">
-                      <FormLabel
-                        className="w-28"
-                        fontWeight={500}
-                        color={'gray.500'}
-                      >
-                        卡號
-                      </FormLabel>
-                      <Box>{list.creditCard}</Box>
-                    </Flex>
-                    <Flex className="flex-col md:flex-row">
-                      <FormLabel
-                        className="w-28"
-                        fontWeight={500}
-                        color={'gray.500'}
-                      >
-                        付款日期
-                      </FormLabel>
-                      <Box>{list.paidAt}</Box>
-                    </Flex>
+                    {data.paidAt && (
+                      <Flex className="flex-col md:flex-row">
+                        <FormLabel
+                          className="w-28"
+                          fontWeight={500}
+                          color={'gray.500'}
+                        >
+                          付款日期
+                        </FormLabel>
+                        <Box>{data.paidAt}</Box>
+                      </Flex>
+                    )}
                   </Box>
                 </Flex>
               </Flex>
@@ -261,7 +302,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         姓名
                       </FormLabel>
-                      <Box>{list.buyerName}</Box>
+                      <Box>{data.buyerName}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -271,7 +312,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         聯絡電話
                       </FormLabel>
-                      <Box>{list.buyerPhone}</Box>
+                      <Box>{data.buyerPhone}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -281,7 +322,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         Email
                       </FormLabel>
-                      <Box>{list.buyerEmail}</Box>
+                      <Box>{data.buyerEmail}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -291,7 +332,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         地址
                       </FormLabel>
-                      <Box>{list.buyerAddress}</Box>
+                      <Box>{data.buyerAddress}</Box>
                     </Flex>
                   </Box>
                 </Flex>
@@ -322,7 +363,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         收件人
                       </FormLabel>
-                      <Box>{list.recipient}</Box>
+                      <Box>{data.recipient}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -332,7 +373,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         聯絡電話
                       </FormLabel>
-                      <Box>{list.recipientPhone}</Box>
+                      <Box>{data.recipientPhone}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -342,7 +383,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         Email
                       </FormLabel>
-                      <Box>{list.recipientEmail}</Box>
+                      <Box>{data.recipientEmail}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -352,7 +393,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         地址
                       </FormLabel>
-                      <Box>{list.shipAddress}</Box>
+                      <Box>{data.shipAddress}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -362,7 +403,7 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         寄送方式
                       </FormLabel>
-                      <Box>{list.shipment}</Box>
+                      <Box>{data.shipment}</Box>
                     </Flex>
                     <Flex className="flex-col md:flex-row">
                       <FormLabel
@@ -372,28 +413,34 @@ const Followings: App.NextPageWithLayout = () => {
                       >
                         物流狀態
                       </FormLabel>
-                      <Box>{list.shipmentStatus} (查詢)</Box>
+                      <Box>{data.shipmentStatus}</Box>
                     </Flex>
-                    <Flex className="flex-col md:flex-row">
-                      <FormLabel
-                        className="w-28"
-                        fontWeight={500}
-                        color={'gray.500'}
-                      >
-                        物流編號
-                      </FormLabel>
-                      <Box>{list.shipmentId}</Box>
-                    </Flex>
-                    <Flex className="flex-col md:flex-row">
-                      <FormLabel
-                        className="w-28"
-                        fontWeight={500}
-                        color={'gray.500'}
-                      >
-                        出貨日期
-                      </FormLabel>
-                      <Box>{list.shipDate}</Box>
-                    </Flex>
+
+                    {data.shipmentId && (
+                      <Flex className="flex-col md:flex-row">
+                        <FormLabel
+                          className="w-28"
+                          fontWeight={500}
+                          color={'gray.500'}
+                        >
+                          物流編號
+                        </FormLabel>
+                        <Box>{data.shipmentId}</Box>
+                      </Flex>
+                    )}
+
+                    {data.shipDate && (
+                      <Flex className="flex-col md:flex-row">
+                        <FormLabel
+                          className="w-28"
+                          fontWeight={500}
+                          color={'gray.500'}
+                        >
+                          出貨日期
+                        </FormLabel>
+                        <Box>{data.shipDate}</Box>
+                      </Flex>
+                    )}
                   </Box>
                 </Flex>
               </Flex>
@@ -405,22 +452,9 @@ const Followings: App.NextPageWithLayout = () => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: [],
-    fallback: true
-  };
-};
+export default Order;
 
-export const getStaticProps: GetStaticProps = async () => {
-  return {
-    props: {}
-  };
-};
-
-export default Followings;
-
-Followings.getLayout = function (page: ReactElement) {
+Order.getLayout = function (page: ReactElement) {
   return (
     <Layout>
       <Box className="bg-gray-100">{page}</Box>
