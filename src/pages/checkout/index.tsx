@@ -79,11 +79,12 @@ const Checkout = ({ accountData, rewardData }: CheckoutProps) => {
 
   useEffect(() => {
     setUserInfo();
-  });
+  }, []);
 
   const setRecipientInfo = () => {
+    const buyerPhone = getValues('buyerPhone');
+    setValue('recipientPhone', buyerPhone);
     setValue('recipient', accountData.name);
-    setValue('recipientPhone', accountData.phone ? accountData.phone : '');
     setValue('recipientEmail', accountData.email);
     setValue(
       'recipientAddress',
