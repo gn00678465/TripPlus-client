@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { IoIosArrowDroprightCircle, IoIosArrowForward } from 'react-icons/io';
 import { FiMessageSquare } from 'react-icons/fi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { currency, request, safeAwait } from '@/utils';
 import dayjs from 'dayjs';
 
@@ -87,6 +87,7 @@ interface TransactionsProps {
 
 const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
   const [tabIdx, setTabIdx] = useState(1);
+  const [listData, setListData] = useState<User.Orders[]>([]);
 
   const selectedTab = tab.find((item) => item.id === tabIdx);
 
@@ -106,6 +107,10 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
     });
     setShowRankModal(true);
   };
+
+  useEffect(() => {
+    setListData(() => list.filter((item) => item.paymentStatus === tabIdx));
+  }, [list, tabIdx]);
 
   return (
     <>
@@ -168,100 +173,101 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
           </Box>
 
           <Box className="space-y-6">
-            {list.map(
-              (item) =>
-                item.paymentStatus === tabIdx && (
+            {listData.length <= 0 ? (
+              <Box textAlign={'center'}>查無相關交易紀錄</Box>
+            ) : (
+              listData.map((item) => (
+                <Box
+                  key={item.transactionId}
+                  bgColor={'white'}
+                  className="p-5 md:p-10"
+                >
+                  <div className="mb-3 text-xs md:text-sm">
+                    提案團隊：{item.team}
+                  </div>
+                  <div className="mb-4 font-medium md:mb-6 md:text-xl">
+                    {item.title}
+                  </div>
+
                   <Box
-                    key={item.transactionId}
-                    bgColor={'white'}
-                    className="p-5 md:p-10"
+                    borderBottom={1}
+                    borderBottomColor={'gray.200'}
+                    borderStyle={'solid'}
+                    className="pb-3 md:pb-4"
                   >
-                    <div className="mb-3 text-xs md:text-sm">
-                      提案團隊：{item.team}
-                    </div>
-                    <div className="mb-4 font-medium md:mb-6 md:text-xl">
-                      {item.title}
-                    </div>
-
-                    <Box
-                      borderBottom={1}
-                      borderBottomColor={'gray.200'}
-                      borderStyle={'solid'}
-                      className="pb-3 md:pb-4"
-                    >
-                      <Flex className="text-xs md:text-sm">
-                        <div className="shrink-0 text-gray-400">購買項目</div>
-                        <div className="ml-2">{item.planTitle}</div>
-                      </Flex>
-
-                      <Box className="mt-1 hidden space-x-4 text-xs md:flex md:text-sm">
-                        <Flex>
-                          <div className="shrink-0 text-gray-400">交易編號</div>
-                          <div className="ml-2">{item.transactionId}</div>
-                        </Flex>
-
-                        <Flex>
-                          <div className="shrink-0 text-gray-400">交易時間</div>
-                          <div className="ml-2">{item.paidAt}</div>
-                        </Flex>
-
-                        <Flex>
-                          <div className="shrink-0 text-gray-400">交易金額</div>
-                          <div className="ml-2">NT {item.fundPrice}</div>
-                        </Flex>
-                      </Box>
-                    </Box>
-
-                    <Flex className="mt-3 flex-col items-start justify-between text-sm md:mt-6 md:flex-row md:items-center md:text-base">
-                      <Flex
-                        color={'secondary-emphasis.500'}
-                        fontWeight={500}
-                        className="space-x-4 md:space-x-9"
-                      >
-                        <Flex
-                          alignItems={'center'}
-                          className="group cursor-pointer"
-                        >
-                          <Link href={`/organization/${item.teamId}`}>
-                            <Icon as={FiMessageSquare} mx={1} />
-                            <span>聯絡提案者</span>
-                            <Icon
-                              as={IoIosArrowForward}
-                              mx={1}
-                              className="transition-transform group-hover:translate-x-2"
-                            />
-                          </Link>
-                        </Flex>
-
-                        <Flex alignItems={'center'} className="group">
-                          <Link
-                            href={`/user/orders/${item.id}`}
-                            className="flex items-center transition-colors group-hover:text-secondary-emphasis-400"
-                          >
-                            <span>查看細節</span>
-                            <Icon
-                              as={IoIosArrowForward}
-                              mx={1}
-                              className="transition-transform group-hover:translate-x-2"
-                            />
-                          </Link>
-                        </Flex>
-                      </Flex>
-
-                      {!item.isProject && (
-                        <Button
-                          colorScheme="primary"
-                          borderRadius={4}
-                          className="mt-4 w-full md:mt-0 md:!h-12 md:w-[154px]"
-                          fontSize={{ base: '0.875rem', md: '1rem' }}
-                          onClick={() => openModal(item)}
-                        >
-                          評價
-                        </Button>
-                      )}
+                    <Flex className="text-xs md:text-sm">
+                      <div className="shrink-0 text-gray-400">購買項目</div>
+                      <div className="ml-2">{item.planTitle}</div>
                     </Flex>
+
+                    <Box className="mt-1 hidden space-x-4 text-xs md:flex md:text-sm">
+                      <Flex>
+                        <div className="shrink-0 text-gray-400">交易編號</div>
+                        <div className="ml-2">{item.transactionId}</div>
+                      </Flex>
+
+                      <Flex>
+                        <div className="shrink-0 text-gray-400">交易時間</div>
+                        <div className="ml-2">{item.paidAt}</div>
+                      </Flex>
+
+                      <Flex>
+                        <div className="shrink-0 text-gray-400">交易金額</div>
+                        <div className="ml-2">NT {item.fundPrice}</div>
+                      </Flex>
+                    </Box>
                   </Box>
-                )
+
+                  <Flex className="mt-3 flex-col items-start justify-between text-sm md:mt-6 md:flex-row md:items-center md:text-base">
+                    <Flex
+                      color={'secondary-emphasis.500'}
+                      fontWeight={500}
+                      className="space-x-4 md:space-x-9"
+                    >
+                      <Flex
+                        alignItems={'center'}
+                        className="group cursor-pointer"
+                      >
+                        <Link href={`/organization/${item.teamId}`}>
+                          <Icon as={FiMessageSquare} mx={1} />
+                          <span>聯絡提案者</span>
+                          <Icon
+                            as={IoIosArrowForward}
+                            mx={1}
+                            className="transition-transform group-hover:translate-x-2"
+                          />
+                        </Link>
+                      </Flex>
+
+                      <Flex alignItems={'center'} className="group">
+                        <Link
+                          href={`/user/orders/${item.id}`}
+                          className="flex items-center transition-colors group-hover:text-secondary-emphasis-400"
+                        >
+                          <span>查看細節</span>
+                          <Icon
+                            as={IoIosArrowForward}
+                            mx={1}
+                            className="transition-transform group-hover:translate-x-2"
+                          />
+                        </Link>
+                      </Flex>
+                    </Flex>
+
+                    {!item.isProject && (
+                      <Button
+                        colorScheme="primary"
+                        borderRadius={4}
+                        className="mt-4 w-full md:mt-0 md:!h-12 md:w-[154px]"
+                        fontSize={{ base: '0.875rem', md: '1rem' }}
+                        onClick={() => openModal(item)}
+                      >
+                        評價
+                      </Button>
+                    )}
+                  </Flex>
+                </Box>
+              ))
             )}
           </Box>
         </Container>
