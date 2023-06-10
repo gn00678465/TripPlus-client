@@ -1,6 +1,5 @@
 import { Text, Button, Icon, Flex } from '@chakra-ui/react';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
-import { useState } from 'react';
 import PageBtn from './PageBtn';
 
 interface PaginationProps {
