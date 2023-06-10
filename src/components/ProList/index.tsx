@@ -1,10 +1,10 @@
 import Pagination from '@/components/Pagination';
-import { useState, ChangeEvent, useEffect, useCallback } from 'react';
+import { useState, ChangeEvent, useCallback, useMemo } from 'react';
 import Card from '@/components/Card';
 import Loading from '@/components/Loading';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR from 'swr';
 import { apiGetProject } from '@/api';
-import { currency } from '@/utils';
+import { currency, handleQueryParams, swrFetch } from '@/utils';
 import { Box, Container, Center, Flex, Select } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 
@@ -26,7 +26,6 @@ const tabs = [
 const ProList = () => {
   const router = useRouter();
   const { pathname, query } = router;
-  const { mutate } = useSWRConfig();
 
   const getCategory = (value: number) => {
     switch (value) {
@@ -41,139 +40,107 @@ const ProList = () => {
     }
   };
 
-  const [list, setList] = useState<Project.ProjectItem[]>([]);
   const [page, setPage] = useState<Project.Pagination>({
     page: 1,
     limit: 1,
     totalPages: 1
   });
-  const [sortType, setSortType] = useState('recently_launched');
 
-  const [categoryValue, setCategoryValue] = useState('');
-
-  const [queryParams, setQueryParams] = useState({
-    sort: 'recently_launched',
-    category: '',
-    page: '1',
-    limit: '9'
-  });
-
-  const getProjects = (data: ApiProject.Projects) => {
-    const items = data.items.map((item) => {
-      return {
-        id: item.id,
-        title: item.title,
-        category: getCategory(item.category),
-        team: item.teamId.title,
-        teamId: item.teamId._id,
-        keyVision: item.keyVision,
-        target: currency(item.target, 'zh-TW', 'TWD'),
-        progressRate: item.progressRate,
-        countDownDays: item.countDownDays,
-        type: item.type,
-        updatedAt: item.updatedAt
-      };
-    });
-
-    setList(() => items);
-  };
-
-  const { data: projectList, isLoading } = useSWR(
-    ['/api/project', queryParams],
-    async ([key, queryParams]) => await apiGetProject(queryParams),
-    {
-      revalidateOnMount: false,
-      onSuccess(data, key, config) {
-        if (data && data.status === 'Success') {
-          getProjects(data.data);
-          setPage({
-            page: data.data.page,
-            limit: data.data.limit,
-            totalPages: data.data.totalPages
-          });
-        }
-      }
-    }
+  const queryParams: ApiProject.ProjectsParams = useMemo(
+    () => handleQueryParams(query),
+    [query]
   );
+
+  const {
+    data,
+    isLoading,
+    mutate: mutateProject
+  } = useSWR(
+    ['/api/projects', queryParams],
+    async ([key, queryParams]) => await swrFetch(apiGetProject(queryParams))
+  );
+
+  const list = useMemo(() => {
+    if (data?.data) {
+      setPage({
+        page: data.data.page,
+        limit: data.data.limit,
+        totalPages: data.data.totalPages
+      });
+      return data.data.items.map((item) => {
+        return {
+          id: item.id,
+          title: item.title,
+          category: getCategory(item.category),
+          team: item.teamId.title,
+          teamId: item.teamId._id,
+          keyVision: item.keyVision,
+          target: currency(item.target, 'zh-TW', 'TWD'),
+          progressRate: item.progressRate,
+          countDownDays: item.countDownDays,
+          type: item.type,
+          updatedAt: item.updatedAt
+        };
+      });
+    }
+    return [];
+  }, [data?.data]);
 
   const mutateData = useCallback(() => {
     if (pathname === '/projects') {
-      mutate(['/api/project', queryParams]);
+      mutateProject();
     } else {
       // TODO:產品 API，暫先接專案
-      mutate(['/api/project', queryParams]);
+      mutateProject();
     }
-  }, [pathname, mutate, queryParams]);
+  }, [pathname, mutateProject]);
 
   const onPageChange = (page: number) => {
-    router.push({
-      pathname,
-      query: {
-        ...queryParams,
-        page: String(page)
-      }
-    });
+    router.push(
+      {
+        pathname,
+        query: {
+          ...queryParams,
+          page: String(page)
+        }
+      },
+      undefined,
+      { shallow: true }
+    );
     mutateData();
   };
 
   const changeSortType = (value: string) => {
-    setSortType(value);
-    router.push({
-      pathname,
-      query: {
-        ...queryParams,
-        sort: value,
-        page: '1'
-      }
-    });
+    router.push(
+      {
+        pathname,
+        query: {
+          ...queryParams,
+          sort: value,
+          page: '1'
+        }
+      },
+      undefined,
+      { shallow: true }
+    );
     mutateData();
   };
 
   const changeCategory = (e: ChangeEvent<HTMLSelectElement>) => {
-    setCategoryValue(e.target.value);
-    router.push({
-      pathname,
-      query: {
-        ...queryParams,
-        category: e.target.value,
-        page: '1'
-      }
-    });
+    router.push(
+      {
+        pathname,
+        query: {
+          ...queryParams,
+          category: e.target.value,
+          page: '1'
+        }
+      },
+      undefined,
+      { shallow: true }
+    );
     mutateData();
   };
-
-  useEffect(() => {
-    mutateData();
-  }, [mutateData]);
-
-  useEffect(() => {
-    setQueryParams({
-      sort: Array.isArray(query.sort)
-        ? query.sort.slice(-1)[0]
-        : query.sort || 'recently_launched',
-      category: Array.isArray(query.category)
-        ? query.category.slice(-1)[0]
-        : query.category || '',
-      page: Array.isArray(query.page)
-        ? query.page.slice(-1)[0]
-        : query.page || '1',
-      limit: Array.isArray(query.limit)
-        ? query.limit.slice(-1)[0]
-        : query.limit || '9'
-    });
-
-    setCategoryValue(
-      Array.isArray(query.category)
-        ? query.category.slice(-1)[0]
-        : query.category || ''
-    );
-
-    setSortType(
-      Array.isArray(query.sort)
-        ? query.sort.slice(-1)[0]
-        : query.sort || 'recently_launched'
-    );
-  }, [query]);
 
   if (isLoading) return <Loading />;
 
@@ -183,7 +150,7 @@ const ProList = () => {
         <Flex className="flex-col md:flex-row md:justify-between">
           <Select
             w={{ base: 'full', md: 200 }}
-            value={categoryValue}
+            value={queryParams?.category}
             onChange={changeCategory}
           >
             {category.map((item) => (
@@ -211,7 +178,9 @@ const ProList = () => {
                 cursor={'pointer'}
                 fontWeight={500}
                 className={`hover:text-secondary-emphasis  md:block ${
-                  sortType === item.value ? 'text-secondary-emphasis' : ''
+                  queryParams.sort === item.value
+                    ? 'text-secondary-emphasis'
+                    : ''
                 }`}
                 onClick={() => changeSortType(item.value)}
               >

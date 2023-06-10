@@ -105,4 +105,46 @@ declare namespace ApiUser {
     comment?: string;
     imageUrls?: string[];
   }
+
+  interface Order {
+    _id: string;
+    transactionId: string;
+    projectId: {
+      _id: string;
+      title: string;
+      type: string;
+      keyVision: string;
+    };
+    productId: {
+      _id: string;
+      title: string;
+      type: string;
+      keyVision: string;
+    };
+    payment: number;
+    paymentStatus: number;
+    createdAt: string;
+    total: number;
+    planId: {
+      _id: string;
+      title: string;
+      price: number;
+    };
+    note: string;
+    paidAt?: string;
+    buyerName: string;
+    buyerPhone: string;
+    buyerEmail: string;
+    buyerAddress: string;
+    recipient: string;
+    recipientPhone: string;
+    recipientEmail: string;
+    shipAddress: string;
+    shipment: number;
+    shipmentStatus: number;
+    shipDate?: string;
+    shipmentId?: string;
+    count: number;
+    extraFund: number;
+  }
 }

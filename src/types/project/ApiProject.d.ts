@@ -122,4 +122,20 @@ declare namespace ApiProject {
     faqs: FAQ[];
     histories: History[];
   }
+
+  interface TeamTitle {
+    _id: string;
+    title: string;
+  }
+
+  interface ProjectWithPlan
+    extends Omit<Project, 'teamId' | 'news' | 'faqs' | 'histories'> {
+    teamId: TeamTitle;
+    type: string;
+    summary: string;
+    seoDescription: string;
+    url: string;
+    isAllowInstallment: number;
+    payment: number;
+  }
 }
