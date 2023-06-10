@@ -93,9 +93,10 @@ declare namespace ApiUser {
       _id: string;
       title: string;
     };
-    paidAt?: string;
+    total: string;
     fundPrice: number;
     paymentStatus: number;
+    createdAt: string;
   }
 
   interface Ranking {
