@@ -69,5 +69,7 @@ declare namespace User {
     shipmentStatus: number;
     shipDate: string;
     shipmentId: string;
+    count: number;
+    extraFund: number;
   }
 }

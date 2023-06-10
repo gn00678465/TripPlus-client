@@ -80,6 +80,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       title: resData.planId.title,
       price: resData.planId.price
     },
+    count: resData.count,
+    extraFund: resData.extraFund,
     note: resData.note || '無',
     paidAt: resData.paidAt
       ? dayjs(resData.paidAt).format('YYYY 年 MM 月 DD 日 hh:mm')
@@ -212,8 +214,15 @@ const Order: App.NextPageWithLayout<OrderProps> = ({ data }) => {
                   <Box lineHeight={2}>
                     <div>
                       <div>{data.plan.title}</div>
-                      <div>NT$ {data.plan.price} X 1</div>
+                      <div>
+                        NT$ {data.plan.price} X {data.count}
+                      </div>
                     </div>
+
+                    <div>
+                      <div>額外贊助：{data.extraFund}</div>
+                    </div>
+
                     <div className="mt-3">
                       <div>請填入捐款收據抬頭：{data.recipient}</div>
                       <div>備註：{data.note}</div>

@@ -109,5 +109,7 @@ declare namespace ApiUser {
     shipmentStatus: number;
     shipDate?: string;
     shipmentId?: string;
+    count: number;
+    extraFund: number;
   }
 }
