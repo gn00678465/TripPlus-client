@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import Link from 'next/link';
 import { GetServerSideProps } from 'next';
 import { Layout, ImageFallback } from '@/components';
 import UserHeader from '@/components/User/user-header';
@@ -67,6 +68,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const data = {
     title: isProject ? resData.projectId.title : resData.productId.title,
+    type: isProject ? 'project' : 'product',
     payment: getPayment(resData.payment),
     paymentStatus: resData.paymentStatus,
     id: resData._id,
@@ -76,7 +78,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     keyVision: isProject
       ? resData.projectId.keyVision
       : resData.productId.keyVision,
+    proId: isProject ? resData.projectId._id : resData.productId._id,
     plan: {
+      _id: resData.planId._id,
       title: resData.planId.title,
       price: resData.planId.price
     },
@@ -155,7 +159,18 @@ const Order: App.NextPageWithLayout<OrderProps> = ({ data }) => {
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   交易狀態
                 </FormLabel>
-                <Box>{data.paymentStatus === 0 ? '未付款' : '完成付款'}</Box>
+                <Box>
+                  {data.paymentStatus === 0 ? (
+                    <Link
+                      href={`/checkout?${data.type}=${data.proId}&reward=${data.plan._id}`}
+                      className="text-secondary-emphasis-500"
+                    >
+                      未付款
+                    </Link>
+                  ) : (
+                    '完成付款'
+                  )}
+                </Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">

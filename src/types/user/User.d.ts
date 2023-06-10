@@ -44,6 +44,7 @@ declare namespace User {
 
   interface Order {
     title: string;
+    type: string;
     payment: number;
     paymentStatus: number;
     id: string;
@@ -52,9 +53,11 @@ declare namespace User {
     total: string;
     keyVision: string;
     plan: {
+      _id: string;
       title: string;
       price: number;
     };
+    proId: string;
     note: string;
     paidAt?: string;
     buyerName: string;

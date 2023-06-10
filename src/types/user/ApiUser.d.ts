@@ -78,11 +78,13 @@ declare namespace ApiUser {
     _id: string;
     transactionId: string;
     projectId: {
+      _id: string;
       title: string;
       type: string;
       keyVision: string;
     };
     productId: {
+      _id: string;
       title: string;
       type: string;
       keyVision: string;
@@ -92,6 +94,7 @@ declare namespace ApiUser {
     createdAt: string;
     total: number;
     planId: {
+      _id: string;
       title: string;
       price: number;
     };
