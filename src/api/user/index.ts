@@ -28,3 +28,7 @@ export function apiGetBonus() {
 export function apiPostFollow(id: string, config?: AxiosRequestConfig) {
   return request.post<ApiUser.Follows>(`/user/follow/${id}`, config);
 }
+
+export function apiPostOrders(orderId: string, data: ApiUser.Ranking) {
+  return request.post<ApiUser.Ranking>(`/user/order/${orderId}/ranking`, data);
+}

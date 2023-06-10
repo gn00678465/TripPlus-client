@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import { Layout } from '@/components';
 import UserHeader from '@/components/User/user-header';
 import RankModal from '@/components/User/rank-modal';
@@ -16,67 +16,101 @@ import {
 } from '@chakra-ui/react';
 import { IoIosArrowDroprightCircle, IoIosArrowForward } from 'react-icons/io';
 import { FiMessageSquare } from 'react-icons/fi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { currency, request, safeAwait } from '@/utils';
+import dayjs from 'dayjs';
 
-const Transactions: App.NextPageWithLayout = () => {
-  const breadcrumb = [
-    { name: '首頁', url: '/' },
-    { name: '會員中心', url: '/user/account' },
-    { name: '交易紀錄', url: '/user/transactions' }
-  ];
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { token } = context.req.cookies;
+  if (!token) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    };
+  }
 
-  const [list, setList] = useState([
-    {
-      id: '1',
-      team: '財團法人賑災基金會',
-      title: '為自由而站：烏克蘭難民援助計畫 #TaiwanStandsWithUkraine',
-      plan: '自由支持｜攜手前進',
-      shipmentId: 'REG1619481646443263',
-      paidAt: '2021.09.09 01:38',
-      fundPrice: '790',
-      isProduct: false
-    },
-    {
-      id: '2',
-      team: 'SUNSHING',
-      title:
-        '【S+ PURE純粹杯】全台首創!高分子抗垢技術，輕鬆清潔不卡垢，體驗最純淨的喝水',
-      plan: '【獨享純粹的喝水】｜一入純粹杯',
-      shipmentId: 'REG16194816464432632',
-      paidAt: '2021.09.09 01:38',
-      fundPrice: '790',
-      isProduct: true
-    },
-    {
-      id: '3',
-      team: '財團法人賑災基金會',
-      title: '為自由而站：烏克蘭難民援助計畫 #TaiwanStandsWithUkraine',
-      plan: '自由支持｜攜手前進',
-      shipmentId: 'REG16194816464432633',
-      paidAt: '2021.09.09 01:38',
-      fundPrice: '790',
-      isProduct: false
-    }
-  ]);
+  const [err, res] = await safeAwait<ApiUser.Orders[]>(
+    request('/user/orders', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
 
-  const tab = [
-    { id: 0, title: '成功交易紀錄' },
-    { id: 1, title: '取消/退款紀錄' },
-    { id: 2, title: '等待付款紀錄' }
-  ];
+  if (err) {
+    return {
+      notFound: true
+    };
+  }
 
-  const [tabIdx, setTabIdx] = useState(0);
+  const list = res.data.map((item) => {
+    const isProject =
+      item.projectId !== null && item.projectId.type === 'project';
+
+    return {
+      id: item._id,
+      transactionId: item.transactionId,
+      team: isProject
+        ? item.projectId.teamId.title
+        : item.productId.teamId.title,
+      teamId: isProject ? item.projectId.teamId._id : item.productId.teamId._id,
+      title: isProject ? item.projectId.title : item.productId.title,
+      planTitle: item.planId.title,
+      paidAt: item.paidAt ? dayjs(item.paidAt).format('YYYY.MM.DD hh:mm') : '',
+      fundPrice: currency(item.fundPrice, 'zh-TW', 'TWD'),
+      paymentStatus: item.paymentStatus,
+      isProject: isProject,
+      projectId: item.projectId,
+      productId: item.productId
+    };
+  });
+
+  return {
+    props: { list }
+  };
+};
+
+const breadcrumb = [
+  { name: '首頁', url: '/' },
+  { name: '會員中心', url: '/user/account' },
+  { name: '交易紀錄', url: '/user/transactions' }
+];
+
+const tab = [
+  { id: 1, title: '成功交易紀錄' },
+  { id: 0, title: '等待付款紀錄' }
+];
+
+interface TransactionsProps {
+  list: User.Orders[];
+}
+
+const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
+  const [tabIdx, setTabIdx] = useState(1);
+  const [listData, setListData] = useState<User.Orders[]>([]);
 
   const selectedTab = tab.find((item) => item.id === tabIdx);
 
   const [showRankModal, setShowRankModal] = useState(false);
 
-  const [modalTitle, setModalTitle] = useState('');
+  const [modalInfo, setModalInfo] = useState({
+    orderId: '',
+    productId: '',
+    title: ''
+  });
 
-  const openModal = (title: string) => {
-    setModalTitle(title);
+  const openModal = (item: User.Orders) => {
+    setModalInfo({
+      orderId: item.id,
+      productId: item.productId,
+      title: item.title
+    });
     setShowRankModal(true);
   };
+
+  useEffect(() => {
+    setListData(() => list.filter((item) => item.paymentStatus === tabIdx));
+  }, [list, tabIdx]);
 
   return (
     <>
@@ -139,113 +173,115 @@ const Transactions: App.NextPageWithLayout = () => {
           </Box>
 
           <Box className="space-y-6">
-            {list.map((item) => (
-              <Box
-                key={item.shipmentId}
-                bgColor={'white'}
-                className="p-5 md:p-10"
-              >
-                <div className="mb-3 text-xs md:text-sm">
-                  提案團隊：{item.team}
-                </div>
-                <div className="mb-4 font-medium md:mb-6 md:text-xl">
-                  {item.title}
-                </div>
-
+            {listData.length <= 0 ? (
+              <Box textAlign={'center'}>查無相關交易紀錄</Box>
+            ) : (
+              listData.map((item) => (
                 <Box
-                  borderBottom={1}
-                  borderBottomColor={'gray.200'}
-                  borderStyle={'solid'}
-                  className="pb-3 md:pb-4"
+                  key={item.transactionId}
+                  bgColor={'white'}
+                  className="p-5 md:p-10"
                 >
-                  <Flex className="text-xs md:text-sm">
-                    <div className="shrink-0 text-gray-400">購買項目</div>
-                    <div className="ml-2">{item.plan}</div>
-                  </Flex>
+                  <div className="mb-3 text-xs md:text-sm">
+                    提案團隊：{item.team}
+                  </div>
+                  <div className="mb-4 font-medium md:mb-6 md:text-xl">
+                    {item.title}
+                  </div>
 
-                  <Box className="mt-1 hidden space-x-4 text-xs md:flex md:text-sm">
-                    <Flex>
-                      <div className="shrink-0 text-gray-400">交易編號</div>
-                      <div className="ml-2">{item.shipmentId}</div>
-                    </Flex>
-
-                    <Flex>
-                      <div className="shrink-0 text-gray-400">交易時間</div>
-                      <div className="ml-2">{item.paidAt}</div>
-                    </Flex>
-
-                    <Flex>
-                      <div className="shrink-0 text-gray-400">交易金額</div>
-                      <div className="ml-2">{item.fundPrice}</div>
-                    </Flex>
-                  </Box>
-                </Box>
-
-                <Flex className="mt-3 flex-col items-start justify-between text-sm md:mt-6 md:flex-row md:items-center md:text-base">
-                  <Flex
-                    color={'secondary-emphasis.500'}
-                    fontWeight={500}
-                    className="space-x-4 md:space-x-9"
+                  <Box
+                    borderBottom={1}
+                    borderBottomColor={'gray.200'}
+                    borderStyle={'solid'}
+                    className="pb-3 md:pb-4"
                   >
+                    <Flex className="text-xs md:text-sm">
+                      <div className="shrink-0 text-gray-400">購買項目</div>
+                      <div className="ml-2">{item.planTitle}</div>
+                    </Flex>
+
+                    <Box className="mt-1 hidden space-x-4 text-xs md:flex md:text-sm">
+                      <Flex>
+                        <div className="shrink-0 text-gray-400">交易編號</div>
+                        <div className="ml-2">{item.transactionId}</div>
+                      </Flex>
+
+                      {item.paidAt && (
+                        <Flex>
+                          <div className="shrink-0 text-gray-400">交易時間</div>
+                          <div className="ml-2">{item.paidAt}</div>
+                        </Flex>
+                      )}
+
+                      <Flex>
+                        <div className="shrink-0 text-gray-400">交易金額</div>
+                        <div className="ml-2">NT {item.fundPrice}</div>
+                      </Flex>
+                    </Box>
+                  </Box>
+
+                  <Flex className="mt-3 flex-col items-start justify-between text-sm md:mt-6 md:flex-row md:items-center md:text-base">
                     <Flex
-                      alignItems={'center'}
-                      className="group cursor-pointer"
+                      color={'secondary-emphasis.500'}
+                      fontWeight={500}
+                      className="space-x-4 md:space-x-9"
                     >
-                      <Icon as={FiMessageSquare} mx={1} />
-                      <span>聯絡提案者</span>
-                      <Icon
-                        as={IoIosArrowForward}
-                        mx={1}
-                        className="transition-transform group-hover:translate-x-2"
-                      />
-                    </Flex>
-
-                    <Flex alignItems={'center'} className="group">
-                      <Link
-                        href={`/user/orders/${item.id}`}
-                        className="flex items-center transition-colors group-hover:text-secondary-emphasis-400"
+                      <Flex
+                        alignItems={'center'}
+                        className="group cursor-pointer"
                       >
-                        <span>查看細節</span>
-                        <Icon
-                          as={IoIosArrowForward}
-                          mx={1}
-                          className="transition-transform group-hover:translate-x-2"
-                        />
-                      </Link>
-                    </Flex>
-                  </Flex>
+                        <Link href={`/organization/${item.teamId}`}>
+                          <Icon as={FiMessageSquare} mx={1} />
+                          <span>聯絡提案者</span>
+                          <Icon
+                            as={IoIosArrowForward}
+                            mx={1}
+                            className="transition-transform group-hover:translate-x-2"
+                          />
+                        </Link>
+                      </Flex>
 
-                  {item.isProduct && (
-                    <Button
-                      colorScheme="primary"
-                      borderRadius={4}
-                      className="mt-4 w-full md:mt-0 md:!h-12 md:w-[154px]"
-                      fontSize={{ base: '0.875rem', md: '1rem' }}
-                      onClick={() => openModal(item.title)}
-                    >
-                      評價
-                    </Button>
-                  )}
-                </Flex>
-              </Box>
-            ))}
+                      <Flex alignItems={'center'} className="group">
+                        <Link
+                          href={`/user/orders/${item.id}`}
+                          className="flex items-center transition-colors group-hover:text-secondary-emphasis-400"
+                        >
+                          <span>查看細節</span>
+                          <Icon
+                            as={IoIosArrowForward}
+                            mx={1}
+                            className="transition-transform group-hover:translate-x-2"
+                          />
+                        </Link>
+                      </Flex>
+                    </Flex>
+
+                    {!item.isProject && (
+                      <Button
+                        colorScheme="primary"
+                        borderRadius={4}
+                        className="mt-4 w-full md:mt-0 md:!h-12 md:w-[154px]"
+                        fontSize={{ base: '0.875rem', md: '1rem' }}
+                        onClick={() => openModal(item)}
+                      >
+                        評價
+                      </Button>
+                    )}
+                  </Flex>
+                </Box>
+              ))
+            )}
           </Box>
         </Container>
       </Box>
 
       <RankModal
-        title={modalTitle}
+        modalInfo={modalInfo}
         isOpen={showRankModal}
         onClose={() => setShowRankModal(false)}
       />
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps = async () => {
-  return {
-    props: {}
-  };
 };
 
 export default Transactions;

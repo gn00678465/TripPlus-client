@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import {
   Box,
   Flex,
@@ -11,23 +12,36 @@ import {
   Button,
   Icon,
   Textarea,
-  FormControl
+  FormControl,
+  Input,
+  useToast
 } from '@chakra-ui/react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiUploadCloud } from 'react-icons/fi';
+import { IoIosCloseCircleOutline } from 'react-icons/io';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { safeAwait } from '@/utils';
+import useSWRMutation from 'swr/mutation';
+import { apiPostOrders, apiPostUpload } from '@/api';
+import { useFileReaders } from '@/hooks';
+import ScrollBar from '@/components/ScrollBar/horizontal';
 
 interface RankModalProps {
-  title: string;
+  modalInfo: {
+    orderId: string;
+    productId: string;
+    title: string;
+  };
   isOpen: boolean;
   onClose: () => void;
 }
 
-const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
+const RankModal = ({ modalInfo, isOpen, onClose }: RankModalProps) => {
+  const toast = useToast();
   const shortComment: string[] = [
-    '符合期望',
-    '質感差異',
+    '符合期待',
+    '質感優異',
     '運送迅速',
     '想再回購',
     '服務貼心',
@@ -55,19 +69,97 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
   ];
 
   const [rate, setRate] = useState(0);
+  const [files, setFiles] = useState<File[]>([]);
+  const [dataURLs, setDataURLs] = useState<string[]>([]);
+  const { dataURLs: dataURLarr } = useFileReaders(files);
+
+  const deleteImg = (idx: number) => {
+    setFiles((state) => state.filter((item, index) => index !== idx));
+  };
 
   const selectedRateText = rateTexts.find((item) => item.rate === rate);
-
-  const onSubmit = async (data: User.rank) => {
-    console.log(data);
-  };
 
   const {
     handleSubmit,
     register,
     formState: { errors },
     reset
-  } = useForm<User.rank>();
+  } = useForm<ApiUser.Ranking>();
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (fileList) {
+      const fileArray = Array.from(fileList);
+      setFiles((state) => [...state, ...fileArray]);
+    }
+  };
+
+  const { trigger: setComment } = useSWRMutation(
+    '/api/user/change-password',
+    (url, { arg }: { arg: ApiUser.Ranking }) =>
+      apiPostOrders(modalInfo.orderId, arg),
+    {
+      onSuccess: (data, key, config) => {
+        toast({
+          status: 'success',
+          position: 'top',
+          duration: 3000,
+          isClosable: true,
+          containerStyle: {
+            width: '100%',
+            maxWidth: '100%'
+          },
+          render: () => (
+            <Box
+              color="white"
+              p={3}
+              bg="secondary-emphasis.400"
+              textAlign={'center'}
+            >
+              您已成功評價
+            </Box>
+          )
+        });
+      },
+      onError: (err, key, config) => {
+        toast({
+          title: err.message,
+          status: 'warning',
+          position: 'top',
+          duration: 3000,
+          isClosable: true,
+          containerStyle: {
+            width: '100%',
+            maxWidth: '100%'
+          }
+        });
+      }
+    }
+  );
+
+  const onSubmit = async (data: ApiUser.Ranking) => {
+    const payload = {
+      productId: modalInfo.productId,
+      rate,
+      shortComment: shortComment.join(),
+      imageUrls: [] as string[],
+      comment: data.comment
+    };
+
+    if (files.length > 0) {
+      files.map(async (item) => {
+        const formData = new FormData();
+        formData.append('file', item);
+        const [err, res] = await safeAwait(apiPostUpload(formData));
+
+        if (res && res.status === 'Success') {
+          payload.imageUrls.push(res.data.imageUrl);
+        }
+      });
+    }
+
+    setComment(payload);
+  };
 
   useEffect(() => {
     if (isOpen) return;
@@ -76,7 +168,13 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
     });
     setRate(0);
     setSelectShortComment(() => []);
+    setFiles(() => []);
+    setDataURLs(() => []);
   }, [isOpen, reset]);
+
+  useEffect(() => {
+    setDataURLs((state) => [...state, ...dataURLarr]);
+  }, [dataURLarr]);
 
   return (
     <Modal
@@ -94,7 +192,9 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
       >
         <ModalHeader textAlign={'center'}>
           <div className="text-xl md:text-[1.75rem]">滿意度評價</div>
-          <div className="mt-4 text-sm md:mt-6 md:text-base">{title}</div>
+          <div className="mt-4 text-sm md:mt-6 md:text-base">
+            {modalInfo.title}
+          </div>
         </ModalHeader>
         <ModalCloseButton
           border={1}
@@ -183,10 +283,49 @@ const RankModal = ({ title, isOpen, onClose }: RankModalProps) => {
                 color: 'secondary-emphasis.400'
               }}
             >
-              <button>
-                <Icon as={FiUploadCloud} mx={1} className="text-xl" />
-                <span className="ml-1">上傳檔案</span>
-              </button>
+              <FormControl>
+                <Input
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={onFileChange}
+                  display={'none'}
+                  multiple
+                />
+                <label htmlFor="photo" className="cursor-pointer">
+                  <Icon as={FiUploadCloud} mx={1} className="text-xl" />
+                  <span className="ml-1">上傳檔案</span>
+                </label>
+              </FormControl>
+
+              {dataURLs.length > 0 && (
+                <ScrollBar>
+                  <Flex mt={3} className="space-x-3">
+                    {dataURLs.map((item: string, idx: number) => (
+                      <Box key={idx} position={'relative'}>
+                        <Image
+                          src={item}
+                          alt=""
+                          width={100}
+                          height={100}
+                          priority
+                        />
+                        <Box
+                          position={'absolute'}
+                          top={0}
+                          right={0}
+                          p={1}
+                          color={'gray.700'}
+                          cursor={'pointer'}
+                          onClick={() => deleteImg(idx)}
+                        >
+                          <IoIosCloseCircleOutline />
+                        </Box>
+                      </Box>
+                    ))}
+                  </Flex>
+                </ScrollBar>
+              )}
             </Box>
           </Box>
         </ModalBody>

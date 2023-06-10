@@ -15,10 +15,6 @@ declare namespace User {
     introduction: string;
   }
 
-  interface rank {
-    comment: string;
-  }
-
   interface Follows {
     id: string;
     title: string;
@@ -40,6 +36,26 @@ declare namespace User {
     bonus: number;
     transactionId: string;
     isProject: boolean;
+  }
+
+  interface TeamId {
+    _id: string;
+    title: string;
+  }
+
+  interface Orders {
+    id: string;
+    transactionId: string;
+    team: string;
+    teamId: string;
+    title: string;
+    planTitle: string;
+    paidAt: string;
+    fundPrice: number;
+    paymentStatus: number;
+    isProject: boolean;
+    projectId: string;
+    productId: string;
   }
 
   interface Order {

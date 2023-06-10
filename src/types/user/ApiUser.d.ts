@@ -74,6 +74,38 @@ declare namespace ApiUser {
     products: BonusList[];
   }
 
+  interface Orders {
+    _id: string;
+    transactionId: string;
+    projectId: {
+      _id: string;
+      teamId: TeamId;
+      type: string;
+      title: string;
+    };
+    productId: {
+      _id: string;
+      teamId: TeamId;
+      type: string;
+      title: string;
+    };
+    planId: {
+      _id: string;
+      title: string;
+    };
+    paidAt?: string;
+    fundPrice: number;
+    paymentStatus: number;
+  }
+
+  interface Ranking {
+    productId: string;
+    rate: number;
+    shortComment?: string;
+    comment?: string;
+    imageUrls?: string[];
+  }
+
   interface Order {
     _id: string;
     transactionId: string;
