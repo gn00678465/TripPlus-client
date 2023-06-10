@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       teamId: isProject ? item.projectId.teamId._id : item.productId.teamId._id,
       title: isProject ? item.projectId.title : item.productId.title,
       planTitle: item.planId.title,
-      paidAt: dayjs(item.paidAt).format('YYYY.MM.DD hh:mm') || '',
+      paidAt: item.paidAt ? dayjs(item.paidAt).format('YYYY.MM.DD hh:mm') : '',
       fundPrice: currency(item.fundPrice, 'zh-TW', 'TWD'),
       paymentStatus: item.paymentStatus,
       isProject: isProject,
@@ -206,10 +206,12 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
                         <div className="ml-2">{item.transactionId}</div>
                       </Flex>
 
-                      <Flex>
-                        <div className="shrink-0 text-gray-400">交易時間</div>
-                        <div className="ml-2">{item.paidAt}</div>
-                      </Flex>
+                      {item.paidAt && (
+                        <Flex>
+                          <div className="shrink-0 text-gray-400">交易時間</div>
+                          <div className="ml-2">{item.paidAt}</div>
+                        </Flex>
+                      )}
 
                       <Flex>
                         <div className="shrink-0 text-gray-400">交易金額</div>
