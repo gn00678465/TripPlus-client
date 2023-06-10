@@ -209,7 +209,7 @@ const Organization = () => {
       </Head>
       <Box as="section">
         <Container maxW="container.md">
-          <Box className="flex py-5">
+          <Box className="flex flex-col items-center py-5 md:flex-row md:items-start">
             {teamInfo.photo && (
               <AspectRatio ratio={1 / 1} maxW={{ base: '180px' }} w="full">
                 <Image
@@ -222,11 +222,11 @@ const Organization = () => {
                 ></Image>
               </AspectRatio>
             )}
-            <Box className="ml-5 flex flex-col">
-              <Text className="mt-2 text-[32px] font-bold">
+            <Box className="flex flex-col md:ml-5">
+              <Text className="mt-2 text-center text-[28px] font-bold md:text-left md:text-[32px]">
                 {teamInfo.title}
               </Text>
-              <Text className="mt-3 text-lg text-gray-500">
+              <Text className="mt-3 text-center text-[16px] text-gray-500 md:text-left md:text-lg">
                 加入時間：{dayjs(teamInfo.createdAt).format('YYYY-MM-DD')}
               </Text>
               <Flex columnGap={3} marginTop={4}>
@@ -264,7 +264,7 @@ const Organization = () => {
                   _hover={{ bgColor: 'gray.200' }}
                 />
                 <Button
-                  ml={20}
+                  ml={{ md: 20 }}
                   leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
                   colorScheme="primary"
                 >
@@ -273,15 +273,18 @@ const Organization = () => {
               </Flex>
             </Box>
           </Box>
-          <Text className="py-5 text-lg">{teamInfo.introduction}</Text>
+          <Text className="py-5 md:text-lg">{teamInfo.introduction}</Text>
           <Box className="py-5">
-            <Text className="mb-7 text-xl font-bold before:border-l-[3px] before:border-gray-900 before:pl-[10px] before:content-['']">
+            <Text className="mb-7 text-[16px] font-bold before:border-l-[3px] before:border-gray-900 before:pl-[10px] before:content-[''] md:text-xl">
               登記資訊
             </Text>
             <Box className="table">
               {registerInfo.map((info) => {
                 return (
-                  <Box className="table-row" key={info.label}>
+                  <Box
+                    className="table-row text-sm md:text-[16px]"
+                    key={info.label}
+                  >
                     <span className="table-cell w-[120px] pb-7 pl-[13px] text-gray-500">
                       {info.label}
                     </span>
@@ -292,13 +295,16 @@ const Organization = () => {
                 );
               })}
             </Box>
-            <Text className="mb-7 mt-5 text-xl font-bold before:border-l-[3px] before:border-gray-900 before:pl-[10px] before:content-['']">
+            <Text className="mb-7 mt-5 text-[16px] font-bold before:border-l-[3px] before:border-gray-900 before:pl-[10px] before:content-[''] md:text-xl">
               客服聯絡資訊
             </Text>
             <Box className="table">
               {contactInfo.map((info) => {
                 return (
-                  <Box className="table-row" key={info.label}>
+                  <Box
+                    className="table-row text-sm md:text-[16px]"
+                    key={info.label}
+                  >
                     <span className="table-cell w-[120px] pb-7 pl-[13px] text-gray-500">
                       {info.label}
                     </span>
