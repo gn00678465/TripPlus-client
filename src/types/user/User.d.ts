@@ -41,4 +41,38 @@ declare namespace User {
     transactionId: string;
     isProject: boolean;
   }
+
+  interface Order {
+    title: string;
+    type: string;
+    payment: number;
+    paymentStatus: number;
+    id: string;
+    transactionId: string;
+    createdAt: string;
+    total: string;
+    keyVision: string;
+    plan: {
+      _id: string;
+      title: string;
+      price: number;
+    };
+    proId: string;
+    note: string;
+    paidAt?: string;
+    buyerName: string;
+    buyerPhone: string;
+    buyerEmail: string;
+    buyerAddress: string;
+    recipient: string;
+    recipientPhone: string;
+    recipientEmail: string;
+    shipAddress: string;
+    shipment: number;
+    shipmentStatus: number;
+    shipDate: string;
+    shipmentId: string;
+    count: number;
+    extraFund: number;
+  }
 }

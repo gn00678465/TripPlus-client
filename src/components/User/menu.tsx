@@ -9,14 +9,19 @@ const UserMenu = () => {
   interface Menu {
     title: string;
     url: string;
+    children: string[];
   }
 
   const menu: Menu[] = [
-    { title: '個人資料', url: '/user/account' },
-    { title: '交易紀錄', url: '/user/transactions' },
-    { title: '追蹤專案', url: '/user/followings' },
-    { title: '紅利紀錄', url: '/user/bonus' },
-    { title: '變更密碼', url: '/user/change-password' }
+    { title: '個人資料', url: '/user/account', children: [] },
+    {
+      title: '交易紀錄',
+      url: '/user/transactions',
+      children: ['/user/orders/[id]']
+    },
+    { title: '追蹤專案', url: '/user/followings', children: [] },
+    { title: '紅利紀錄', url: '/user/bonus', children: [] },
+    { title: '變更密碼', url: '/user/change-password', children: [] }
   ];
 
   return (
@@ -26,13 +31,17 @@ const UserMenu = () => {
           <Link
             href={item.url}
             className={`group relative font-medium text-gray-900 transition-colors hover:text-secondary-emphasis-500 ${
-              pathName === item.url ? 'text-secondary-emphasis-500' : ''
+              pathName === item.url || item.children.includes(pathName)
+                ? 'text-secondary-emphasis-500'
+                : ''
             }`}
           >
             {item.title}
             <span
               className={`absolute bottom-[-16px] left-0 h-0.5 w-full scale-y-100 bg-secondary-emphasis-500 transition-transform group-hover:scale-x-100 md:bottom-[-28px] ${
-                pathName === item.url ? 'scale-x-100' : 'scale-x-0'
+                pathName === item.url || item.children.includes(pathName)
+                  ? 'scale-x-100'
+                  : 'scale-x-0'
               }`}
             ></span>
           </Link>
