@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 
 const MemberMenu = () => {
   const router = useRouter();
+  const setUserInfo = useAuthStore((state) => state.setUserInfo);
 
   const menu = [
     { title: '個人資料', url: '/user/account' },
@@ -21,6 +22,7 @@ const MemberMenu = () => {
     useAuthStore.persist.clearStorage();
     deleteCookie();
     router.push('/');
+    setUserInfo(null);
   };
 
   return (
