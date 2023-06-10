@@ -1,4 +1,4 @@
-import { Layout } from '@/components';
+import { Layout, GoogleSSOBtn } from '@/components';
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -21,10 +21,8 @@ import {
   Flex,
   Spacer,
   Button,
-  Divider,
-  Icon
+  Divider
 } from '@chakra-ui/react';
-import { FcGoogle } from 'react-icons/fc';
 import { useAuthStore } from '@/store';
 
 const Login: App.NextPageWithLayout = () => {
@@ -158,10 +156,7 @@ const Login: App.NextPageWithLayout = () => {
               <Divider borderColor={'gray.300'} />
             </Flex>
 
-            <Button colorScheme="gray" width={'100%'} my={4}>
-              <Icon as={FcGoogle} mr={1} className="text-xl" />
-              使用 Google 帳號登入
-            </Button>
+            <GoogleSSOBtn />
 
             <Divider borderColor={'gray.300'} mt={3} mb={5} />
 
