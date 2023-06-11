@@ -18,6 +18,7 @@ import { IoIosArrowDroprightCircle, IoIosArrowForward } from 'react-icons/io';
 import { FiMessageSquare } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { currency, request, safeAwait, utc2Local } from '@/utils';
+import dayjs from 'dayjs';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { token } = context.req.cookies;
@@ -111,7 +112,15 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
   };
 
   useEffect(() => {
-    setListData(() => list.filter((item) => item.paymentStatus === tabIdx));
+    setListData(() => {
+      const data = list.filter((item) => item.paymentStatus === tabIdx);
+      data.sort((a, b) => {
+        const timestampA = dayjs(a.createdAt).valueOf();
+        const timestampB = dayjs(b.createdAt).valueOf();
+        return timestampB - timestampA;
+      });
+      return data;
+    });
   }, [list, tabIdx]);
 
   return (
