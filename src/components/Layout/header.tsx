@@ -159,7 +159,11 @@ const Header = ({ ...rest }: BoxProps) => {
                 ref={memberMenuRef}
                 className="absolute right-3 top-14 rounded border bg-white pt-1.5 text-center text-sm tracking-widest text-gray-500 shadow-md"
               >
-                <MemberMenu />
+                <MemberMenu
+                  onClose={() => {
+                    setOpenMemberMenu(false);
+                  }}
+                />
               </Box>
             )}
           </Box>
@@ -222,7 +226,7 @@ const Header = ({ ...rest }: BoxProps) => {
                 >
                   Member
                 </Box>
-                <MemberMenu />
+                <MemberMenu onClose={onClose} />
               </Box>
             ) : (
               <Button colorScheme="primary" width={'100%'}>

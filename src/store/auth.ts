@@ -11,7 +11,7 @@ type State = {
 };
 
 type Actions = {
-  setUserInfo: (arg: ApiAuth.UserInfo) => void;
+  setUserInfo: (arg: ApiAuth.UserInfo | null) => void;
   setHasHydrated: (state: boolean) => void;
 };
 
@@ -22,16 +22,23 @@ export const useAuthStore = create<State & Actions>()(
         userInfo: null,
         _hasHydrated: false,
         setUserInfo: (params) => {
-          set((state) => {
-            Cookies.set('token', params.token, { secure: true });
-            return { ...state, userInfo: params };
-          });
+          if (params) {
+            set((state) => {
+              Cookies.set('token', params.token, { secure: true });
+              return { ...state, userInfo: params };
+            });
+          } else {
+            set((state) => {
+              return { ...state, userInfo: null };
+            });
+          }
         },
         setHasHydrated: (state) => {
           set({
             _hasHydrated: state
           });
         },
+        clearUserInfo: () => {},
         getters: {
           get isLogin() {
             return !!get().userInfo;
