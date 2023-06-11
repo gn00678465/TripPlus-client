@@ -17,7 +17,7 @@ import {
 import { IoIosArrowDroprightCircle, IoIosArrowForward } from 'react-icons/io';
 import { FiMessageSquare } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
-import { currency, request, safeAwait } from '@/utils';
+import { currency, request, safeAwait, utc2Local } from '@/utils';
 import dayjs from 'dayjs';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -56,12 +56,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       teamId: isProject ? item.projectId.teamId._id : item.productId.teamId._id,
       title: isProject ? item.projectId.title : item.productId.title,
       planTitle: item.planId.title,
-      paidAt: item.paidAt ? dayjs(item.paidAt).format('YYYY.MM.DD hh:mm') : '',
       fundPrice: currency(item.fundPrice, 'zh-TW', 'TWD'),
       paymentStatus: item.paymentStatus,
+      total: item.total,
       isProject: isProject,
       projectId: item.projectId,
-      productId: item.productId
+      productId: item.productId,
+      createdAt: item.createdAt
+        ? utc2Local(item.createdAt).format('YYYY.MM.DD HH:mm')
+        : ''
     };
   });
 
@@ -109,7 +112,15 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
   };
 
   useEffect(() => {
-    setListData(() => list.filter((item) => item.paymentStatus === tabIdx));
+    setListData(() => {
+      const data = list.filter((item) => item.paymentStatus === tabIdx);
+      data.sort((a, b) => {
+        const timestampA = dayjs(a.createdAt).valueOf();
+        const timestampB = dayjs(b.createdAt).valueOf();
+        return timestampB - timestampA;
+      });
+      return data;
+    });
   }, [list, tabIdx]);
 
   return (
@@ -206,16 +217,14 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
                         <div className="ml-2">{item.transactionId}</div>
                       </Flex>
 
-                      {item.paidAt && (
-                        <Flex>
-                          <div className="shrink-0 text-gray-400">交易時間</div>
-                          <div className="ml-2">{item.paidAt}</div>
-                        </Flex>
-                      )}
+                      <Flex>
+                        <div className="shrink-0 text-gray-400">交易時間</div>
+                        <div className="ml-2">{item.createdAt}</div>
+                      </Flex>
 
                       <Flex>
                         <div className="shrink-0 text-gray-400">交易金額</div>
-                        <div className="ml-2">NT {item.fundPrice}</div>
+                        <div className="ml-2">NT {item.total}</div>
                       </Flex>
                     </Box>
                   </Box>

@@ -50,12 +50,13 @@ declare namespace User {
     teamId: string;
     title: string;
     planTitle: string;
-    paidAt: string;
     fundPrice: number;
     paymentStatus: number;
+    total: string;
     isProject: boolean;
     projectId: string;
     productId: string;
+    createdAt: string;
   }
 
   interface Order {

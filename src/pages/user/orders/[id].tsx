@@ -5,7 +5,7 @@ import { Layout, ImageFallback } from '@/components';
 import UserHeader from '@/components/User/user-header';
 import type { ReactElement } from 'react';
 import { Box, Flex, Container, Heading, FormLabel } from '@chakra-ui/react';
-import { request, safeAwait } from '@/utils';
+import { request, safeAwait, utc2Local } from '@/utils';
 import dayjs from 'dayjs';
 import NoImage from '@/assets/images/user/no-image.png';
 
@@ -73,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     paymentStatus: resData.paymentStatus,
     id: resData._id,
     transactionId: resData.transactionId,
-    createdAt: dayjs(resData.createdAt).format('YYYY 年 MM 月 DD 日 hh:mm'),
+    createdAt: utc2Local(resData.createdAt).format('YYYY 年 MM 月 DD 日 HH:mm'),
     total: resData.total,
     keyVision: isProject
       ? resData.projectId.keyVision
@@ -88,7 +88,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     extraFund: resData.extraFund,
     note: resData.note || '無',
     paidAt: resData.paidAt
-      ? dayjs(resData.paidAt).format('YYYY 年 MM 月 DD 日 hh:mm')
+      ? utc2Local(resData.paidAt).format('YYYY 年 MM 月 DD 日 HH:mm')
       : '',
     buyerName: resData.buyerName,
     buyerPhone: resData.buyerPhone,
@@ -102,7 +102,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     shipmentStatus: getShipmentStatus(resData.shipmentStatus),
     shipmentId: resData.shipmentId || '',
     shipDate: resData.shipDate
-      ? dayjs(resData.shipDate).format('YYYY 年 MM 月 DD 日 hh:mm')
+      ? utc2Local(resData.shipDate).format('YYYY 年 MM 月 DD 日 HH:mm')
       : ''
   };
 
