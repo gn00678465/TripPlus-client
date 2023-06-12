@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Head from 'next/head';
-import Logo from '@/assets/images/logo.png';
 import {
   Box,
   Flex,
@@ -16,11 +15,13 @@ import {
   Button,
   Input
 } from '@chakra-ui/react';
-import UserImage from '@/assets/images/user/user-image.png';
+
 import MessageList, { type Message } from '@/components/Message/msg-list';
+import MsgHeader from '@/components/Message/header';
 import PopoverBox from '@/components/Popover';
 import { FiPaperclip } from 'react-icons/fi';
 import { BsImage, BsSendFill } from 'react-icons/bs';
+import { MdArrowBackIosNew } from 'react-icons/md';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -79,51 +80,33 @@ const Message = () => {
         <title>訊息中心-TripPlus+</title>
       </Head>
 
-      <Flex
-        as="header"
-        px={6}
-        alignItems={'center'}
-        boxShadow={'0 2px 3px rgba(0,0,0,.05)'}
-        h={'14'}
-      >
-        <Link href="/message" className="flex items-center">
-          <Image
-            src={Logo}
-            width={129}
-            height={36}
-            alt="TripPlus Logo"
-            className="mr-1"
-            priority
-          />
-          <Text fontWeight={500} fontSize={'lg'}>
-            訊息中心
-          </Text>
-        </Link>
+      <Box className="hidden md:block">
+        <MsgHeader />
+      </Box>
 
-        <Spacer />
-
-        <Box>
-          <Image
-            src={UserImage}
-            alt="使用者圖片"
-            width={30}
-            height={30}
-            priority
-          />
+      <Flex h={{ base: '100vh', md: 'calc(100vh - 56px)' }}>
+        <Box className="hidden md:block">
+          <MessageList messages={messages} />
         </Box>
-      </Flex>
-
-      <Flex h={'calc(100vh - 56px)'}>
-        <MessageList messages={messages} />
 
         <Box flexGrow={1} position={'relative'}>
-          <Box
-            p={6}
+          <Flex
+            p={{ md: 6 }}
+            h={{ base: '52px', md: 'auto' }}
             borderBottom={1}
             borderColor={'gray.300'}
             borderStyle={'solid'}
+            alignItems={'center'}
+            justifyContent={{ base: 'center', md: 'start' }}
+            position={'relative'}
           >
-            <Flex>
+            <Box display={{ md: 'none' }} position={'absolute'} left={4}>
+              <Link href="/message">
+                <Icon as={MdArrowBackIosNew} fontSize={'xl'} />
+              </Link>
+            </Box>
+
+            <Flex px={{ base: 10, md: 0 }}>
               <Image
                 src="https://picsum.photos/200/200"
                 width={40}
@@ -133,12 +116,19 @@ const Message = () => {
                 className="mr-2"
               />
               <Center fontWeight={500}>
-                <Link href="/organization/1">Trista 微笑女孩手作革物</Link>
+                <Link href="/organization/1" className="line-clamp-1">
+                  Trista 微笑女孩手作革物
+                </Link>
               </Center>
             </Flex>
-          </Box>
+          </Flex>
 
-          <Box p={6}>
+          <Box
+            p={6}
+            h={{ base: 'calc(100vh - 52px - 164px)', md: 'auto' }}
+            fontSize={{ base: 'sm', md: 'md' }}
+            className="overflow-y-auto"
+          >
             <Box position="relative" py="10">
               <Divider borderColor={'gray.300'} />
               <AbsoluteCenter bg="white" px="4">
@@ -146,7 +136,7 @@ const Message = () => {
               </AbsoluteCenter>
             </Box>
 
-            <Box>
+            <Box mt={4}>
               <Flex alignItems={'end'} flexFlow={'column'}>
                 <Box
                   bg={'secondary-emphasis.500'}
@@ -163,7 +153,7 @@ const Message = () => {
               </Flex>
             </Box>
 
-            <Flex alignItems={'start'}>
+            <Flex alignItems={'start'} mt={4}>
               <Box>
                 <Image
                   src="https://picsum.photos/200/200"
@@ -199,6 +189,7 @@ const Message = () => {
             position={'absolute'}
             w={'full'}
             bottom={0}
+            h={'164px'}
           >
             <Box position={'relative'}>
               <FormControl>
@@ -218,14 +209,7 @@ const Message = () => {
                 ></Textarea>
               </FormControl>
 
-              <Flex
-                w={'full'}
-                py={2}
-                px={4}
-                fontSize={'lg'}
-                zIndex={10}
-                bg={'white'}
-              >
+              <Flex w={'full'} p={2} fontSize={'lg'} zIndex={10} bg={'white'}>
                 <Flex alignItems={'center'}>
                   <PopoverBox text={'上傳檔案'}>
                     <Input

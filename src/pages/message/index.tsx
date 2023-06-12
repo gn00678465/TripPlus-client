@@ -1,10 +1,7 @@
-import Link from 'next/link';
-import Image from 'next/image';
 import Head from 'next/head';
-import Logo from '@/assets/images/logo.png';
-import { Box, Flex, Text, Spacer, Icon } from '@chakra-ui/react';
-import UserImage from '@/assets/images/user/user-image.png';
+import { Box, Flex, Text, Icon } from '@chakra-ui/react';
 import MessageList, { type Message } from '@/components/Message/msg-list';
+import MsgHeader from '@/components/Message/header';
 import { TbMessages } from 'react-icons/tb';
 
 const messages = [
@@ -32,41 +29,11 @@ const Message = () => {
         <title>訊息中心-TripPlus+</title>
       </Head>
 
-      <Flex
-        as="header"
-        px={6}
-        alignItems={'center'}
-        boxShadow={'0 2px 3px rgba(0,0,0,.05)'}
-        h={'14'}
-      >
-        <Link href="/message" className="flex items-center">
-          <Image
-            src={Logo}
-            width={129}
-            height={36}
-            alt="TripPlus Logo"
-            className="mr-1"
-            priority
-          />
-          <Text fontWeight={500} fontSize={'lg'}>
-            訊息中心
-          </Text>
-        </Link>
+      <MsgHeader />
 
-        <Spacer />
-
-        <Box>
-          <Image
-            src={UserImage}
-            alt="使用者圖片"
-            width={30}
-            height={30}
-            priority
-          />
-        </Box>
-      </Flex>
       <Flex h={'calc(100vh - 56px)'}>
         <MessageList messages={messages} />
+
         <Box
           flexGrow={1}
           p={6}
