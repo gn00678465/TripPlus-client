@@ -6,7 +6,6 @@ import UserHeader from '@/components/User/user-header';
 import type { ReactElement } from 'react';
 import { Box, Flex, Container, Heading, FormLabel } from '@chakra-ui/react';
 import { request, safeAwait, utc2Local } from '@/utils';
-import dayjs from 'dayjs';
 import NoImage from '@/assets/images/user/no-image.png';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -73,7 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     paymentStatus: resData.paymentStatus,
     id: resData._id,
     transactionId: resData.transactionId,
-    createdAt: utc2Local(resData.createdAt).format('YYYY 年 MM 月 DD 日 HH:mm'),
+    createdAt: resData.createdAt,
     total: resData.total,
     keyVision: isProject
       ? resData.projectId.keyVision
@@ -87,9 +86,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     count: resData.count,
     extraFund: resData.extraFund,
     note: resData.note || '無',
-    paidAt: resData.paidAt
-      ? utc2Local(resData.paidAt).format('YYYY 年 MM 月 DD 日 HH:mm')
-      : '',
+    paidAt: resData.paidAt ? resData.paidAt : '',
     buyerName: resData.buyerName,
     buyerPhone: resData.buyerPhone,
     buyerEmail: resData.buyerEmail,
@@ -101,9 +98,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     shipment: getShipment(resData.shipment),
     shipmentStatus: getShipmentStatus(resData.shipmentStatus),
     shipmentId: resData.shipmentId || '',
-    shipDate: resData.shipDate
-      ? utc2Local(resData.shipDate).format('YYYY 年 MM 月 DD 日 HH:mm')
-      : ''
+    shipDate: resData.shipDate ? resData.shipDate : ''
   };
 
   return {
@@ -184,7 +179,11 @@ const Order: App.NextPageWithLayout<OrderProps> = ({ data }) => {
                 <FormLabel className="w-40" fontWeight={500} color={'gray.500'}>
                   交易成立時間
                 </FormLabel>
-                <Box>{data.createdAt}</Box>
+                <Box>
+                  {utc2Local(data.createdAt).format(
+                    'YYYY 年 MM 月 DD 日 HH:mm'
+                  )}
+                </Box>
               </Flex>
 
               <Flex my={10} className="flex-col md:flex-row">
@@ -294,7 +293,11 @@ const Order: App.NextPageWithLayout<OrderProps> = ({ data }) => {
                         >
                           付款日期
                         </FormLabel>
-                        <Box>{data.paidAt}</Box>
+                        <Box>
+                          {utc2Local(data.paidAt).format(
+                            'YYYY 年 MM 月 DD 日 HH:mm'
+                          )}
+                        </Box>
                       </Flex>
                     )}
                   </Box>
@@ -462,7 +465,11 @@ const Order: App.NextPageWithLayout<OrderProps> = ({ data }) => {
                         >
                           出貨日期
                         </FormLabel>
-                        <Box>{data.shipDate}</Box>
+                        <Box>
+                          {utc2Local(data.shipDate).format(
+                            'YYYY 年 MM 月 DD 日 HH:mm'
+                          )}
+                        </Box>
                       </Flex>
                     )}
                   </Box>
