@@ -23,6 +23,7 @@ import {
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars } from 'react-icons/fa';
 import { GrClose } from 'react-icons/gr';
+import { TbMessageCircle } from 'react-icons/tb';
 import { useState, useEffect, useRef, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store';
@@ -133,21 +134,31 @@ const Header = ({ ...rest }: BoxProps) => {
             </Center>
 
             {hasHydrated && isLogin ? (
-              <button
-                ref={memberBtnRef}
-                className="w-12 overflow-hidden rounded-md focus:border-2 focus:border-secondary-emphasis-300"
-                onClick={() => {
-                  setOpenMemberMenu(!openMemberMenu);
-                }}
-              >
-                <Image
-                  src={UserImage}
-                  alt="使用者圖片"
-                  width={500}
-                  height={500}
-                  priority
-                />
-              </button>
+              <Flex alignItems={'center'}>
+                <Link href="/message" className="mr-6">
+                  <Icon
+                    as={TbMessageCircle}
+                    fontSize={'3xl'}
+                    color={'gray.600'}
+                    _hover={{ color: 'primary.500' }}
+                  />
+                </Link>
+                <button
+                  ref={memberBtnRef}
+                  className="w-12 overflow-hidden rounded-md focus:border-2 focus:border-secondary-emphasis-300"
+                  onClick={() => {
+                    setOpenMemberMenu(!openMemberMenu);
+                  }}
+                >
+                  <Image
+                    src={UserImage}
+                    alt="使用者圖片"
+                    width={500}
+                    height={500}
+                    priority
+                  />
+                </button>
+              </Flex>
             ) : (
               <Button colorScheme="primary" width={81}>
                 <Link href="/login">登入</Link>
