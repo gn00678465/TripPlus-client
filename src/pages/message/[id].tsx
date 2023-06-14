@@ -154,14 +154,13 @@ const Message = () => {
             </Box>
 
             <Flex alignItems={'start'} mt={4}>
-              <Box>
+              <Box className="mr-2 shrink-0">
                 <Image
                   src="https://picsum.photos/200/200"
                   width={40}
                   height={40}
                   alt=""
                   priority
-                  className="mr-2"
                 />
               </Box>
 
@@ -171,7 +170,7 @@ const Message = () => {
                   px={4}
                   py={3}
                   borderRadius={10}
-                  borderBottomLeftRadius={0}
+                  borderTopLeftRadius={0}
                   maxW={'360px'}
                 >
                   您好，皮夾最好不要碰水，因為水可能會使皮革變形、發霉、變色、脫皮等。但如果不慎將皮夾弄濕了，應該盡快用乾布擦拭表面，然後在通風處晾乾，避免陽光直射或用吹風機吹乾，以免皮革變硬或開裂。如果有必要，可以使用專門的皮革保養產品進行清潔和保養。
