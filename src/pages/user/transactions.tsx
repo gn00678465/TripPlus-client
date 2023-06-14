@@ -62,9 +62,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       isProject: isProject,
       projectId: item.projectId,
       productId: item.productId,
-      createdAt: item.createdAt
-        ? utc2Local(item.createdAt).format('YYYY.MM.DD HH:mm')
-        : ''
+      createdAt: item.createdAt ? item.createdAt : ''
     };
   });
 
@@ -219,7 +217,9 @@ const Transactions: App.NextPageWithLayout<TransactionsProps> = ({ list }) => {
 
                       <Flex>
                         <div className="shrink-0 text-gray-400">交易時間</div>
-                        <div className="ml-2">{item.createdAt}</div>
+                        <div className="ml-2">
+                          {utc2Local(item.createdAt).format('YYYY.MM.DD HH:mm')}
+                        </div>
                       </Flex>
 
                       <Flex>
