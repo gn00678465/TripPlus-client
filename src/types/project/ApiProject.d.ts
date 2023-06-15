@@ -121,6 +121,7 @@ declare namespace ApiProject {
     news: New[];
     faqs: FAQ[];
     histories: History[];
+    summary: string;
   }
 
   interface TeamTitle {

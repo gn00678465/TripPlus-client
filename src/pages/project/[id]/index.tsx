@@ -47,7 +47,6 @@ import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 import dayjs from 'dayjs';
-import { spawn } from 'child_process';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
@@ -391,7 +390,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
               borderLeftStyle={{ base: 'solid' }}
               color="gray.600"
             >
-              {data?.content}
+              {data?.summary}
             </Text>
           </Box>
           <Box w="full">
