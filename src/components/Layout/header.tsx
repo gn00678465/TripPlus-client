@@ -59,7 +59,7 @@ const Header = ({ ...rest }: BoxProps) => {
   ];
 
   useEffect(() => {
-    if (router.route === '/') setTransparent(true);
+    if (router.route === '/' || router.route === '/about') setTransparent(true);
     setOpenMemberMenu(false);
   }, [router.route]);
   const memberBtnRef = useRef<HTMLButtonElement>(null);
