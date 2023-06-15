@@ -47,7 +47,6 @@ import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 import dayjs from 'dayjs';
-import { spawn } from 'child_process';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
@@ -186,13 +185,19 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
           </AspectRatio>
           <Flex flexDirection="column">
             <Flex flexDirection={{ base: 'column' }}>
-              <Text
-                className="text-secondary-emphasis"
+              <Link
+                href={`/organization/${data?.teamId._id}`}
+                color="secondary-emphasis.500"
                 fontSize={{ base: 'sm', lg: 'md' }}
                 mb={{ base: 2, lg: 3 }}
+                _hover={{
+                  textDecoration: 'none',
+                  color: 'secondary-emphasis.400'
+                }}
+                as={NextLink}
               >
                 {data?.teamId.title}
-              </Text>
+              </Link>
               <Heading
                 as="h3"
                 fontSize={{ base: '20px', lg: '28px' }}
@@ -391,7 +396,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
               borderLeftStyle={{ base: 'solid' }}
               color="gray.600"
             >
-              {data?.content}
+              {data?.summary}
             </Text>
           </Box>
           <Box w="full">
@@ -421,7 +426,17 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
               <ul className="flex w-full flex-col justify-center gap-y-2 text-xs tracking-[1px] md:justify-start md:gap-y-1 md:text-sm">
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
                   <p className="min-w-[75px] text-gray-500">提案者名稱</p>
-                  <p className="text-gray-600">{data?.teamId.title}</p>
+                  <Link
+                    as={NextLink}
+                    href={`/organization/${data?.teamId._id}`}
+                    color="gray.600"
+                    _hover={{
+                      textDecoration: 'none',
+                      color: 'gray.500'
+                    }}
+                  >
+                    {data?.teamId.title}
+                  </Link>
                 </li>
                 <li className="flex flex-col gap-y-1 md:flex-row md:gap-x-5">
                   <p className="min-w-[75px] text-gray-500">統一編號</p>
