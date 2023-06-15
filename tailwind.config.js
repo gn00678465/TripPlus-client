@@ -57,10 +57,13 @@ module.exports = {
           500: '#00C2FF',
           DEFAULT: '#00C2FF'
         },
+        white: {
+          500: '#FFFFFF',
+          DEFAULT: '#FFFFFF'
+        },
         secondary: '#EAF8F8',
         'secondary-light': '#EFF5F5',
         light: '#4F4F4F',
-        white: '#FFFFFF',
         red: '#F15761'
       },
       fontFamily: {
