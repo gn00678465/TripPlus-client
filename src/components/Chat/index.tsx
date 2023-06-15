@@ -64,19 +64,21 @@ const Chat = ({ teamInfo, isOpen, onClose }: ChatProps) => {
                 <Box>
                   <Box className="absolute inset-x-0 top-0 z-[1] flex h-[52px]">
                     <Box className="flex w-full items-center justify-center border-b-[1px] border-b-gray-200 py-[10px]">
-                      <AspectRatio
-                        ratio={1 / 1}
-                        maxW={{ base: '24px' }}
-                        w="full"
-                      >
-                        <Image
-                          src={teamInfo.photo}
-                          alt={teamInfo.title}
-                          width={24}
-                          height={24}
-                          priority
-                        ></Image>
-                      </AspectRatio>
+                      {teamInfo.photo && (
+                        <AspectRatio
+                          ratio={1 / 1}
+                          maxW={{ base: '24px' }}
+                          w="full"
+                        >
+                          <Image
+                            src={teamInfo.photo}
+                            alt={teamInfo.title}
+                            width={24}
+                            height={24}
+                            priority
+                          ></Image>
+                        </AspectRatio>
+                      )}
                       <Text className="ml-2 text-lg font-bold">
                         {teamInfo.title}
                       </Text>
