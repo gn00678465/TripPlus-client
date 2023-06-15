@@ -9,6 +9,7 @@ import { currencyTWD } from '@/utils';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import Loading from '@/components/Loading';
 import Card from '@/components/Card';
+import Chat from '@/components/Chat';
 import {
   Text,
   Box,
@@ -57,6 +58,8 @@ const Organization = () => {
   const [completeProjects, setCompleteProjects] = useState<
     Project.ProjectItem[]
   >([]);
+
+  const [openChatBox, setOpenChatBox] = useState<boolean>(false);
 
   const { data, isLoading } = useSWR(id ? id : null, apiGetProposer, {
     onSuccess(data, key, config) {
@@ -267,6 +270,9 @@ const Organization = () => {
                   ml={{ md: 20 }}
                   leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
                   colorScheme="primary"
+                  onClick={() => {
+                    setOpenChatBox(true);
+                  }}
                 >
                   聯絡提案者
                 </Button>
@@ -377,6 +383,11 @@ const Organization = () => {
           </Tabs>
         </Container>
       </Box>
+      <Chat
+        teamInfo={teamInfo}
+        isOpen={openChatBox}
+        onClose={() => setOpenChatBox(false)}
+      />
     </>
   );
 };
