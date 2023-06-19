@@ -1,5 +1,6 @@
 declare namespace ApiUser {
   interface Account {
+    _id: string;
     email: string;
     name: string;
     nickName?: string;

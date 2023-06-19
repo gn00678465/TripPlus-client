@@ -1,9 +1,12 @@
 import Image from 'next/image';
-import { Box, Flex, Text, Spacer, Icon } from '@chakra-ui/react';
+import { Box, Flex, Text, Spacer } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
+import { formatDay } from '@/utils';
+import UserImage from '@/assets/images/user/user-image.png';
 
 export interface Message {
   id: string;
+  projectId: string;
   name: string;
   photo: string;
   createdAt: string;
@@ -60,12 +63,12 @@ const MessageList = ({ messages }: MessagesProp) => {
               cursor={'pointer'}
               _hover={{ bg: 'gray.100' }}
               transition={'background-color .4s ease'}
-              onClick={() => routerTo(item.id)}
+              onClick={() => routerTo(item.projectId)}
               w="full"
             >
               <Box className="shrink-0">
                 <Image
-                  src={item.photo}
+                  src={item.photo || UserImage}
                   width={40}
                   height={40}
                   alt=""
@@ -80,7 +83,7 @@ const MessageList = ({ messages }: MessagesProp) => {
                   </Box>
                   <Spacer />
                   <Text fontSize={'sm'} color={'gray.500'}>
-                    {item.createdAt}
+                    {formatDay(item.createdAt)}
                   </Text>
                 </Flex>
                 <Text

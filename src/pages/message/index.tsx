@@ -1,35 +1,97 @@
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
 import { Box, Flex, Text, Icon } from '@chakra-ui/react';
 import MessageList, { type Message } from '@/components/Message/msg-list';
 import MsgHeader from '@/components/Message/header';
 import { TbMessages } from 'react-icons/tb';
+import { useState } from 'react';
+import { apiGetMessageMember } from '@/api';
+import useSWR from 'swr';
+import Loading from '@/components/Loading';
+import { request, safeAwait, utc2Local } from '@/utils';
 
-const messages = [
-  {
-    id: '0',
-    name: 'Trista 微笑女孩手作革物',
-    photo: 'https://picsum.photos/200/200',
-    createdAt: '10:45',
-    content:
-      '您好，皮夾最好不要碰水，因為水可能會使皮革變形、發霉、變色、脫皮等。但如果不慎將皮夾弄濕了，應該盡快用乾布擦拭表面，然後在通風處晾乾，避免陽光直射或用吹風機吹乾，以免皮革變硬或開裂。如果有必要，可以使用專門的皮革保養產品進行清潔和保養。'
-  },
-  {
-    id: '1',
-    name: '電腦 3C 產品',
-    photo: 'https://picsum.photos/id/0/200/200',
-    createdAt: '10:45',
-    content: '您好，這裡是電腦 3C 產品'
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { token } = context.req.cookies;
+  if (!token) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    };
   }
-];
 
-const Message = () => {
+  const [err, res] = await safeAwait<ApiUser.Account>(
+    request('/user/account', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
+
+  if (err) {
+    return {
+      notFound: true
+    };
+  }
+
+  return {
+    props: {
+      userId: res.data._id,
+      userPhoto: res.data.photo || ''
+    }
+  };
+};
+
+interface MessageProps {
+  userId: string;
+  userPhoto: string;
+}
+
+const Message = ({ userId, userPhoto }: MessageProps) => {
+  const [messages, setMessages] = useState<Message.Member[]>([]);
+
+  const { data: member, isLoading } = useSWR(
+    ['get', '/api/message/member'],
+    apiGetMessageMember,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          setMemberData(data.data);
+        }
+      }
+    }
+  );
+
+  const setMemberData = (data: ApiMessage.Member[]) => {
+    setMessages(() => {
+      const latestMsgs = data.filter(
+        (item, index, array) =>
+          array.findIndex((el) => el.projectId === item.projectId) === index
+      );
+
+      return latestMsgs.map((item) => {
+        const userIsSender = item.sender._id === userId ? true : false;
+
+        return {
+          id: item._id,
+          projectId: item.projectId,
+          name: userIsSender ? item.receiver.name : item.sender.name,
+          createdAt: utc2Local(item.createdAt).format('YYYY/MM/DD HH:mm'),
+          photo: userIsSender ? item.receiver.photo : item.sender.photo,
+          content: item.content
+        };
+      });
+    });
+  };
+
+  if (isLoading) return <Loading />;
+
   return (
     <>
       <Head>
         <title>訊息中心-TripPlus+</title>
       </Head>
 
-      <MsgHeader />
+      <MsgHeader photo={userPhoto} />
 
       <Flex h={'calc(100vh - 56px)'}>
         <MessageList messages={messages} />
