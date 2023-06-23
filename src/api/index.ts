@@ -5,4 +5,3 @@ export * from './proposer';
 export * from './project';
 export * from './home';
 export * from './order';
-export * from './message';

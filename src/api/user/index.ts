@@ -32,3 +32,16 @@ export function apiPostFollow(id: string, config?: AxiosRequestConfig) {
 export function apiPostOrders(orderId: string, data: ApiUser.Ranking) {
   return request.post<ApiUser.Ranking>(`/user/order/${orderId}/ranking`, data);
 }
+
+export function apiGetUserRoomMessage(
+  roomId: string,
+  pageIndex: number,
+  pageSize: number
+) {
+  return request.get<ApiMessage.Chatroom[]>(`/user/${roomId}/message`, {
+    params: {
+      pageIndex,
+      pageSize
+    }
+  });
+}

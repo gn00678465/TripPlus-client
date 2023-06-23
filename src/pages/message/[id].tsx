@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { ImageFallback } from '@/components';
 import NoImage from '@/assets/images/user/user-image.png';
-import MessageList, { type Message } from '@/components/Message/msg-list';
+import MessageList, { type MessageData } from '@/components/Message/msg-list';
 import MsgHeader from '@/components/Message/header';
 import PopoverBox from '@/components/Popover';
 import { FiPaperclip } from 'react-icons/fi';
@@ -27,8 +27,8 @@ import { MdArrowBackIosNew } from 'react-icons/md';
 import io from 'socket.io-client';
 import { useEffect, useState, useMemo, useRef, RefObject } from 'react';
 import { request, safeAwait, utc2Local, formatDay } from '@/utils';
-import { apiGetMessageMember, apiGetMessageProject } from '@/api';
-import useSWR, { useSWRConfig } from 'swr';
+import { apiGetUserRoomMessage } from '@/api';
+import useSWR from 'swr';
 import Loading from '@/components/Loading';
 import { useRouter } from 'next/router';
 import dayjs from 'dayjs';
@@ -43,83 +43,112 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const [err, res] = await safeAwait<ApiUser.Account>(
+  const [accountErr, accountRes] = await safeAwait<ApiUser.Account>(
     request('/user/account', {
       headers: { Authorization: `Bearer ${token}` }
     })
   );
 
-  if (err) {
+  const [chatroomErr, chatroomRes] = await safeAwait<ApiMessage.Chatroom[]>(
+    request('/user/chatroom', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
+
+  if (accountErr || chatroomErr) {
     return {
       notFound: true
     };
   }
+  const userId = accountRes.data._id;
+
+  const chatroomList = chatroomRes.data.map((item) => {
+    const userIsSender = item.sender._id === userId ? true : false;
+
+    return {
+      id: item._id,
+      roomId: item.roomId._id,
+      name: userIsSender ? item.receiver.name : item.sender.name,
+      photo: userIsSender ? item.receiver.photo || '' : item.sender.photo || '',
+      createdAt: item.createdAt,
+      content: item.content
+    };
+  });
+
+  chatroomList.sort((a, b) => {
+    const timestampA = new Date(a.createdAt).getTime();
+    const timestampB = new Date(b.createdAt).getTime();
+    return timestampB - timestampA;
+  });
 
   return {
-    props: { userId: res.data._id, userPhoto: res.data.photo || '' }
+    props: {
+      userId,
+      userPhoto: accountRes.data.photo || '',
+      chatroomList
+    }
   };
 };
 
 interface MessageProps {
   userId: string;
   userPhoto: string;
+  chatroomList: MessageData[];
 }
 
-const Message = ({ userId, userPhoto }: MessageProps) => {
+const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
   const URL: string = process.env.BASE_API_URL || '';
   const socket = io(URL, { transports: ['websocket'] });
   const router = useRouter();
-  const projectId = useMemo(() => router.query.id, [router]);
-
+  const roomId = useMemo(() => router.query.id, [router]);
   const chatWindow: RefObject<HTMLDivElement> = useRef(null);
 
-  const [messages, setMessages] = useState<Message.Member[]>([]);
+  const [chatroomMember, setChatroomMember] =
+    useState<MessageData[]>(chatroomList);
 
   const [projectInfo, setProjectInfo] = useState<Message.Project>({
-    name: '',
-    photo: '',
-    receiver: '',
+    creatorName: '',
+    creatorPhoto: '',
+    creatorId: '',
     title: '',
     id: ''
   });
 
-  const [projectMsg, setProjectMsg] = useState<Message.MsgList[]>([]);
-
-  const [currentMsg, setCurrentMsg] = useState<Message.MsgData>({
+  const [userInfo, setUserInfo] = useState<Message.Chatter>({
     id: '',
     name: '',
-    photo: '',
-    content: '',
-    isUserMsg: true,
-    createdAt: ''
+    photo: ''
   });
+
+  const [receiverInfo, setReceiverInfo] = useState<Message.Chatter>({
+    id: '',
+    name: '',
+    photo: ''
+  });
+
+  const [isScrollDown, setIsScrollDown] = useState(true);
+  const [roomMsg, setRoomMsg] = useState<Message.RoomMsg[]>([]);
 
   const [content, setConent] = useState('');
 
-  const { data: member, isLoading: isMemberLoading } = useSWR(
-    ['get', '/api/message/member'],
-    apiGetMessageMember,
-    {
-      onSuccess(data, key, config) {
-        if (data && data.status === 'Success') {
-          setMemberData(data.data);
-        }
-      }
-    }
-  );
+  const [page, setPage] = useState({
+    pageIndex: 1,
+    pageSize: 10
+  });
 
   const {
-    data: msgProject,
-    isLoading: isProjectLoading,
+    data: roomMessage,
+    isLoading: isRoomMsgLoading,
     mutate: fetchMsgProject
   } = useSWR(
-    ['get', '/api/message/projectId'],
-    () => apiGetMessageProject(projectId as string),
+    ['get', `/api/user/${roomId}/message`],
+    () =>
+      apiGetUserRoomMessage(roomId as string, page.pageIndex, page.pageSize),
     {
       onSuccess(data, key, config) {
         if (data && data.status === 'Success') {
-          setProject(data.data[0]);
-          getProjectMsg(data.data);
+          setInfo(data.data[0]);
+          getRoomMsg(data.data);
         }
       },
 
@@ -129,80 +158,79 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
     }
   );
 
-  const setMemberData = (data: ApiMessage.Member[]) => {
-    setMessages(() => {
-      const latestMsgs = data.filter(
-        (item, index, array) =>
-          array.findIndex((el) => el.projectId === item.projectId) === index
-      );
+  const setInfo = (firstRoomMsg: ApiMessage.Chatroom) => {
+    const creatorIsSender =
+      firstRoomMsg.sender._id === firstRoomMsg.roomId.projectCreator
+        ? true
+        : false;
+    const userIsSender = firstRoomMsg.sender._id === userId ? true : false;
 
-      return latestMsgs.map((item) => {
-        const userIsSender = item.sender._id === userId ? true : false;
+    setProjectInfo({
+      creatorName: creatorIsSender
+        ? firstRoomMsg.sender.name
+        : firstRoomMsg.receiver.name,
+      creatorPhoto: creatorIsSender
+        ? firstRoomMsg.sender.photo
+        : firstRoomMsg.receiver.photo,
+      creatorId: creatorIsSender
+        ? firstRoomMsg.sender._id
+        : firstRoomMsg.receiver._id,
+      title: firstRoomMsg.roomId.projectId.title,
+      id: firstRoomMsg._id
+    });
 
-        return {
-          id: item._id,
-          projectId: item.projectId,
-          name: userIsSender ? item.receiver.name : item.sender.name,
-          createdAt: utc2Local(item.createdAt).format('YYYY/MM/DD HH:mm'),
-          photo: userIsSender ? item.receiver.photo : item.sender.photo,
-          content: item.content
-        };
-      });
+    setUserInfo({
+      id: userIsSender ? firstRoomMsg.sender._id : firstRoomMsg.receiver._id,
+      name: userIsSender
+        ? firstRoomMsg.sender.name
+        : firstRoomMsg.receiver.name,
+      photo: userIsSender
+        ? firstRoomMsg.sender.photo
+        : firstRoomMsg.receiver.photo
+    });
+
+    setReceiverInfo({
+      id: userIsSender ? firstRoomMsg.receiver._id : firstRoomMsg.sender._id,
+      name: userIsSender
+        ? firstRoomMsg.receiver.name
+        : firstRoomMsg.sender.name,
+      photo: userIsSender
+        ? firstRoomMsg.receiver.photo
+        : firstRoomMsg.sender.photo
     });
   };
 
-  const setProject = (project: ApiMessage.ProjectMsg) => {
-    setProjectInfo(() => {
-      const userIsSender = project.sender._id === userId ? true : false;
-
-      return {
-        name: userIsSender ? project.receiver.name : project.sender.name,
-        photo: userIsSender ? project.receiver.photo : project.sender.photo,
-        receiver: userIsSender ? project.receiver._id : project.sender._id,
-        title: project.projectId.title,
-        id: project.projectId._id
-      };
-    });
-  };
-
-  const getProjectMsg = (data: ApiMessage.ProjectMsg[]) => {
-    setProjectMsg(() => {
-      let msgList: Message.MsgList[] = [];
+  const getRoomMsg = (data: ApiMessage.Chatroom[]) => {
+    setRoomMsg(() => {
+      let msgList: Message.RoomMsg[] = [];
       let dateIndexes: any = {}; // 記錄每個日期的索引
 
       data.forEach((item) => {
         const userIsSender = item.sender._id === userId ? true : false;
         const dateKey: string = utc2Local(item.createdAt).format('YYYY-MM-DD');
 
+        const msgData = {
+          id: item._id,
+          name: userIsSender ? item.receiver.name : item.sender.name,
+          photo: userIsSender ? item.receiver.photo : item.sender.photo,
+          content: item.content,
+          isUserMsg: userIsSender ? true : false,
+          createdAt: item.createdAt
+        };
+
         if (dateIndexes[dateKey] === undefined) {
           // 如果該日期不存在，添加新的數據
           msgList.push({
             id: item._id,
             createdAt: item.createdAt,
-            data: [
-              {
-                id: item._id,
-                name: userIsSender ? item.receiver.name : item.sender.name,
-                photo: userIsSender ? item.receiver.photo : item.sender.photo,
-                content: item.content,
-                isUserMsg: userIsSender ? true : false,
-                createdAt: item.createdAt
-              }
-            ]
+            data: [msgData]
           });
           // 記錄該日期的索引
           dateIndexes[dateKey] = msgList.length - 1;
         } else {
           // 如果日期已存在，更新現有數據
           const index = dateIndexes[dateKey];
-          msgList[index].data.push({
-            id: item._id,
-            name: userIsSender ? item.receiver.name : item.sender.name,
-            photo: userIsSender ? item.receiver.photo : item.sender.photo,
-            content: item.content,
-            isUserMsg: userIsSender ? true : false,
-            createdAt: item.createdAt
-          });
+          msgList[index].data.push(msgData);
         }
       });
 
@@ -248,54 +276,46 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
 
   const sendMessage = () => {
     const messagePayload = {
-      sender: userId,
-      receiver: projectInfo.receiver,
+      sender: userInfo.id,
+      receiver: receiverInfo.id,
       content,
-      projectId
+      roomId
     };
 
     socket.emit('message', messagePayload);
-
-    setCurrentMsg({
-      id: generateId(),
-      name: projectInfo.name,
-      photo: projectInfo.photo,
-      content,
-      isUserMsg: true,
-      createdAt: dayjs().format('YYYY-MM-DD HH:mm')
-    });
-
     setConent('');
+    setIsScrollDown(true);
   };
-
-  useEffect(() => {
-    fetchMsgProject();
-  }, [projectId, fetchMsgProject]);
 
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected to server');
     });
 
-    socket.on('message', (data) => {
-      console.log('接收', data);
+    socket.emit('joinRoom', roomId);
 
-      setProjectMsg((state) => {
-        const lastDate = projectMsg[projectMsg.length - 1].createdAt;
+    const handleNewMessage = (data: ApiMessage.msgBody) => {
+      setRoomMsg((state) => {
+        const userIsSender = data.sender === userId ? true : false;
+        const lastItemIndex = state.length - 1;
+        const lastDate = state[lastItemIndex].createdAt;
         const isSameDay = dayjs(lastDate).isSame(new Date(), 'day')
           ? true
           : false;
 
+        const msgData = {
+          id: generateId(),
+          name: receiverInfo.name,
+          photo: receiverInfo.photo,
+          content: data.content,
+          isUserMsg: userIsSender ? true : false,
+          createdAt: dayjs().format('YYYY-MM-DD HH:mm')
+        };
+
         const newMsg = {
-          id: currentMsg.id,
-          createdAt: currentMsg.createdAt,
-          data: [
-            {
-              ...currentMsg,
-              isUserMsg: data.sender === userId ? true : false,
-              content: data.content
-            }
-          ]
+          id: generateId(),
+          createdAt: dayjs().format('YYYY-MM-DD HH:mm'),
+          data: [msgData]
         };
 
         if (state.length === 0) {
@@ -306,55 +326,80 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
           return [...state, newMsg];
         }
 
-        const lastItemIndex = state.length - 1;
         const lastData = state[lastItemIndex].data;
-        const updatedData = [
-          ...lastData,
-          {
-            ...currentMsg,
-            isUserMsg: data.sender === userId ? true : false,
-            content: data.content
-          }
-        ];
+        const updatedData = [...lastData, msgData];
         const updatedItem = { ...state[lastItemIndex], data: updatedData };
         const updatedState = [...state.slice(0, lastItemIndex), updatedItem];
 
         return updatedState;
       });
 
-      setMessages((state) => {
-        const hasSame = messages.some((item) => item.projectId === projectId);
+      setChatroomMember((state) => {
+        const index = state.findIndex((item) => item.roomId === roomId);
+        if (index === -1) {
+          return state;
+        }
 
-        const newData: Message.Member = {
-          id: currentMsg.id,
-          projectId: projectId as string,
-          name: projectInfo.name,
-          createdAt: currentMsg.createdAt,
-          photo: projectInfo.photo,
-          content: data.content
-        };
+        const updatedItem = state[index];
+        const updatedState = [
+          updatedItem,
+          ...state.slice(0, index),
+          ...state.slice(index + 1)
+        ];
 
-        if (!hasSame) return [newData, ...state];
-
-        const removeProjIdData = state.filter(
-          (item, idx) => item.projectId !== projectId
-        );
-        return [newData, ...removeProjIdData];
+        return updatedState.map((item) => {
+          return {
+            ...item,
+            content: item.roomId === roomId ? data.content : item.content
+          };
+        });
       });
-    });
+    };
+
+    socket.on('message', handleNewMessage);
 
     return () => {
       socket.disconnect();
       console.log('Disconnected from server');
     };
-  }, [projectMsg, messages, projectId]);
+  }, [roomMsg, roomId]);
 
   useEffect(() => {
-    if (!chatWindow.current) return;
-    chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
-  }, [projectMsg]);
+    if (chatWindow.current && isScrollDown) {
+      chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
+    }
+  }, [roomMsg]);
 
-  if (isMemberLoading || isProjectLoading) return <Loading />;
+  useEffect(() => {
+    let currentChatWindow = chatWindow.current;
+
+    const handleScroll = () => {
+      if (currentChatWindow && currentChatWindow.scrollTop <= 30) {
+        setIsScrollDown(false);
+
+        setPage((state) => {
+          return {
+            ...state,
+            pageSize: state.pageSize + 10
+          };
+        });
+
+        fetchMsgProject();
+      }
+    };
+
+    if (currentChatWindow) {
+      currentChatWindow.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (currentChatWindow) {
+        currentChatWindow.removeEventListener('scroll', handleScroll);
+      }
+    };
+  });
+
+  if (isRoomMsgLoading) return <Loading />;
 
   return (
     <>
@@ -368,7 +413,7 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
 
       <Flex h={{ base: '100vh', md: 'calc(100vh - 56px)' }}>
         <Box className="hidden md:block">
-          <MessageList messages={messages} />
+          <MessageList chatroomMember={chatroomMember} />
         </Box>
 
         <Box flexGrow={1} position={'relative'}>
@@ -390,9 +435,9 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
 
             <Flex px={{ base: 10, md: 0 }} alignItems={'center'}>
               <ImageFallback
-                src={projectInfo.photo || NoImage.src}
+                src={projectInfo.creatorPhoto || NoImage.src}
                 fallbackSrc={NoImage.src}
-                alt={projectInfo.name}
+                alt={projectInfo.creatorName}
                 width={40}
                 height={40}
                 priority
@@ -400,7 +445,7 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
               ></ImageFallback>
 
               <Box fontWeight={500} mt={1}>
-                <Box className="line-clamp-1">{projectInfo.name}</Box>
+                <Box className="line-clamp-1">{projectInfo.creatorName}</Box>
                 <Link
                   href={`/project/${projectInfo.id}`}
                   as={NextLink}
@@ -424,7 +469,7 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
             className="overflow-y-auto"
             ref={chatWindow}
           >
-            {projectMsg.map((item, idx) => (
+            {roomMsg.map((item, idx) => (
               <Box key={item.id}>
                 <Box position="relative" py="10">
                   <Divider borderColor={'gray.300'} />

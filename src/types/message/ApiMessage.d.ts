@@ -5,24 +5,30 @@ declare namespace ApiMessage {
     _id: string;
   }
 
-  interface Member {
+  interface Chatroom {
     _id: string;
     content: string;
-    createdAt: string;
-    projectId: string;
-    receiver: Chatter;
     sender: Chatter;
+    receiver: Chatter;
+    roomId: {
+      _id: string;
+      participants: string[];
+      projectId: {
+        _id: string;
+        creator: string;
+        title: string;
+        type: string;
+        id: string;
+      };
+      projectCreator: string;
+    };
+    createdAt: string;
   }
 
-  interface ProjectMsg {
-    _id: string;
+  interface msgBody {
+    sender: string;
+    receiver: string;
     content: string;
-    createdAt: string;
-    receiver: Chatter;
-    sender: Chatter;
-    projectId: {
-      _id: string;
-      title: string;
-    };
+    roomId: string;
   }
 }

@@ -4,9 +4,9 @@ import { useRouter } from 'next/router';
 import { formatDay } from '@/utils';
 import UserImage from '@/assets/images/user/user-image.png';
 
-export interface Message {
+export interface MessageData {
   id: string;
-  projectId: string;
+  roomId: string;
   name: string;
   photo: string;
   createdAt: string;
@@ -14,18 +14,18 @@ export interface Message {
 }
 
 interface MessagesProp {
-  messages: Message[];
+  chatroomMember: MessageData[];
 }
 
-const MessageList = ({ messages }: MessagesProp) => {
+const MessageList = ({ chatroomMember }: MessagesProp) => {
   const router = useRouter();
-  const routerTo = (id: string) => {
-    router.push(`/message/${id}`);
+  const routerTo = (roomId: string) => {
+    router.push(`/message/${roomId}`);
   };
 
   return (
     <>
-      {messages.length <= 0 ? (
+      {chatroomMember.length <= 0 ? (
         <Flex
           p={6}
           alignItems={'center'}
@@ -55,7 +55,7 @@ const MessageList = ({ messages }: MessagesProp) => {
           borderStyle={'solid'}
           w={{ base: 'full', md: '355px' }}
         >
-          {messages.map((item) => (
+          {chatroomMember.map((item) => (
             <Flex
               alignItems={'center'}
               key={item.id}
@@ -63,7 +63,7 @@ const MessageList = ({ messages }: MessagesProp) => {
               cursor={'pointer'}
               _hover={{ bg: 'gray.100' }}
               transition={'background-color .4s ease'}
-              onClick={() => routerTo(item.projectId)}
+              onClick={() => routerTo(item.roomId)}
               w="full"
             >
               <Box className="shrink-0">

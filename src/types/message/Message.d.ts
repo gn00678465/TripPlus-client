@@ -1,27 +1,10 @@
 declare namespace Message {
-  interface Member {
-    id: string;
-    projectId: string;
-    name: string;
-    createdAt: string;
-    photo: string;
-    content: string;
-  }
-
   interface Project {
-    name: string;
-    photo: string;
-    receiver: string;
+    creatorName: string;
+    creatorPhoto: string;
+    creatorId: string;
     title: string;
     id: string;
-  }
-
-  interface ProjectMsg {
-    id: string;
-    content: string;
-    photo: string;
-    createdAt: string;
-    isUserMsg: boolean;
   }
 
   interface MsgData {
@@ -33,9 +16,15 @@ declare namespace Message {
     createdAt: string;
   }
 
-  interface MsgList {
+  interface RoomMsg {
     id: string;
     createdAt: string;
     data: MsgData[];
+  }
+
+  interface Chatter {
+    id: string;
+    name: string;
+    photo: string;
   }
 }

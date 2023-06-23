@@ -15,7 +15,7 @@ export const formatDay = (date: string) => {
   if (diffInDays === 0) return '今天';
   if (diffInDays === -1) return '昨天';
   if (diffInDays < -1 && diffInDays > -5) return setDayName(dayOfWeek);
-  return dayjs(date).format('YYYY/MM/DD');
+  return utc2Local(date).format('YYYY/MM/DD');
 };
 
 export const setDayName = (dayOfWeek: number) => {

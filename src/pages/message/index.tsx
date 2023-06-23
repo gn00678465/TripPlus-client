@@ -1,14 +1,10 @@
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { Box, Flex, Text, Icon } from '@chakra-ui/react';
-import MessageList, { type Message } from '@/components/Message/msg-list';
+import MessageList, { type MessageData } from '@/components/Message/msg-list';
 import MsgHeader from '@/components/Message/header';
 import { TbMessages } from 'react-icons/tb';
-import { useState } from 'react';
-import { apiGetMessageMember } from '@/api';
-import useSWR from 'swr';
-import Loading from '@/components/Loading';
-import { request, safeAwait, utc2Local } from '@/utils';
+import { request, safeAwait } from '@/utils';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { token } = context.req.cookies;
@@ -21,70 +17,59 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const [err, res] = await safeAwait<ApiUser.Account>(
+  const [accountErr, accountRes] = await safeAwait<ApiUser.Account>(
     request('/user/account', {
       headers: { Authorization: `Bearer ${token}` }
     })
   );
 
-  if (err) {
+  const [chatroomErr, chatroomRes] = await safeAwait<ApiMessage.Chatroom[]>(
+    request('/user/chatroom', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
+
+  if (accountErr || chatroomErr) {
     return {
       notFound: true
     };
   }
 
+  const userId = accountRes.data._id;
+
+  const chatroomList = chatroomRes.data.map((item) => {
+    const userIsSender = item.sender._id === userId ? true : false;
+
+    return {
+      id: item._id,
+      roomId: item.roomId._id,
+      name: userIsSender ? item.receiver.name : item.sender.name,
+      photo: userIsSender ? item.receiver.photo || '' : item.sender.photo || '',
+      createdAt: item.createdAt,
+      content: item.content
+    };
+  });
+
+  chatroomList.sort((a, b) => {
+    const timestampA = new Date(a.createdAt).getTime();
+    const timestampB = new Date(b.createdAt).getTime();
+    return timestampB - timestampA;
+  });
+
   return {
     props: {
-      userId: res.data._id,
-      userPhoto: res.data.photo || ''
+      userPhoto: accountRes.data.photo || '',
+      chatroomList
     }
   };
 };
 
 interface MessageProps {
-  userId: string;
   userPhoto: string;
+  chatroomList: MessageData[];
 }
 
-const Message = ({ userId, userPhoto }: MessageProps) => {
-  const [messages, setMessages] = useState<Message.Member[]>([]);
-
-  const { data: member, isLoading } = useSWR(
-    ['get', '/api/message/member'],
-    apiGetMessageMember,
-    {
-      onSuccess(data, key, config) {
-        if (data && data.status === 'Success') {
-          setMemberData(data.data);
-        }
-      }
-    }
-  );
-
-  const setMemberData = (data: ApiMessage.Member[]) => {
-    setMessages(() => {
-      const latestMsgs = data.filter(
-        (item, index, array) =>
-          array.findIndex((el) => el.projectId === item.projectId) === index
-      );
-
-      return latestMsgs.map((item) => {
-        const userIsSender = item.sender._id === userId ? true : false;
-
-        return {
-          id: item._id,
-          projectId: item.projectId,
-          name: userIsSender ? item.receiver.name : item.sender.name,
-          createdAt: utc2Local(item.createdAt).format('YYYY/MM/DD HH:mm'),
-          photo: userIsSender ? item.receiver.photo : item.sender.photo,
-          content: item.content
-        };
-      });
-    });
-  };
-
-  if (isLoading) return <Loading />;
-
+const Message = ({ userPhoto, chatroomList }: MessageProps) => {
   return (
     <>
       <Head>
@@ -94,7 +79,7 @@ const Message = ({ userId, userPhoto }: MessageProps) => {
       <MsgHeader photo={userPhoto} />
 
       <Flex h={'calc(100vh - 56px)'}>
-        <MessageList messages={messages} />
+        <MessageList chatroomMember={chatroomList} />
 
         <Box
           flexGrow={1}
