@@ -1,38 +1,85 @@
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
 import { Box, Flex, Text, Icon } from '@chakra-ui/react';
-import MessageList, { type Message } from '@/components/Message/msg-list';
+import MessageList, { type MessageData } from '@/components/Message/msg-list';
 import MsgHeader from '@/components/Message/header';
 import { TbMessages } from 'react-icons/tb';
+import { request, safeAwait } from '@/utils';
 
-const messages = [
-  {
-    id: '0',
-    name: 'Trista 微笑女孩手作革物',
-    photo: 'https://picsum.photos/200/200',
-    createdAt: '10:45',
-    content:
-      '您好，皮夾最好不要碰水，因為水可能會使皮革變形、發霉、變色、脫皮等。但如果不慎將皮夾弄濕了，應該盡快用乾布擦拭表面，然後在通風處晾乾，避免陽光直射或用吹風機吹乾，以免皮革變硬或開裂。如果有必要，可以使用專門的皮革保養產品進行清潔和保養。'
-  },
-  {
-    id: '1',
-    name: '電腦 3C 產品',
-    photo: 'https://picsum.photos/id/0/200/200',
-    createdAt: '10:45',
-    content: '您好，這裡是電腦 3C 產品'
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { token } = context.req.cookies;
+  if (!token) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    };
   }
-];
 
-const Message = () => {
+  const [accountErr, accountRes] = await safeAwait<ApiUser.Account>(
+    request('/user/account', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
+
+  const [chatroomErr, chatroomRes] = await safeAwait<ApiMessage.Chatroom[]>(
+    request('/user/chatroom', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  );
+
+  if (accountErr || chatroomErr) {
+    return {
+      notFound: true
+    };
+  }
+
+  const userId = accountRes.data._id;
+
+  const chatroomList = chatroomRes.data.map((item) => {
+    const userIsSender = item.sender._id === userId ? true : false;
+
+    return {
+      id: item._id,
+      roomId: item.roomId._id,
+      name: userIsSender ? item.receiver.name : item.sender.name,
+      photo: userIsSender ? item.receiver.photo || '' : item.sender.photo || '',
+      createdAt: item.createdAt,
+      content: item.content
+    };
+  });
+
+  chatroomList.sort((a, b) => {
+    const timestampA = new Date(a.createdAt).getTime();
+    const timestampB = new Date(b.createdAt).getTime();
+    return timestampB - timestampA;
+  });
+
+  return {
+    props: {
+      userPhoto: accountRes.data.photo || '',
+      chatroomList
+    }
+  };
+};
+
+interface MessageProps {
+  userPhoto: string;
+  chatroomList: MessageData[];
+}
+
+const Message = ({ userPhoto, chatroomList }: MessageProps) => {
   return (
     <>
       <Head>
         <title>訊息中心-TripPlus+</title>
       </Head>
 
-      <MsgHeader />
+      <MsgHeader photo={userPhoto} />
 
       <Flex h={'calc(100vh - 56px)'}>
-        <MessageList messages={messages} />
+        <MessageList chatroomMember={chatroomList} />
 
         <Box
           flexGrow={1}
