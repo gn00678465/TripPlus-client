@@ -72,9 +72,7 @@ const MsgHeader = ({ photo, onClose }: MsgHeaderProp) => {
           zIndex={10}
         >
           <ListItem px={4} py={2} _hover={{ bg: 'secondary-emphasis.50' }}>
-            <Link href="/" target="_blank">
-              前往 TripPlus+ 首頁
-            </Link>
+            <Link href="/">前往 TripPlus+ 首頁</Link>
           </ListItem>
           <ListItem
             px={4}

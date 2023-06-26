@@ -176,7 +176,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
         ? firstRoomMsg.sender._id
         : firstRoomMsg.receiver._id,
       title: firstRoomMsg.roomId.projectId.title,
-      id: firstRoomMsg._id
+      id: firstRoomMsg.roomId.projectId._id
     });
 
     setUserInfo({
@@ -262,8 +262,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
     preventDefault: () => void;
   }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+      sendMessage(e);
     }
   };
 
@@ -274,7 +273,8 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
     return `${timestamp}-${randomNum}`;
   };
 
-  const sendMessage = () => {
+  const sendMessage = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
     const messagePayload = {
       sender: userInfo.id,
       receiver: receiverInfo.id,
