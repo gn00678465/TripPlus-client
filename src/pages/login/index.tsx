@@ -48,7 +48,7 @@ const Login: App.NextPageWithLayout = () => {
     formState: { errors }
   } = useForm<AuthInterface.LoginForm>({
     defaultValues: {
-      isRemember: true
+      isRememberMe: 1
     }
   });
 
@@ -131,7 +131,7 @@ const Login: App.NextPageWithLayout = () => {
 
             <FormControl>
               <Flex my={4}>
-                <Checkbox {...register('isRemember')}>記住我</Checkbox>
+                <Checkbox {...register('isRememberMe')}>記住我</Checkbox>
 
                 <Spacer />
 

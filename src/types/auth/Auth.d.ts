@@ -9,6 +9,6 @@ declare namespace AuthInterface {
   interface LoginForm {
     email: string;
     password: string;
-    isRemember: boolean;
+    isRememberMe: number;
   }
 }
