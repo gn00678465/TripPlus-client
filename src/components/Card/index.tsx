@@ -30,7 +30,7 @@ const Card = ({ item, content }: CardProps) => {
             ? `/project/${item.id}`
             : `/product/${item.id}`
         }
-        className="relative flex w-full items-start justify-end rounded-lg bg-cover bg-center pb-[70%]"
+        className="relative flex w-full items-start justify-end rounded-lg bg-cover bg-center pb-[70%] transition-opacity duration-300 hover:opacity-75"
         style={{
           backgroundImage: `url(${item.keyVision})`
         }}
