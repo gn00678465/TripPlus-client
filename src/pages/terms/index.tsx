@@ -17,7 +17,7 @@ const Terms: App.NextPageWithLayout = () => {
         <title>使用條款-TripPlus+</title>
       </Head>
       <Box className="leading-8" my={10}>
-        <Container maxW={'container.xl'}>
+        <Container maxW={'container.lg'}>
           <Heading
             as="h1"
             fontSize={'3xl'}
