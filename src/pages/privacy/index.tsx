@@ -10,7 +10,7 @@ import {
   Text
 } from '@chakra-ui/react';
 
-const Terms: App.NextPageWithLayout = () => {
+const Privacy: App.NextPageWithLayout = () => {
   return (
     <>
       <Head>
@@ -126,8 +126,8 @@ const Terms: App.NextPageWithLayout = () => {
   );
 };
 
-export default Terms;
+export default Privacy;
 
-Terms.getLayout = function (page: ReactElement) {
+Privacy.getLayout = function (page: ReactElement) {
   return <Layout>{page}</Layout>;
 };
