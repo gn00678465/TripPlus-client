@@ -3,7 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   env: {
-    BASE_API_URL: process.env.BASE_API_URL
+    BASE_API_URL: process.env.BASE_API_URL,
+    BACKEND_URL: process.env.BACKEND_URL
   },
   images: {
     domains: [
