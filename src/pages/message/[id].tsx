@@ -102,7 +102,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
   const router = useRouter();
   const roomId = useMemo(() => router.query.id, [router]);
   const chatWindow: RefObject<HTMLDivElement> = useRef(null);
-
+  const isComposition = useRef(true);
   const [chatroomMember, setChatroomMember] =
     useState<MessageData[]>(chatroomList);
 
@@ -256,12 +256,8 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
     setConent(e.target.value);
   };
 
-  const KeyPressContent = (e: {
-    key: string;
-    shiftKey: any;
-    preventDefault: () => void;
-  }) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const KeyPressContent = (e: { key: string; preventDefault: () => void }) => {
+    if (e.key === 'Enter' && isComposition.current) {
       sendMessage(e);
     }
   };
@@ -561,6 +557,13 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
                   p={3}
                   resize={'none'}
                   onChange={changeContent}
+                  onCompositionStart={() => {
+                    isComposition.current = false;
+                  }}
+                  onCompositionEnd={() => {
+                    isComposition.current = true;
+                  }}
+                  wrap="off"
                   onKeyDown={KeyPressContent}
                 ></Textarea>
               </FormControl>
