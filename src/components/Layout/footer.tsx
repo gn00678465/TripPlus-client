@@ -10,7 +10,7 @@ const Footer = () => {
       list: [
         { title: '關於我們', url: '/about' },
         { title: '使用條款', url: '/terms' },
-        { title: '隱私權政策', url: '/' }
+        { title: '隱私權政策', url: '/privacy' }
       ]
     },
     {
