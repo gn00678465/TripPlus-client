@@ -17,7 +17,7 @@ const Footer = () => {
       title: '協助',
       list: [
         { title: '常見問題', url: '/' },
-        { title: '提案教學', url: '/' },
+        { title: '提案教學', url: '/teach' },
         { title: '聯絡我們', url: '/about' }
       ]
     }
