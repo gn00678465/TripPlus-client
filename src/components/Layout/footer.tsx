@@ -10,14 +10,14 @@ const Footer = () => {
       list: [
         { title: '關於我們', url: '/about' },
         { title: '使用條款', url: '/terms' },
-        { title: '隱私權政策', url: '/' }
+        { title: '隱私權政策', url: '/privacy' }
       ]
     },
     {
       title: '協助',
       list: [
-        { title: '常見問題', url: '/' },
-        { title: '提案教學', url: '/' },
+        { title: '常見問題', url: '/faq' },
+        { title: '提案教學', url: '/teach' },
         { title: '聯絡我們', url: '/about' }
       ]
     }

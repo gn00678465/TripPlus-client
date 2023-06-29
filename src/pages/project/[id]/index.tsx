@@ -627,6 +627,14 @@ export const ProjectLayout = ({
     <>
       <Head>
         <title>{`${data?.data?.title}-TripPlus+`}</title>
+        <meta property="og:title" content={`TripPlus+ | ${data?.data.title}`} />
+        <meta property="og:description" content={data?.data.summary} />
+        <meta property="og:image" content={data?.data.keyVision} />
+        <meta property="og:image:alt" content={data?.data.title} />
+        <meta
+          property="og:url"
+          content={`${process.env.OG_URL}/project/${id}`}
+        />
       </Head>
       <HeaderBlock
         id={id}
