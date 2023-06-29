@@ -235,7 +235,7 @@ const Index = () => {
                         width={800}
                         height={560}
                         priority
-                        className="aspect-ratio-object rounded-lg"
+                        className="aspect-ratio-object rounded-lg transition-opacity duration-300 hover:opacity-75"
                       ></Image>
                       <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
                         紅利回饋
@@ -350,7 +350,7 @@ const Index = () => {
                         width={800}
                         height={560}
                         priority
-                        className="aspect-ratio-object rounded-lg"
+                        className="aspect-ratio-object rounded-lg transition-opacity duration-300 hover:opacity-75"
                       ></Image>
                       <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
                         紅利回饋
@@ -515,7 +515,7 @@ const Index = () => {
                         width={800}
                         height={560}
                         priority
-                        className="aspect-ratio-object rounded-lg"
+                        className="aspect-ratio-object rounded-lg transition-opacity duration-300 hover:opacity-75"
                       ></Image>
                       <span className="absolute right-3 top-3 z-[200] rounded bg-red p-2 text-xs text-white md:text-sm">
                         可用紅利

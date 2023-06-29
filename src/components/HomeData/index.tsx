@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import CTA from '@/assets/images/index/CTA.png';
 import CTAMobile from '@/assets/images/index/CTA-mobile.png';
+import NextLink from 'next/link';
 import { Text, Box, Container, Button } from '@chakra-ui/react';
 import { currencyTWD, replaceTWDSymbol } from '@/utils';
 
@@ -9,6 +10,8 @@ interface HomeDataProps {
   sum: number;
   sponsorCount: number;
 }
+
+const backendUrl: string | undefined = process.env.BACKEND_URL;
 
 const HomeData = ({ successCount, sum, sponsorCount }: HomeDataProps) => {
   return (
@@ -72,13 +75,15 @@ const HomeData = ({ successCount, sum, sponsorCount }: HomeDataProps) => {
           >
             點燃你的創意．集眾人之力
           </Text>
-          <Button
-            className="relative z-10 !h-[96px] !w-[96px] !rounded-[100%] !text-[14px] after:absolute after:left-[50%] after:top-[50%]
+          <NextLink href={backendUrl || ''} target="_blank">
+            <Button
+              className="relative z-10 !h-[96px] !w-[96px] !rounded-[100%] !text-[14px] after:absolute after:left-[50%] after:top-[50%]
               after:h-[112px] after:w-[112px]  after:translate-x-[-50%] after:translate-y-[-50%] after:rounded-[100%] after:border-[1px] after:border-dashed after:border-white after:bg-transparent md:!h-[140px] md:!w-[140px] md:!text-[20px] md:after:h-[164px] md:after:w-[164px] md:after:border-2"
-            colorScheme="secondary-emphasis"
-          >
-            我要提案
-          </Button>
+              colorScheme="secondary-emphasis"
+            >
+              我要提案
+            </Button>
+          </NextLink>
         </Box>
       </Container>
     </Box>

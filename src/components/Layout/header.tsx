@@ -30,12 +30,19 @@ import { useAuthStore } from '@/store';
 import UserImage from '@/assets/images/user/user-image.png';
 import MemberMenu from './member-menu';
 import Logo from '@/assets/images/logo.png';
+import useSWR, { useSWRConfig } from 'swr';
+import { apiGetUserAccount } from '@/api/index';
+
+const backendUrl: string | undefined = process.env.BACKEND_URL;
 
 const Header = ({ ...rest }: BoxProps) => {
+  const { mutate } = useSWRConfig();
+
   const router = useRouter();
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const loginStatus = useAuthStore((state) => state.getters.isLogin);
   const [isLogin, setIsLogin] = useState(false);
+  const [userPhoto, setUserPhoto] = useState<string>(UserImage.src);
 
   useEffect(() => {
     if (hasHydrated) {
@@ -55,7 +62,7 @@ const Header = ({ ...rest }: BoxProps) => {
   const menu = [
     { title: '首頁', url: '/', isShowPc: false },
     { title: '探索', url: '/projects', isShowPc: true },
-    { title: '提案', url: '/', isShowPc: true }
+    { title: '提案', url: backendUrl || '', isShowPc: true }
   ];
 
   useEffect(() => {
@@ -85,6 +92,29 @@ const Header = ({ ...rest }: BoxProps) => {
       window.removeEventListener('click', handleClick);
     };
   }, [openMemberMenu]);
+
+  const { data: account } = useSWR(
+    ['get', '/api/user/account'],
+    apiGetUserAccount,
+    {
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          setUserPhoto(data.data.photo || '');
+        }
+      }
+    }
+  );
+
+  useEffect(() => {
+    if (isLogin) {
+      mutate(['get', '/api/user/account']);
+    } else {
+      setUserPhoto('');
+    }
+  }, [isLogin]);
 
   return (
     <Box
@@ -116,7 +146,11 @@ const Header = ({ ...rest }: BoxProps) => {
                 (item) =>
                   item.isShowPc && (
                     <ListItem key={item.title}>
-                      <Link href={item.url} className="hover:text-[#757575]">
+                      <Link
+                        href={item.url}
+                        target={item.title === '提案' ? '_blank' : '_self'}
+                        className="hover:text-[#757575]"
+                      >
                         {item.title}
                       </Link>
                     </ListItem>
@@ -145,16 +179,16 @@ const Header = ({ ...rest }: BoxProps) => {
                 </Link>
                 <button
                   ref={memberBtnRef}
-                  className="w-12 overflow-hidden rounded-md focus:border-2 focus:border-secondary-emphasis-300"
+                  className="h-12 w-12 overflow-hidden rounded-md focus:border-2 focus:border-secondary-emphasis-300"
                   onClick={() => {
                     setOpenMemberMenu(!openMemberMenu);
                   }}
                 >
                   <Image
-                    src={UserImage}
+                    src={userPhoto || UserImage}
                     alt="使用者圖片"
-                    width={500}
-                    height={500}
+                    width={100}
+                    height={100}
                     priority
                   />
                 </button>
@@ -217,7 +251,11 @@ const Header = ({ ...rest }: BoxProps) => {
                   key={item.title}
                   className="border-b border-[#E9E9E9] last:border-b-0 hover:bg-white"
                 >
-                  <Link href={item.url} className="block py-3">
+                  <Link
+                    href={item.url}
+                    target={item.title === '提案' ? '_blank' : '_self'}
+                    className="block py-3"
+                  >
                     {item.title}
                   </Link>
                 </ListItem>
