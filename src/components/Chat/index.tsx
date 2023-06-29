@@ -19,7 +19,7 @@ import { useEffect, useState, useRef, RefObject } from 'react';
 import useSWR from 'swr';
 import { apiGetProjectMessage, apiGetUserAccount } from '@/api';
 import dayjs from 'dayjs';
-import { safeAwait, utc2Local, formatDay } from '@/utils';
+import { formatDay } from '@/utils';
 
 interface Team {
   title: string;
@@ -36,32 +36,33 @@ interface ChatProps {
 const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
   const router = useRouter();
   const chatWindow: RefObject<HTMLDivElement> = useRef(null);
+  const isComposition = useRef(true);
   const [isScrollDown, setIsScrollDown] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEnd, setIsEnd] = useState(false);
 
   const URL: string = process.env.BASE_API_URL || '';
   const socket = io(URL, { transports: ['websocket'] });
 
-  // const { data: accountData } = useSWR(
-  //   ['get', '/api/user/account'],
-  //   apiGetUserAccount,
-  //   {
-  //     onSuccess(data, key, config) {
-  //       if (data && data.status === 'Success') {
-  //         getUserAccount(data.data);
-  //       }
-  //     }
-  //   }
-  // );
+  const { data: accountData } = useSWR(
+    isOpen ? '/api/user/account' : null,
+    apiGetUserAccount,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          getUserAccount(data.data);
+        }
+      }
+    }
+  );
 
   const [userId, setUserId] = useState<string>('');
   const [projectCreatorId, setProjectCreatorId] = useState<string>('');
   const [roomId, setRoomId] = useState<string>('');
 
-  // const getUserAccount = (data: ApiUser.Account) => {
-  //   console.log('data._id', data._id);
-  //   setUserId(() => data._id);
-  // };
+  const getUserAccount = (data: ApiUser.Account) => {
+    setUserId(() => data._id);
+  };
 
   interface Message {
     id: string;
@@ -85,9 +86,9 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
 
   const getRoomId = (data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom) => {
     if ('roomId' in data) {
-      setRoomId(data.roomId._id);
+      setRoomId(() => data.roomId._id);
     } else {
-      setRoomId(data._id);
+      setRoomId(() => data._id);
     }
   };
 
@@ -95,30 +96,13 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom
   ) => {
     if ('roomId' in data) {
-      setProjectCreatorId(data.roomId.projectCreator);
+      setProjectCreatorId(() => data.roomId.projectCreator);
     } else {
-      setProjectCreatorId(data.projectCreator);
-    }
-  };
-
-  const getUserId = (data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom) => {
-    if (projectCreatorId) {
-      if ('roomId' in data) {
-        const userId = data.roomId.participants.filter(
-          (item) => item !== projectCreatorId
-        );
-        setUserId(userId[0]);
-      } else {
-        const userId = data.participants.filter(
-          (item) => item !== projectCreatorId
-        );
-        setUserId(userId[0]);
-      }
+      setProjectCreatorId(() => data.projectCreator);
     }
   };
 
   const getMessages = (data: ApiMessage.Chatroom[]) => {
-    console.log('userId', userId);
     const messages = data.reverse().map((item) => {
       let message: any = {};
       message.id = item._id;
@@ -129,11 +113,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
       return message;
     });
     const newMessages = insertDateBefoeMsg(messages);
-    console.log('newMessages', newMessages);
-    // setMessages((prev) => newMessages.concat(prev));
-    setMessages((state) => {
-      return [...state, ...newMessages];
-    });
+    setMessages((prev) => newMessages.concat(prev));
   };
 
   const insertDateBefoeMsg = (messages: Message[]) => {
@@ -143,7 +123,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
       .map((message: Message) => {
         return dayjs(message.createdAt).format('YYYY-MM-DD');
       });
-    console.log('dateList', dateList);
     for (let i = 0; i < messages.length - 1; i++) {
       if (!latestDate) {
         latestDate = dateList[0];
@@ -151,7 +130,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
       let beforeDateIndex = dateList.findIndex((date: string) => {
         return new Date(date).getTime() < new Date(latestDate).getTime();
       });
-      console.log('beforeDateIndex', beforeDateIndex);
       if (beforeDateIndex > -1) {
         messages[messages.length - beforeDateIndex].showDate =
           dateList[beforeDateIndex - 1];
@@ -161,12 +139,26 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     return messages;
   };
 
+  const showDateImmediately = (message: Message) => {
+    if (
+      dayjs(message.createdAt).isAfter(
+        dayjs(messages[messages.length - 1].createdAt),
+        'day'
+      )
+    ) {
+      message.showDate = dayjs(message.createdAt).format('YYYY-MM-DD');
+    }
+    return message;
+  };
+
   const {
     data: roomMessage,
     isLoading: isRoomMsgLoading,
     mutate: fetchMsgProject
   } = useSWR(
-    projectId ? `/api/project/${projectId}/message?${userId}` : null,
+    isOpen && projectId && userId && !isLoading && !isEnd
+      ? `/api/project/${projectId}/message?${userId}`
+      : null,
     () =>
       apiGetProjectMessage(projectId as string, page.pageIndex, page.pageSize),
     {
@@ -178,13 +170,20 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
           data.message === '取得訊息' &&
           Array.isArray(data.data)
         ) {
-          console.log('data', data);
           if (page.pageIndex === 1) {
             getRoomId(data.data[0]);
             getProjectCreatorId(data.data[0]);
-            getUserId(data.data[0]);
+          }
+          if (data.data.length < page.pageSize) {
+            setIsEnd(true);
           }
           getMessages(data.data);
+          setPage((state) => {
+            return {
+              ...state,
+              pageIndex: state.pageIndex++
+            };
+          });
         }
 
         if (
@@ -196,22 +195,28 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
         ) {
           getRoomId(data.data);
           getProjectCreatorId(data.data);
-          getUserId(data.data);
         }
       },
 
       onError: (err, key, config) => {
         console.log('err', err);
-        // alert(err.message);
+        alert(err.message);
       }
     }
   );
+
+  useEffect(() => {
+    if (isEnd) {
+      messages[0].showDate = dayjs(messages[0].createdAt).format('YYYY-MM-DD');
+    }
+  }, [isEnd, messages]);
 
   const changeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setConent(e.target.value);
   };
 
   const sendMessage = (e: { preventDefault: () => void }) => {
+    if (!content.trim()) return;
     e.preventDefault();
     const messagePayload = {
       sender: userId,
@@ -223,6 +228,12 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     socket.emit('message', messagePayload);
     setConent('');
     setIsScrollDown(true);
+  };
+
+  const KeyPressContent = (e: { key: string; preventDefault: () => void }) => {
+    if (e.key === 'Enter' && isComposition.current) {
+      sendMessage(e);
+    }
   };
 
   const generateId = () => {
@@ -240,13 +251,14 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
 
     const handleNewMessage = (data: ApiMessage.msgBody) => {
       console.log('handleNewMessage', data);
-      const newMessage = {
+      const message = {
         id: generateId(),
         showDate: '',
         content: data.content,
         createdAt: dayjs().format('YYYY-MM-DD HH:mm'),
         chatMySelf: data.sender === userId
       };
+      const newMessage = showDateImmediately(message);
       setMessages((state) => {
         return [...state, newMessage];
       });
@@ -258,7 +270,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
       socket.off('message');
       console.log('Disconnected from server');
     };
-  }, [projectId]);
+  }, [roomId, messages]);
 
   useEffect(() => {
     if (chatWindow.current && isScrollDown) {
@@ -270,29 +282,31 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     let currentChatWindow = chatWindow.current;
 
     const handleScroll = () => {
-      console.log('handleScroll');
-
-      if (currentChatWindow && currentChatWindow.scrollTop <= 30) {
+      if (
+        currentChatWindow &&
+        currentChatWindow.scrollTop <= 30 &&
+        !isLoading &&
+        !isEnd
+      ) {
         setIsScrollDown(false);
-
-        setPage((state) => {
-          return {
-            ...state,
-            page: state.pageIndex++
-          };
-        });
-        // setIsLoading(true);
-        // setTimeout(() => {
-        //   fetchMsgProject();
-        //   currentChatWindow!.scrollTop = 100;
-        //   setIsLoading(false);
-        // }, 1000);
+        setIsLoading(true);
+        setTimeout(() => {
+          fetchMsgProject();
+          currentChatWindow!.scrollTop = 100;
+          setIsLoading(false);
+        }, 1000);
       }
     };
 
     if (currentChatWindow && isOpen) {
       currentChatWindow.addEventListener('scroll', handleScroll);
     }
+
+    return () => {
+      if (currentChatWindow) {
+        currentChatWindow.removeEventListener('scroll', handleScroll);
+      }
+    };
   });
 
   return (
@@ -359,10 +373,22 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
                       className="relative h-full w-full overflow-y-auto"
                       ref={chatWindow}
                     >
+                      {isRoomMsgLoading && page.pageIndex === 1 && (
+                        <Box className="">
+                          <Spinner
+                            position="absolute"
+                            top="50%"
+                            left="50%"
+                            size="lg"
+                            transform="translate(-50%, -50%)"
+                            color="secondary-emphasis.500"
+                          />
+                        </Box>
+                      )}
                       <Box className="absolute top-0 h-full w-full px-3">
                         {isLoading && (
                           <Box className="my-5 flex justify-center">
-                            <Spinner />
+                            <Spinner color="gray.500" />
                           </Box>
                         )}
                         {messages.map((message) => {
@@ -428,9 +454,18 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
                         outline={'none'}
                         border={0}
                         onChange={changeContent}
+                        onCompositionStart={() => {
+                          isComposition.current = false;
+                        }}
+                        onCompositionEnd={() => {
+                          isComposition.current = true;
+                        }}
+                        wrap="off"
+                        onKeyDown={KeyPressContent}
                       />
                       <Box className="flex items-center justify-between px-[6px] py-[10px]">
-                        <Box className="flex items-center">
+                        {/* 暫時隱藏 */}
+                        <Box className="flex items-center opacity-0">
                           <IconButton
                             colorScheme="secondary-emphasis"
                             variant={'link'}
