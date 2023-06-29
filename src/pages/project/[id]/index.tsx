@@ -627,7 +627,10 @@ export const ProjectLayout = ({
     <>
       <Head>
         <title>{`${data?.data?.title}-TripPlus+`}</title>
+        <meta name="description" content={data?.data.summary} />
+        {/* facebook */}
         <meta property="og:title" content={`TripPlus+ | ${data?.data.title}`} />
+        <meta property="og:type" content="website" />
         <meta property="og:description" content={data?.data.summary} />
         <meta property="og:image" content={data?.data.keyVision} />
         <meta property="og:image:alt" content={data?.data.title} />
@@ -635,6 +638,7 @@ export const ProjectLayout = ({
           property="og:url"
           content={`${process.env.OG_URL}/project/${id}`}
         />
+        <meta name="twitter:card" content="summary_large_image"></meta>
       </Head>
       <HeaderBlock
         id={id}
