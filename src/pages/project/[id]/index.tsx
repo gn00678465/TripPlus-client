@@ -3,6 +3,7 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { Layout, ImageFallback } from '@/components';
+import Chat from '@/components/Chat';
 import { Carousel } from '@/components/Swiper';
 import { ReactElement, ReactNode, useMemo, MouseEvent } from 'react';
 import useSWR, { SWRConfig } from 'swr';
@@ -47,6 +48,7 @@ import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 import dayjs from 'dayjs';
+import { useState, useEffect } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
@@ -241,7 +243,7 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                   <p className="text-xs leading-[18px] text-gray-600 lg:text-sm lg:leading-[21px]">
                     剩餘時間
                   </p>
-                  <p className="text-lg  text-gray-900 lg:text-xl">
+                  <p className="text-lg text-gray-900 lg:text-xl">
                     {data?.countDownDays === 0 &&
                     dayjs().isAfter(utc2Local(data?.endTime as string)) ? (
                       <span className="lg:text-lg">已結束</span>
@@ -260,7 +262,7 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                   <p className="text-xs leading-[18px] text-gray-600 lg:text-sm lg:leading-[21px]">
                     贊助人數
                   </p>
-                  <p className="text-lg  text-gray-900 lg:text-xl">
+                  <p className="text-lg text-gray-900 lg:text-xl">
                     <span className="font-medium">{data?.sponsorCount}</span>
                     <span className="ml-1 lg:text-lg">人</span>
                   </p>
@@ -270,7 +272,7 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                   <p className="text-xs leading-[18px] text-gray-600 lg:text-sm lg:leading-[21px]">
                     募資達成率
                   </p>
-                  <p className="text-lg  font-medium text-gray-900 lg:text-xl">
+                  <p className="text-lg font-medium text-gray-900 lg:text-xl">
                     <span>{data?.progressRate}</span>
                     <span className="ml-1">%</span>
                   </p>
@@ -619,9 +621,53 @@ export const ProjectLayout = ({
   isFollowed,
   id
 }: ProjectLayoutProps) => {
+  const [teamInfo, setTeamInfo] = useState({
+    _id: '',
+    type: 0,
+    title: '',
+    photo: '',
+    introduction: '',
+    taxId: '',
+    address: '',
+    serviceTime: '',
+    representative: '',
+    email: '',
+    phone: '',
+    website: '',
+    facebook: '',
+    instagram: '',
+    createdAt: ''
+  });
+
+  const getTeamInfo = (data: ApiProposer.Team) => {
+    setTeamInfo({
+      _id: data._id,
+      type: data.type,
+      title: data.title,
+      photo: data.photo,
+      introduction: data.introduction,
+      taxId: data.taxId,
+      address: data.address,
+      serviceTime: data.serviceTime,
+      representative: data.representative,
+      email: data.email,
+      phone: data.phone,
+      website: data.website,
+      facebook: data.facebook,
+      instagram: data.instagram,
+      createdAt: data.createdAt
+    });
+  };
+
+  const [openChatBox, setOpenChatBox] = useState(false);
+
   const { data } = useSWR(id ? `/project/${id}` : null, () =>
     swrFetch(apiGetProjectInfo(id as string))
   );
+
+  useEffect(() => {
+    getTeamInfo(data!.data.teamId);
+  }, [data]);
 
   return (
     <>
@@ -647,6 +693,12 @@ export const ProjectLayout = ({
         {typeof children === 'function' ? children(data?.data) : children}
       </ContentBlock>
       <PlansBlock id={id} data={data?.data}></PlansBlock>
+      <Chat
+        teamInfo={teamInfo}
+        isOpen={openChatBox}
+        projectId={'id'}
+        onClose={() => setOpenChatBox(false)}
+      />
     </>
   );
 };
