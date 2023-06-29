@@ -55,7 +55,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
   // );
 
   const [userId, setUserId] = useState<string>('');
-  const [projectCreaterId, setProjectCreaterId] = useState<string>('');
+  const [projectCreatorId, setProjectCreatorId] = useState<string>('');
   const [roomId, setRoomId] = useState<string>('');
 
   // const getUserAccount = (data: ApiUser.Account) => {
@@ -95,22 +95,22 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom
   ) => {
     if ('roomId' in data) {
-      setProjectCreaterId(data.roomId.projectCreator);
+      setProjectCreatorId(data.roomId.projectCreator);
     } else {
-      setProjectCreaterId(data.projectCreator);
+      setProjectCreatorId(data.projectCreator);
     }
   };
 
   const getUserId = (data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom) => {
-    if (projectCreaterId) {
+    if (projectCreatorId) {
       if ('roomId' in data) {
         const userId = data.roomId.participants.filter(
-          (item) => item !== projectCreaterId
+          (item) => item !== projectCreatorId
         );
         setUserId(userId[0]);
       } else {
         const userId = data.participants.filter(
-          (item) => item !== projectCreaterId
+          (item) => item !== projectCreatorId
         );
         setUserId(userId[0]);
       }
@@ -170,6 +170,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     () =>
       apiGetProjectMessage(projectId as string, page.pageIndex, page.pageSize),
     {
+      revalidateOnFocus: false,
       onSuccess(data, key, config) {
         if (
           data &&
@@ -214,7 +215,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     e.preventDefault();
     const messagePayload = {
       sender: userId,
-      receiver: projectCreaterId,
+      receiver: projectCreatorId,
       content,
       roomId
     };
@@ -235,7 +236,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     socket.on('connect', () => {
       console.log('Connected to server');
     });
-    socket.emit('joinRoom', '6493b2ecfe1f0d27d44b2655');
+    socket.emit('joinRoom', roomId);
 
     const handleNewMessage = (data: ApiMessage.msgBody) => {
       console.log('handleNewMessage', data);
