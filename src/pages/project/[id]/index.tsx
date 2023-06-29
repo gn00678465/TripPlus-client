@@ -47,6 +47,7 @@ import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 import dayjs from 'dayjs';
+import { NextSeo } from 'next-seo';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params || {};
@@ -625,17 +626,23 @@ export const ProjectLayout = ({
 
   return (
     <>
-      <Head>
-        <title>{`${data?.data?.title}-TripPlus+`}</title>
-        <meta property="og:title" content={`TripPlus+ | ${data?.data.title}`} />
-        <meta property="og:description" content={data?.data.summary} />
-        <meta property="og:image" content={data?.data.keyVision} />
-        <meta property="og:image:alt" content={data?.data.title} />
-        <meta
-          property="og:url"
-          content={`${process.env.OG_URL}/project/${id}`}
-        />
-      </Head>
+      <NextSeo
+        title={`${data?.data?.title}-TripPlus+`}
+        description={data?.data.summary}
+        openGraph={{
+          type: 'website',
+          locale: 'zh-TW',
+          url: `${process.env.OG_URL}/project/${id}`,
+          title: `TripPlus+ | ${data?.data.title}`,
+          description: data?.data.summary,
+          images: [
+            {
+              url: data?.data.keyVision as string,
+              alt: data?.data.title
+            }
+          ]
+        }}
+      />
       <HeaderBlock
         id={id}
         data={data?.data}
