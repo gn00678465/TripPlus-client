@@ -322,52 +322,79 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
 
 interface SocialBlockProps extends FlexProps {
   team?: ApiProject.Team;
+  projectId?: string;
 }
 
-const SocialBlock = ({ team, ...rest }: SocialBlockProps) => (
-  <Flex columnGap={{ base: 2 }} {...rest}>
-    <IconButton
-      as="a"
-      target="_blank"
-      href={team?.website as string}
-      cursor="pointer"
-      aria-label="website"
-      variant="outline"
-      borderRadius="full"
-      icon={<Icon as={FiGlobe} boxSize={{ base: '18px' }} />}
-      _hover={{ bgColor: 'white' }}
-    />
-    <IconButton
-      as="a"
-      target="_blank"
-      href={team?.facebook as string}
-      cursor="pointer"
-      aria-label="facebook"
-      variant="outline"
-      borderRadius="full"
-      icon={<Icon as={FaFacebookF} boxSize={{ base: '18px' }} />}
-      _hover={{ bgColor: 'white' }}
-    />
-    <IconButton
-      as="a"
-      target="_blank"
-      href={team?.instagram as string}
-      cursor="pointer"
-      aria-label="instagram"
-      variant="outline"
-      borderRadius="full"
-      icon={<Icon as={FaInstagram} boxSize={{ base: '18px' }} />}
-      _hover={{ bgColor: 'white' }}
-    />
-    <Button
-      ml={{ base: 'auto' }}
-      leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
-      colorScheme="primary"
-    >
-      聯絡提案者
-    </Button>
-  </Flex>
-);
+const SocialBlock = ({ team, projectId, ...rest }: SocialBlockProps) => {
+  const [teamInfo, setTeamInfo] = useState({
+    title: '',
+    photo: ''
+  });
+
+  const [openChatBox, setOpenChatBox] = useState(false);
+
+  useEffect(() => {
+    setTeamInfo({
+      title: team?.title as string,
+      photo: team?.photo as string
+    });
+  }, [team]);
+  return (
+    <>
+      <Flex columnGap={{ base: 2 }} {...rest}>
+        <IconButton
+          as="a"
+          target="_blank"
+          href={team?.website as string}
+          cursor="pointer"
+          aria-label="website"
+          variant="outline"
+          borderRadius="full"
+          icon={<Icon as={FiGlobe} boxSize={{ base: '18px' }} />}
+          _hover={{ bgColor: 'white' }}
+        />
+        <IconButton
+          as="a"
+          target="_blank"
+          href={team?.facebook as string}
+          cursor="pointer"
+          aria-label="facebook"
+          variant="outline"
+          borderRadius="full"
+          icon={<Icon as={FaFacebookF} boxSize={{ base: '18px' }} />}
+          _hover={{ bgColor: 'white' }}
+        />
+        <IconButton
+          as="a"
+          target="_blank"
+          href={team?.instagram as string}
+          cursor="pointer"
+          aria-label="instagram"
+          variant="outline"
+          borderRadius="full"
+          icon={<Icon as={FaInstagram} boxSize={{ base: '18px' }} />}
+          _hover={{ bgColor: 'white' }}
+        />
+        <Button
+          ml={{ base: 'auto' }}
+          leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
+          colorScheme="primary"
+          onClick={() => {
+            setOpenChatBox(true);
+          }}
+        >
+          聯絡提案者
+        </Button>
+      </Flex>
+      <Chat
+        teamInfo={teamInfo}
+        isOpen={openChatBox}
+        projectId={projectId as string}
+        onClose={() => setOpenChatBox(false)}
+      />
+    </>
+  );
+};
 
 const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   return (
@@ -449,6 +476,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                 <li className="mt-auto">
                   <SocialBlock
                     team={data?.teamId}
+                    projectId={data?._id}
                     display={{ base: 'none', md: 'flex' }}
                   />
                 </li>
@@ -456,6 +484,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             </Flex>
             <SocialBlock
               team={data?.teamId}
+              projectId={data?._id}
               display={{ base: 'flex', md: 'none' }}
             />
           </Box>
@@ -621,54 +650,9 @@ export const ProjectLayout = ({
   isFollowed,
   id
 }: ProjectLayoutProps) => {
-  const [teamInfo, setTeamInfo] = useState({
-    _id: '',
-    type: 0,
-    title: '',
-    photo: '',
-    introduction: '',
-    taxId: '',
-    address: '',
-    serviceTime: '',
-    representative: '',
-    email: '',
-    phone: '',
-    website: '',
-    facebook: '',
-    instagram: '',
-    createdAt: ''
-  });
-
-  const getTeamInfo = (data: ApiProposer.Team) => {
-    setTeamInfo({
-      _id: data._id,
-      type: data.type,
-      title: data.title,
-      photo: data.photo,
-      introduction: data.introduction,
-      taxId: data.taxId,
-      address: data.address,
-      serviceTime: data.serviceTime,
-      representative: data.representative,
-      email: data.email,
-      phone: data.phone,
-      website: data.website,
-      facebook: data.facebook,
-      instagram: data.instagram,
-      createdAt: data.createdAt
-    });
-  };
-
-  const [openChatBox, setOpenChatBox] = useState(false);
-
   const { data } = useSWR(id ? `/project/${id}` : null, () =>
     swrFetch(apiGetProjectInfo(id as string))
   );
-
-  useEffect(() => {
-    getTeamInfo(data!.data.teamId);
-  }, [data]);
-
   return (
     <>
       <Head>
@@ -693,12 +677,6 @@ export const ProjectLayout = ({
         {typeof children === 'function' ? children(data?.data) : children}
       </ContentBlock>
       <PlansBlock id={id} data={data?.data}></PlansBlock>
-      <Chat
-        teamInfo={teamInfo}
-        isOpen={openChatBox}
-        projectId={'id'}
-        onClose={() => setOpenChatBox(false)}
-      />
     </>
   );
 };
