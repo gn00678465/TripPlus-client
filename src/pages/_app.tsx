@@ -3,8 +3,13 @@ import type { AppProps } from 'next/app';
 import { Noto_Sans_TC, Ubuntu } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Chakra } from '@/components';
+import { useRouter } from 'next/router';
+import NProgress from 'nprogress';
+import { useEffect } from 'react';
 import '@/styles/banner.scss';
 import '@/styles/cases.scss';
+import 'nprogress/nprogress.css';
+import '@/styles/nprogress-custom.scss';
 
 const noto_sans_tc = Noto_Sans_TC({
   weight: ['100', '300', '400', '500', '700', '900'],
@@ -46,6 +51,14 @@ type AppPropsWithLayout = AppProps & {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
+  const router = useRouter();
+
+  useEffect(() => {
+    router.events.on('routeChangeStart', () => NProgress.start());
+    router.events.on('routeChangeComplete', () => NProgress.done());
+    router.events.on('routeChangeError', () => NProgress.done());
+  }, []);
+
   return (
     <main
       className={`${ubuntu.variable} ${noto_sans_tc.variable} ${alkatra.variable} flex min-h-screen flex-col font-sans text-gray-900`}
