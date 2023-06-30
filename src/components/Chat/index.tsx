@@ -84,7 +84,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     socket.emit('joinRoom', roomId);
 
     const handleNewMessage = (data: ApiMessage.msgBody) => {
-      console.log('handleNewMessage', data);
       const message = {
         id: generateId(),
         showDate: '',
