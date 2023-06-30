@@ -24,7 +24,7 @@ import PopoverBox from '@/components/Popover';
 import { FiPaperclip } from 'react-icons/fi';
 import { BsImage, BsSendFill } from 'react-icons/bs';
 import { MdArrowBackIosNew } from 'react-icons/md';
-import io from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { useEffect, useState, useMemo, useRef, RefObject } from 'react';
 import { request, safeAwait, utc2Local, formatDay } from '@/utils';
 import { apiGetUserRoomMessage } from '@/api';
@@ -97,8 +97,7 @@ interface MessageProps {
 }
 
 const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
-  const URL: string = process.env.BASE_API_URL || '';
-  const socket = io(URL, { transports: ['websocket'] });
+  const [socket, setSocket] = useState<Socket | undefined>(undefined);
   const router = useRouter();
   const roomId = useMemo(() => router.query.id, [router]);
   const chatWindow: RefObject<HTMLDivElement> = useRef(null);
@@ -129,7 +128,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
   const [isScrollDown, setIsScrollDown] = useState(true);
   const [roomMsg, setRoomMsg] = useState<Message.RoomMsg[]>([]);
 
-  const [content, setConent] = useState('');
+  const [content, setContent] = useState('');
 
   const [page, setPage] = useState({
     pageIndex: 1,
@@ -253,10 +252,10 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
   };
 
   const changeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setConent(e.target.value);
+    setContent(e.target.value);
   };
 
-  const KeyPressContent = (e: { key: string; preventDefault: () => void }) => {
+  const keyPressContent = (e: { key: string; preventDefault: () => void }) => {
     if (e.key === 'Enter' && isComposition.current) {
       sendMessage(e);
     }
@@ -278,16 +277,13 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
       roomId
     };
 
-    socket.emit('message', messagePayload);
-    setConent('');
+    socket?.emit('message', messagePayload);
+    setContent('');
     setIsScrollDown(true);
   };
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
-
+    if (!socket) return;
     socket.emit('joinRoom', roomId);
 
     const handleNewMessage = (data: ApiMessage.msgBody) => {
@@ -355,10 +351,27 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
     socket.on('message', handleNewMessage);
 
     return () => {
+      socket.emit('leaveRoom', roomId);
+      socket.off('message');
+    };
+  }, [socket, roomMsg, roomId]);
+
+  useEffect(() => {
+    const URL: string = process.env.BASE_API_URL || '';
+    const newSocket = io(URL, { transports: ['websocket'] });
+    setSocket(newSocket);
+
+    if (!socket) return;
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    return () => {
       socket.disconnect();
+      newSocket.close();
       console.log('Disconnected from server');
     };
-  }, [roomMsg, roomId]);
+  }, []);
 
   useEffect(() => {
     if (chatWindow.current && isScrollDown) {
@@ -564,7 +577,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
                     isComposition.current = true;
                   }}
                   wrap="off"
-                  onKeyDown={KeyPressContent}
+                  onKeyDown={keyPressContent}
                 ></Textarea>
               </FormControl>
 
