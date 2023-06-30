@@ -287,6 +287,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
     socket.emit('joinRoom', roomId);
 
     const handleNewMessage = (data: ApiMessage.msgBody) => {
+      console.log('handleNewMessage', data);
       setRoomMsg((state) => {
         const userIsSender = data.sender === userId ? true : false;
         const lastItemIndex = state.length - 1;
@@ -590,7 +591,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
                       type="file"
                       display={'none'}
                     />
-                    <label htmlFor="file" className="cursor-pointer p-2">
+                    <label htmlFor="file" className="p-2 cursor-pointer">
                       <Icon as={FiPaperclip}></Icon>
                     </label>
                   </PopoverBox>
@@ -602,7 +603,7 @@ const Message = ({ userId, userPhoto, chatroomList }: MessageProps) => {
                       display={'none'}
                       accept="image/*"
                     />
-                    <label htmlFor="image" className="cursor-pointer p-2">
+                    <label htmlFor="image" className="p-2 cursor-pointer">
                       <Icon as={BsImage}></Icon>
                     </label>
                   </PopoverBox>
