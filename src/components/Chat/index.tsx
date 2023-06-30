@@ -14,7 +14,7 @@ import {
 import { BsBoxArrowUpRight, BsXLg, BsFillImageFill } from 'react-icons/bs';
 import { FiPaperclip } from 'react-icons/fi';
 import { MdSend } from 'react-icons/md';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { useEffect, useState, useRef, RefObject } from 'react';
 import useSWR from 'swr';
 import { apiGetProjectMessage, apiGetUserAccount } from '@/api';
@@ -40,9 +40,52 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
   const [isScrollDown, setIsScrollDown] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isEnd, setIsEnd] = useState(false);
+  const [socket, setSocket] = useState<any>(undefined);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [content, setConent] = useState('');
+  const [page, setPage] = useState({
+    pageIndex: 1,
+    pageSize: 10
+  });
 
   const URL: string = process.env.BASE_API_URL || '';
-  const socket = io(URL, { transports: ['websocket'] });
+
+  useEffect(() => {
+    const newSocket = io(URL, { transports: ['websocket'] });
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, [setSocket]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+    socket.emit('joinRoom', roomId);
+
+    const handleNewMessage = (data: ApiMessage.msgBody) => {
+      console.log('handleNewMessage', data);
+      const message = {
+        id: generateId(),
+        showDate: '',
+        content: data.content,
+        createdAt: dayjs().format('YYYY-MM-DD HH:mm'),
+        chatMySelf: data.sender === userId
+      };
+      const newMessage = showDateImmediately(message);
+      setMessages((state) => {
+        return [...state, newMessage];
+      });
+    };
+
+    socket.on('message', handleNewMessage);
+    return () => {
+      socket.off('message', handleNewMessage);
+    };
+  }, [socket, messages]);
 
   const { data: accountData } = useSWR(
     isOpen ? '/api/user/account' : null,
@@ -71,14 +114,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     showDate: string;
     createdAt: string;
   }
-
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [content, setConent] = useState('');
-
-  const [page, setPage] = useState({
-    pageIndex: 1,
-    pageSize: 10
-  });
 
   const transformTime = (time: string) => {
     return dayjs(time).format('HH:mm');
@@ -141,10 +176,12 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
 
   const showDateImmediately = (message: Message) => {
     if (
-      dayjs(message.createdAt).isAfter(
-        dayjs(messages[messages.length - 1].createdAt),
-        'day'
-      )
+      (messages.length &&
+        dayjs(message.createdAt).isAfter(
+          dayjs(messages[messages.length - 1].createdAt),
+          'day'
+        )) ||
+      !messages.length
     ) {
       message.showDate = dayjs(message.createdAt).format('YYYY-MM-DD');
     }
@@ -242,35 +279,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     const randomNum = Math.floor(Math.random() * 10000);
     return `${timestamp}-${randomNum}`;
   };
-
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
-    socket.emit('joinRoom', roomId);
-
-    const handleNewMessage = (data: ApiMessage.msgBody) => {
-      console.log('handleNewMessage', data);
-      const message = {
-        id: generateId(),
-        showDate: '',
-        content: data.content,
-        createdAt: dayjs().format('YYYY-MM-DD HH:mm'),
-        chatMySelf: data.sender === userId
-      };
-      const newMessage = showDateImmediately(message);
-      setMessages((state) => {
-        return [...state, newMessage];
-      });
-    };
-
-    socket.on('message', handleNewMessage);
-    return () => {
-      socket.disconnect();
-      socket.off('message');
-      console.log('Disconnected from server');
-    };
-  }, [roomId, messages]);
 
   useEffect(() => {
     if (chatWindow.current && isScrollDown) {
