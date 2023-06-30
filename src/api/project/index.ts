@@ -16,3 +16,19 @@ export function apiGetProjectNews(id: string, config?: AxiosRequestConfig) {
 export function apiGetProjectFAQs(id: string, config?: AxiosRequestConfig) {
   return request.get<ApiProject.FAQ[]>(`/project/${id}/faqs`, config);
 }
+
+export function apiGetProjectMessage(
+  projectId: string,
+  pageIndex: number,
+  pageSize: number
+) {
+  return request.get<ApiMessage.Chatroom[] | ApiMessage.EmptyChatroom>(
+    `/project/${projectId}/message`,
+    {
+      params: {
+        pageIndex,
+        pageSize
+      }
+    }
+  );
+}

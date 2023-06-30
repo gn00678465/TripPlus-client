@@ -3,6 +3,7 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { Layout, ImageFallback } from '@/components';
+import Chat from '@/components/Chat';
 import { Carousel } from '@/components/Swiper';
 import { ReactElement, ReactNode, useMemo, MouseEvent } from 'react';
 import useSWR, { SWRConfig } from 'swr';
@@ -47,6 +48,7 @@ import { apiGetProjectInfo } from '@/api';
 import NoImage from '@/assets/images/user/user-image.png';
 import { categoryEnum, projectStepEnum, ProductStepEnum } from '@/enum';
 import dayjs from 'dayjs';
+import { useState, useEffect } from 'react';
 import { NextSeo } from 'next-seo';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -242,7 +244,7 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                   <p className="text-xs leading-[18px] text-gray-600 lg:text-sm lg:leading-[21px]">
                     剩餘時間
                   </p>
-                  <p className="text-lg  text-gray-900 lg:text-xl">
+                  <p className="text-lg text-gray-900 lg:text-xl">
                     {data?.countDownDays === 0 &&
                     dayjs().isAfter(utc2Local(data?.endTime as string)) ? (
                       <span className="lg:text-lg">已結束</span>
@@ -261,7 +263,7 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                   <p className="text-xs leading-[18px] text-gray-600 lg:text-sm lg:leading-[21px]">
                     贊助人數
                   </p>
-                  <p className="text-lg  text-gray-900 lg:text-xl">
+                  <p className="text-lg text-gray-900 lg:text-xl">
                     <span className="font-medium">{data?.sponsorCount}</span>
                     <span className="ml-1 lg:text-lg">人</span>
                   </p>
@@ -271,7 +273,7 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
                   <p className="text-xs leading-[18px] text-gray-600 lg:text-sm lg:leading-[21px]">
                     募資達成率
                   </p>
-                  <p className="text-lg  font-medium text-gray-900 lg:text-xl">
+                  <p className="text-lg font-medium text-gray-900 lg:text-xl">
                     <span>{data?.progressRate}</span>
                     <span className="ml-1">%</span>
                   </p>
@@ -321,52 +323,79 @@ const HeaderBlock = ({ id, data, isFollowed, ...rest }: BoxBlockProps) => {
 
 interface SocialBlockProps extends FlexProps {
   team?: ApiProject.Team;
+  projectId?: string;
 }
 
-const SocialBlock = ({ team, ...rest }: SocialBlockProps) => (
-  <Flex columnGap={{ base: 2 }} {...rest}>
-    <IconButton
-      as="a"
-      target="_blank"
-      href={team?.website as string}
-      cursor="pointer"
-      aria-label="website"
-      variant="outline"
-      borderRadius="full"
-      icon={<Icon as={FiGlobe} boxSize={{ base: '18px' }} />}
-      _hover={{ bgColor: 'white' }}
-    />
-    <IconButton
-      as="a"
-      target="_blank"
-      href={team?.facebook as string}
-      cursor="pointer"
-      aria-label="facebook"
-      variant="outline"
-      borderRadius="full"
-      icon={<Icon as={FaFacebookF} boxSize={{ base: '18px' }} />}
-      _hover={{ bgColor: 'white' }}
-    />
-    <IconButton
-      as="a"
-      target="_blank"
-      href={team?.instagram as string}
-      cursor="pointer"
-      aria-label="instagram"
-      variant="outline"
-      borderRadius="full"
-      icon={<Icon as={FaInstagram} boxSize={{ base: '18px' }} />}
-      _hover={{ bgColor: 'white' }}
-    />
-    <Button
-      ml={{ base: 'auto' }}
-      leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
-      colorScheme="primary"
-    >
-      聯絡提案者
-    </Button>
-  </Flex>
-);
+const SocialBlock = ({ team, projectId, ...rest }: SocialBlockProps) => {
+  const [teamInfo, setTeamInfo] = useState({
+    title: '',
+    photo: ''
+  });
+
+  const [openChatBox, setOpenChatBox] = useState(false);
+
+  useEffect(() => {
+    setTeamInfo({
+      title: team?.title as string,
+      photo: team?.photo as string
+    });
+  }, [team]);
+  return (
+    <>
+      <Flex columnGap={{ base: 2 }} {...rest}>
+        <IconButton
+          as="a"
+          target="_blank"
+          href={team?.website as string}
+          cursor="pointer"
+          aria-label="website"
+          variant="outline"
+          borderRadius="full"
+          icon={<Icon as={FiGlobe} boxSize={{ base: '18px' }} />}
+          _hover={{ bgColor: 'white' }}
+        />
+        <IconButton
+          as="a"
+          target="_blank"
+          href={team?.facebook as string}
+          cursor="pointer"
+          aria-label="facebook"
+          variant="outline"
+          borderRadius="full"
+          icon={<Icon as={FaFacebookF} boxSize={{ base: '18px' }} />}
+          _hover={{ bgColor: 'white' }}
+        />
+        <IconButton
+          as="a"
+          target="_blank"
+          href={team?.instagram as string}
+          cursor="pointer"
+          aria-label="instagram"
+          variant="outline"
+          borderRadius="full"
+          icon={<Icon as={FaInstagram} boxSize={{ base: '18px' }} />}
+          _hover={{ bgColor: 'white' }}
+        />
+        <Button
+          ml={{ base: 'auto' }}
+          leftIcon={<Icon as={FiMessageSquare} boxSize={{ base: 5 }} />}
+          colorScheme="primary"
+          onClick={() => {
+            setOpenChatBox(true);
+          }}
+        >
+          聯絡提案者
+        </Button>
+      </Flex>
+      <Chat
+        teamInfo={teamInfo}
+        isOpen={openChatBox}
+        projectId={projectId as string}
+        onClose={() => setOpenChatBox(false)}
+      />
+    </>
+  );
+};
 
 const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
   return (
@@ -448,6 +477,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
                 <li className="mt-auto">
                   <SocialBlock
                     team={data?.teamId}
+                    projectId={data?._id}
                     display={{ base: 'none', md: 'flex' }}
                   />
                 </li>
@@ -455,6 +485,7 @@ const SummaryBlock = ({ id, data, ...rest }: BoxBlockProps) => {
             </Flex>
             <SocialBlock
               team={data?.teamId}
+              projectId={data?._id}
               display={{ base: 'flex', md: 'none' }}
             />
           </Box>
@@ -623,7 +654,6 @@ export const ProjectLayout = ({
   const { data } = useSWR(id ? `/project/${id}` : null, () =>
     swrFetch(apiGetProjectInfo(id as string))
   );
-
   return (
     <>
       <NextSeo

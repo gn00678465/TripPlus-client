@@ -386,6 +386,7 @@ const Organization = () => {
       <Chat
         teamInfo={teamInfo}
         isOpen={openChatBox}
+        projectId={allProjects[0]?.id}
         onClose={() => setOpenChatBox(false)}
       />
     </>

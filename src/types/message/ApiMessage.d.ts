@@ -25,6 +25,15 @@ declare namespace ApiMessage {
     createdAt: string;
   }
 
+  interface EmptyChatroom {
+    _id: string;
+    participants: string[];
+    projectId: string;
+    projectCreator: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+
   interface msgBody {
     sender: string;
     receiver: string;

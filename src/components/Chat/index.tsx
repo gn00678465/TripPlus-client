@@ -6,11 +6,20 @@ import {
   IconButton,
   Icon,
   AspectRatio,
-  Textarea
+  Textarea,
+  AbsoluteCenter,
+  Divider,
+  Spinner
 } from '@chakra-ui/react';
 import { BsBoxArrowUpRight, BsXLg, BsFillImageFill } from 'react-icons/bs';
 import { FiPaperclip } from 'react-icons/fi';
 import { MdSend } from 'react-icons/md';
+import { io, Socket } from 'socket.io-client';
+import { useEffect, useState, useRef, RefObject } from 'react';
+import useSWR from 'swr';
+import { apiGetProjectMessage, apiGetUserAccount } from '@/api';
+import dayjs from 'dayjs';
+import { formatDay } from '@/utils';
 
 interface Team {
   title: string;
@@ -20,11 +29,294 @@ interface Team {
 interface ChatProps {
   teamInfo: Team;
   isOpen: boolean;
+  projectId: string;
   onClose: () => void;
 }
 
-const Chat = ({ teamInfo, isOpen, onClose }: ChatProps) => {
+const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
   const router = useRouter();
+  const chatWindow: RefObject<HTMLDivElement> = useRef(null);
+  const isComposition = useRef(true);
+  const [isScrollDown, setIsScrollDown] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEnd, setIsEnd] = useState(false);
+  const [socket, setSocket] = useState<any>(undefined);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [content, setConent] = useState('');
+  const [page, setPage] = useState({
+    pageIndex: 1,
+    pageSize: 10
+  });
+  const [userId, setUserId] = useState<string>('');
+  const [projectCreatorId, setProjectCreatorId] = useState<string>('');
+  const [roomId, setRoomId] = useState<string>('');
+
+  const URL: string = process.env.BASE_API_URL || '';
+
+  const showDateImmediately = (message: Message) => {
+    if (
+      (messages.length &&
+        dayjs(message.createdAt).isAfter(
+          dayjs(messages[messages.length - 1].createdAt),
+          'day'
+        )) ||
+      !messages.length
+    ) {
+      message.showDate = dayjs(message.createdAt).format('YYYY-MM-DD');
+    }
+    return message;
+  };
+
+  useEffect(() => {
+    const newSocket = io(URL, { transports: ['websocket'] });
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, [setSocket]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+    socket.emit('joinRoom', roomId);
+
+    const handleNewMessage = (data: ApiMessage.msgBody) => {
+      const message = {
+        id: generateId(),
+        showDate: '',
+        content: data.content,
+        createdAt: dayjs().format('YYYY-MM-DD HH:mm'),
+        chatMySelf: data.sender === userId
+      };
+      const newMessage = showDateImmediately(message);
+      setMessages((state) => {
+        return [...state, newMessage];
+      });
+    };
+
+    socket.on('message', handleNewMessage);
+    return () => {
+      socket.off('message', handleNewMessage);
+    };
+  }, [socket, messages, roomId]);
+
+  const { data: accountData } = useSWR(
+    isOpen ? '/api/user/account' : null,
+    apiGetUserAccount,
+    {
+      onSuccess(data, key, config) {
+        if (data && data.status === 'Success') {
+          getUserAccount(data.data);
+        }
+      }
+    }
+  );
+
+  const getUserAccount = (data: ApiUser.Account) => {
+    setUserId(() => data._id);
+  };
+
+  interface Message {
+    id: string;
+    content: string;
+    chatMySelf: boolean;
+    showDate: string;
+    createdAt: string;
+  }
+
+  const transformTime = (time: string) => {
+    return dayjs(time).format('HH:mm');
+  };
+
+  const getRoomId = (data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom) => {
+    if ('roomId' in data) {
+      setRoomId(() => data.roomId._id);
+    } else {
+      setRoomId(() => data._id);
+    }
+  };
+
+  const getProjectCreatorId = (
+    data: ApiMessage.Chatroom | ApiMessage.EmptyChatroom
+  ) => {
+    if ('roomId' in data) {
+      setProjectCreatorId(() => data.roomId.projectCreator);
+    } else {
+      setProjectCreatorId(() => data.projectCreator);
+    }
+  };
+
+  const getMessages = (data: ApiMessage.Chatroom[]) => {
+    const messages = data.reverse().map((item) => {
+      let message: any = {};
+      message.id = item._id;
+      message.createdAt = item.createdAt;
+      message.content = item.content;
+      message.chatMySelf = item.sender._id === userId;
+      message.showDate = '';
+      return message;
+    });
+    const newMessages = insertDateBefoeMsg(messages);
+    setMessages((prev) => newMessages.concat(prev));
+  };
+
+  const insertDateBefoeMsg = (messages: Message[]) => {
+    let latestDate = '';
+    const dateList = JSON.parse(JSON.stringify(messages))
+      .reverse()
+      .map((message: Message) => {
+        return dayjs(message.createdAt).format('YYYY-MM-DD');
+      });
+    for (let i = 0; i < messages.length - 1; i++) {
+      if (!latestDate) {
+        latestDate = dateList[0];
+      }
+      let beforeDateIndex = dateList.findIndex((date: string) => {
+        return new Date(date).getTime() < new Date(latestDate).getTime();
+      });
+      if (beforeDateIndex > -1) {
+        messages[messages.length - beforeDateIndex].showDate =
+          dateList[beforeDateIndex - 1];
+        latestDate = dateList[beforeDateIndex];
+      }
+    }
+    return messages;
+  };
+
+  const {
+    data: roomMessage,
+    isLoading: isRoomMsgLoading,
+    mutate: fetchMsgProject
+  } = useSWR(
+    isOpen && projectId && userId && !isLoading && !isEnd
+      ? `/api/project/${projectId}/message?${userId}`
+      : null,
+    () =>
+      apiGetProjectMessage(projectId as string, page.pageIndex, page.pageSize),
+    {
+      revalidateOnFocus: false,
+      onSuccess(data, key, config) {
+        if (
+          data &&
+          data.status === 'Success' &&
+          data.message === '取得訊息' &&
+          Array.isArray(data.data)
+        ) {
+          if (page.pageIndex === 1) {
+            getRoomId(data.data[0]);
+            getProjectCreatorId(data.data[0]);
+          }
+          if (data.data.length < page.pageSize) {
+            setIsEnd(true);
+          }
+          getMessages(data.data);
+          setPage((state) => {
+            return {
+              ...state,
+              pageIndex: state.pageIndex++
+            };
+          });
+        }
+
+        if (
+          data &&
+          data.status === 'Success' &&
+          ['建立新的聊天室窗', '尚未建立訊息'].includes(
+            data.message as string
+          ) &&
+          page.pageIndex === 1 &&
+          !Array.isArray(data.data)
+        ) {
+          getRoomId(data.data);
+          getProjectCreatorId(data.data);
+        }
+      },
+
+      onError: (err, key, config) => {
+        console.log('err', err);
+        alert(err.message);
+      }
+    }
+  );
+
+  useEffect(() => {
+    if (isEnd) {
+      messages[0].showDate = dayjs(messages[0].createdAt).format('YYYY-MM-DD');
+    }
+  }, [isEnd, messages]);
+
+  const changeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setConent(e.target.value);
+  };
+
+  const sendMessage = (e: { preventDefault: () => void }) => {
+    if (!content.trim()) return;
+    e.preventDefault();
+    const messagePayload = {
+      sender: userId,
+      receiver: projectCreatorId,
+      content,
+      roomId
+    };
+
+    socket.emit('message', messagePayload);
+    setConent('');
+    setIsScrollDown(true);
+  };
+
+  const KeyPressContent = (e: { key: string; preventDefault: () => void }) => {
+    if (e.key === 'Enter' && isComposition.current) {
+      sendMessage(e);
+    }
+  };
+
+  const generateId = () => {
+    const now = new Date();
+    const timestamp = now.getTime();
+    const randomNum = Math.floor(Math.random() * 10000);
+    return `${timestamp}-${randomNum}`;
+  };
+
+  useEffect(() => {
+    if (chatWindow.current && isScrollDown) {
+      chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    let currentChatWindow = chatWindow.current;
+
+    const handleScroll = () => {
+      if (
+        currentChatWindow &&
+        currentChatWindow.scrollTop <= 30 &&
+        !isLoading &&
+        !isEnd
+      ) {
+        setIsScrollDown(false);
+        setIsLoading(true);
+        setTimeout(() => {
+          fetchMsgProject();
+          currentChatWindow!.scrollTop = 100;
+          setIsLoading(false);
+        }, 1000);
+      }
+    };
+
+    if (currentChatWindow && isOpen) {
+      currentChatWindow.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (currentChatWindow) {
+        currentChatWindow.removeEventListener('scroll', handleScroll);
+      }
+    };
+  });
+
   return (
     <Box className="fixed bottom-0 right-0 z-[999999] overflow-visible">
       <Box
@@ -85,52 +377,103 @@ const Chat = ({ teamInfo, isOpen, onClose }: ChatProps) => {
                     </Box>
                   </Box>
                   <Box className="absolute inset-x-0 bottom-[132px] top-[52px]">
-                    <Box></Box>
-                    <Box className="relative h-full w-full overflow-y-auto">
+                    <Box
+                      className="relative h-full w-full overflow-y-auto"
+                      ref={chatWindow}
+                    >
+                      {isRoomMsgLoading && page.pageIndex === 1 && (
+                        <Box className="">
+                          <Spinner
+                            position="absolute"
+                            top="50%"
+                            left="50%"
+                            size="lg"
+                            transform="translate(-50%, -50%)"
+                            color="secondary-emphasis.500"
+                          />
+                        </Box>
+                      )}
                       <Box className="absolute top-0 h-full w-full px-3">
-                        <Box className="my-[10px] flex justify-end">
-                          <Box className="flex max-w-[70%] flex-col items-end">
-                            <Box className="rounded-lg rounded-br-none bg-secondary-emphasis p-[10px]">
-                              <Text className="text-white">
-                                台北條通日式酒店「光」，致力於保存五光十色的條通文化
-                              </Text>
-                            </Box>
-                            <Box className="text-sm text-gray-500">10:10</Box>
+                        {isLoading && (
+                          <Box className="my-5 flex justify-center">
+                            <Spinner color="gray.500" />
                           </Box>
-                        </Box>
-                        <Box className="my-[10px] flex justify-start">
-                          <Box className="flex max-w-[70%] flex-col items-start">
-                            <Box className="rounded-lg rounded-bl-none bg-gray-200 p-[10px]">
-                              <Text>
-                                台北條通日式酒店「光」，致力於保存五光十色的條通文化
-                              </Text>
+                        )}
+                        {messages.map((message) => {
+                          return message.chatMySelf ? (
+                            <Box key={message.id}>
+                              {message.showDate && (
+                                <Box position="relative" py="5">
+                                  <Divider borderColor={'gray.300'} />
+                                  <AbsoluteCenter bg="white" px="4">
+                                    {formatDay(message.showDate)}
+                                  </AbsoluteCenter>
+                                </Box>
+                              )}
+                              <Box className="my-[10px] flex justify-end">
+                                <Box className="flex max-w-[70%] flex-col items-end">
+                                  <Box className="rounded-lg rounded-br-none bg-secondary-emphasis p-[10px]">
+                                    <Text className="text-white">
+                                      {message.content}
+                                    </Text>
+                                  </Box>
+                                  <Box className="text-sm text-gray-500">
+                                    {transformTime(message.createdAt)}
+                                  </Box>
+                                </Box>
+                              </Box>
                             </Box>
-                            <Box className="text-sm text-gray-500">10:10</Box>
-                          </Box>
-                        </Box>
-                        <Box className="my-[10px] flex justify-start">
-                          <Box className="flex max-w-[70%] flex-col items-start">
-                            <Box className="rounded-lg rounded-bl-none bg-gray-200 p-[10px]">
-                              <Text>
-                                台北條通日式酒店「光」，致力於保存五光十色的條通文化台北條通日式酒店「光」，致力於保存五光十色的條通文化台北條通日式酒店「光」，致力於保存五光十色的條通文化台北條通日式酒店「光」，致力於保存五光十色的條通文化台北條通日式酒店「光」，致力於保存五光十色的條通文化
-                              </Text>
+                          ) : (
+                            <Box key={message.id}>
+                              {message.showDate && (
+                                <Box position="relative" py="5">
+                                  <Divider borderColor={'gray.300'} />
+                                  <AbsoluteCenter bg="white" px="4">
+                                    {formatDay(message.showDate)}
+                                  </AbsoluteCenter>
+                                </Box>
+                              )}
+                              <Box className="my-[10px] flex justify-start">
+                                <Box className="flex max-w-[70%] flex-col items-start">
+                                  <Box className="rounded-lg rounded-bl-none bg-gray-200 p-[10px]">
+                                    <Text>{message.content}</Text>
+                                  </Box>
+                                  <Box className="text-sm text-gray-500">
+                                    {transformTime(message.createdAt)}
+                                  </Box>
+                                </Box>
+                              </Box>
                             </Box>
-                            <Box className="text-sm text-gray-500">10:10</Box>
-                          </Box>
-                        </Box>
+                          );
+                        })}
                       </Box>
                     </Box>
                   </Box>
-                  <Box className="absolute inset-x-0 bottom-0">
+                  <Box
+                    className="absolute inset-x-0 bottom-0"
+                    as="form"
+                    onSubmit={sendMessage}
+                  >
                     <Box className="border-t-[1px] border-t-gray-200">
                       <Textarea
+                        value={content}
                         placeholder="請輸入"
                         resize={'none'}
                         outline={'none'}
                         border={0}
+                        onChange={changeContent}
+                        onCompositionStart={() => {
+                          isComposition.current = false;
+                        }}
+                        onCompositionEnd={() => {
+                          isComposition.current = true;
+                        }}
+                        wrap="off"
+                        onKeyDown={KeyPressContent}
                       />
                       <Box className="flex items-center justify-between px-[6px] py-[10px]">
-                        <Box className="flex items-center">
+                        {/* 暫時隱藏 */}
+                        <Box className="flex items-center opacity-0">
                           <IconButton
                             colorScheme="secondary-emphasis"
                             variant={'link'}
@@ -160,6 +503,7 @@ const Chat = ({ teamInfo, isOpen, onClose }: ChatProps) => {
                           variant={'solid'}
                           size={'sm'}
                           aria-label="send text"
+                          type="submit"
                           icon={<Icon as={MdSend} boxSize={{ base: '20px' }} />}
                         />
                       </Box>
