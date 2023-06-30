@@ -47,8 +47,25 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     pageIndex: 1,
     pageSize: 10
   });
+  const [userId, setUserId] = useState<string>('');
+  const [projectCreatorId, setProjectCreatorId] = useState<string>('');
+  const [roomId, setRoomId] = useState<string>('');
 
   const URL: string = process.env.BASE_API_URL || '';
+
+  const showDateImmediately = (message: Message) => {
+    if (
+      (messages.length &&
+        dayjs(message.createdAt).isAfter(
+          dayjs(messages[messages.length - 1].createdAt),
+          'day'
+        )) ||
+      !messages.length
+    ) {
+      message.showDate = dayjs(message.createdAt).format('YYYY-MM-DD');
+    }
+    return message;
+  };
 
   useEffect(() => {
     const newSocket = io(URL, { transports: ['websocket'] });
@@ -85,7 +102,7 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     return () => {
       socket.off('message', handleNewMessage);
     };
-  }, [socket, messages]);
+  }, [socket, messages, roomId]);
 
   const { data: accountData } = useSWR(
     isOpen ? '/api/user/account' : null,
@@ -98,10 +115,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
       }
     }
   );
-
-  const [userId, setUserId] = useState<string>('');
-  const [projectCreatorId, setProjectCreatorId] = useState<string>('');
-  const [roomId, setRoomId] = useState<string>('');
 
   const getUserAccount = (data: ApiUser.Account) => {
     setUserId(() => data._id);
@@ -174,20 +187,6 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
     return messages;
   };
 
-  const showDateImmediately = (message: Message) => {
-    if (
-      (messages.length &&
-        dayjs(message.createdAt).isAfter(
-          dayjs(messages[messages.length - 1].createdAt),
-          'day'
-        )) ||
-      !messages.length
-    ) {
-      message.showDate = dayjs(message.createdAt).format('YYYY-MM-DD');
-    }
-    return message;
-  };
-
   const {
     data: roomMessage,
     isLoading: isRoomMsgLoading,
@@ -226,7 +225,9 @@ const Chat = ({ teamInfo, isOpen, projectId, onClose }: ChatProps) => {
         if (
           data &&
           data.status === 'Success' &&
-          data.message === '尚未建立訊息' &&
+          ['建立新的聊天室窗', '尚未建立訊息'].includes(
+            data.message as string
+          ) &&
           page.pageIndex === 1 &&
           !Array.isArray(data.data)
         ) {
