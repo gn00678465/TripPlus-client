@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  // output: 'standalone',
   env: {
     BASE_API_URL: process.env.BASE_API_URL,
     BACKEND_URL: process.env.BACKEND_URL,
