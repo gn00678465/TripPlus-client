@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.4
+
 FROM node:18-alpine AS base
 
 # Multi-stage deps 安裝必要依賴
@@ -28,6 +30,17 @@ COPY --link  . .
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
+
+# 環境變數
+# API PATH
+ARG BASE_API_URL
+ENV BASE_API_URL=${BASE_API_URL}
+# Admin PATH
+ARG BACKEND_URL
+ENV BACKEND_URL=${BACKEND_URL}
+# Open Graph PATH
+ARG OG_URL
+ENV OG_URL=${OG_URL}
 
 RUN yarn build
 
