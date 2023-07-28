@@ -1,6 +1,6 @@
 {
-  "name": "nextjs-template",
-  "version": "0.1.0",
+  "name": "tripplus-client",
+  "version": "1.0.2",
   "private": true,
   "engines": {
     "node": ">=16"
