@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
 FROM node:18-alpine AS base
 
 # Multi-stage deps 安裝必要依賴
@@ -11,7 +9,7 @@ RUN corepack enable
 WORKDIR /app
 
 # 安裝 node_modules
-COPY --link package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
@@ -23,8 +21,8 @@ RUN \
 # Multi-stage builder 編譯程式
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps --link /app/node_modules ./node_modules
-COPY --link  . .
+COPY --from=deps /app/node_modules ./node_modules
+COPY  . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -56,12 +54,12 @@ RUN \
   addgroup --system --gid 1001 nodejs; \
   adduser --system --uid 1001 nextjs
 
-COPY --from=builder --link /app/public ./public
+COPY --from=builder /app/public ./public
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --link --chown=1001:1001 /app/.next/standalone ./
-COPY --from=builder --link --chown=1001:1001 /app/.next/static ./.next/static
+COPY --from=builder --chown=1001:1001 /app/.next/standalone ./
+COPY --from=builder --chown=1001:1001 /app/.next/static ./.next/static
 
 USER nextjs
 
